@@ -405,6 +405,7 @@ set(client_SRCS
 	guiFormSpecMenu.cpp
 	guiKeyChangeMenu.cpp
 	guiPasswordChange.cpp
+	guiScalingFilter.cpp
 	guiTable.cpp
 	guiVolumeChange.cpp
 	hud.cpp

@@ -51,6 +51,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/hex.h"
 #include "util/numeric.h"
 #include "util/string.h" // for parseColorString()
+#include "guiScalingFilter.h"
 
 #define MY_CHECKPOS(a,b)													\
 	if (v_pos.size() != 2) {												\
@@ -2283,7 +2284,7 @@ void GUIFormSpecMenu::drawMenu()
 
 			const video::SColor color(255,255,255,255);
 			const video::SColor colors[] = {color,color,color,color};
-			driver->draw2DImage(texture, rect,
+			draw2DImageFilterScaled(driver, texture, rect,
 				core::rect<s32>(core::position2d<s32>(0,0),
 						core::dimension2di(texture->getOriginalSize())),
 				NULL/*&AbsoluteClippingRect*/, colors, true);
@@ -2333,7 +2334,7 @@ void GUIFormSpecMenu::drawMenu()
 			core::rect<s32> rect = imgrect + spec.pos;
 			const video::SColor color(255,255,255,255);
 			const video::SColor colors[] = {color,color,color,color};
-			driver->draw2DImage(texture, rect,
+			draw2DImageFilterScaled(driver, texture, rect,
 				core::rect<s32>(core::position2d<s32>(0,0),img_origsize),
 				NULL/*&AbsoluteClippingRect*/, colors, true);
 		}
@@ -2362,7 +2363,7 @@ void GUIFormSpecMenu::drawMenu()
 		core::rect<s32> rect = imgrect + spec.pos;
 		const video::SColor color(255,255,255,255);
 		const video::SColor colors[] = {color,color,color,color};
-		driver->draw2DImage(texture, rect,
+		draw2DImageFilterScaled(driver, texture, rect,
 			core::rect<s32>(core::position2d<s32>(0,0),
 					core::dimension2di(texture->getOriginalSize())),
 			NULL/*&AbsoluteClippingRect*/, colors, true);

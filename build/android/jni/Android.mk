@@ -143,6 +143,7 @@ LOCAL_SRC_FILES :=                                \
 		jni/src/guiKeyChangeMenu.cpp              \
 		jni/src/guiPasswordChange.cpp             \
 		jni/src/guiTable.cpp                      \
+		jni/src/guiScalingFilter.cpp              \
 		jni/src/guiVolumeChange.cpp               \
 		jni/src/httpfetch.cpp                     \
 		jni/src/hud.cpp                           \
