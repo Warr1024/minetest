@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gamedef.h"
 #include "strfnd.h"
 #include "util/string.h" // for parseColorString()
+#include "imagefilters.h"
 
 #ifdef __ANDROID__
 #include <GLES/gl.h>
@@ -223,58 +224,9 @@ public:
 			}
 		}
 
-		/* Apply the "clean transparent" filter to textures, removing borders on transparent textures.
-		 * PNG optimizers discard RGB values of fully-transparent pixels, but filters may expose the
-		 * replacement colors at borders by blending to them; this filter compensates for that by
-		 * filling in those RGB values from nearby pixels.
-		 */
-		if (g_settings->getBool("texture_clean_transparent")) {
-			const core::dimension2d<u32> dim = toadd->getDimension();
-
-			// Walk each pixel looking for ones that will show as transparent.
-			for (u32 ctrx = 0; ctrx < dim.Width; ctrx++)
-			for (u32 ctry = 0; ctry < dim.Height; ctry++) {
-				irr::video::SColor c = toadd->getPixel(ctrx, ctry);
-				if (c.getAlpha() > 127)
-					continue;
-
-				// Sample size and total weighted r, g, b values.
-				u32 ss = 0, sr = 0, sg = 0, sb = 0;
-
-				// Walk each neighbor pixel (clipped to image bounds).
-				for (u32 sx = (ctrx < 1) ? 0 : (ctrx - 1);
-						sx <= (ctrx + 1) && sx < dim.Width; sx++)
-				for (u32 sy = (ctry < 1) ? 0 : (ctry - 1);
-						sy <= (ctry + 1) && sy < dim.Height; sy++) {
-
-					// Ignore the center pixel (its RGB is already
-					// presumed meaningless).
-					if ((sx == ctrx) && (sy == ctry))
-						continue;
-
-					// Ignore other nearby pixels that would be
-					// transparent upon display.
-					irr::video::SColor d = toadd->getPixel(sx, sy);
-					if(d.getAlpha() < 128)
-						continue;
-
-					// Add one weighted sample.
-					ss++;
-					sr += d.getRed();
-					sg += d.getGreen();
-					sb += d.getBlue();
-				}
-
-				// If we found any neighbor RGB data, set pixel to average
-				// weighted by alpha.
-				if (ss > 0) {
-					c.setRed(sr / ss);
-					c.setGreen(sg / ss);
-					c.setBlue(sb / ss);
-					toadd->setPixel(ctrx, ctry, c);
-				}
-			}
-		}
+		// Apply the "clean transparent" filter, if configured.
+		if (g_settings->getBool("texture_clean_transparent"))
+			imageCleanTransparent(toadd, 127);
 
 		if (need_to_grab)
 			toadd->grab();
