@@ -11,6 +11,9 @@ void guiScalingCache(io::path key, video::IImage *value);
 video::ITexture *guiScalingResizeCached(video::IVideoDriver *, video::ITexture *,
 		const core::rect<s32> &, const core::rect<s32> &);
 
+video::ITexture *guiScalingImageButton(video::IVideoDriver *driver, video::ITexture *src,
+	s32 width, s32 height);
+
 void draw2DImageFilterScaled(video::IVideoDriver *driver, video::ITexture *txr,
 		const core::rect<s32> &destrect, const core::rect<s32> &srcrect,
 		const core::rect<s32> *cliprect, const video::SColor *const colors,

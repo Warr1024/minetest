@@ -74,6 +74,13 @@ video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITex
 	return scaled;
 }
 
+video::ITexture *guiScalingImageButton(video::IVideoDriver *driver, video::ITexture *src,
+		s32 width, s32 height) {
+	return guiScalingResizeCached(driver, src,
+		core::rect<s32>(0, 0, src->getSize().Width, src->getSize().Height),
+		core::rect<s32>(0, 0, width, height));
+}
+
 void draw2DImageFilterScaled(video::IVideoDriver *driver, video::ITexture *txr,
 		const core::rect<s32> &destrect, const core::rect<s32> &srcrect,
 		const core::rect<s32> *cliprect = 0, const video::SColor *const colors = 0,
