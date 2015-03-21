@@ -29,13 +29,13 @@ core::rect<s32> guiScalingSourceRect(const core::rect<s32> &srcrect,
 }
 
 u32 nextpower2(u32 orig) {
-	if ((orig & (orig - 1)) == 0)
-		return orig;
-	u32 p = 1;
-	while (orig) {
-		p <<= 1;
-		orig >>= 1;
-	}
+	orig--;
+	orig |= orig >> 1;
+	orig |= orig >> 2;
+	orig |= orig >> 4;
+	orig |= orig >> 8;
+	orig |= orig >> 16;
+	orig++;
 }
 
 video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITexture *src,
