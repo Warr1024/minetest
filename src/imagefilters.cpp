@@ -36,7 +36,7 @@ void imageCleanTransparent(video::IImage *src, u32 threshold) {
 
 			// Ignore transparent pixels.
 			irr::video::SColor d = src->getPixel(sx, sy);
-			if (c.getAlpha() <= threshold)
+			if (d.getAlpha() <= threshold)
 				continue;
 
 			// Add RGB values weighted by alpha.

@@ -1310,7 +1310,7 @@ void GUIFormSpecMenu::parseImageButton(parserData* data,std::string element,
 		e->setUseAlphaChannel(true);
 		e->setImage(guiScalingImageButton(Environment->getVideoDriver(), texture, geom.X, geom.Y));
 		e->setPressedImage(guiScalingImageButton(Environment->getVideoDriver(), pressed_texture, geom.X, geom.Y));
-		e->setScaleImage(false);
+		e->setScaleImage(true);
 		e->setNotClipped(noclip);
 		e->setDrawBorder(drawborder);
 
@@ -1455,7 +1455,7 @@ void GUIFormSpecMenu::parseItemImageButton(parserData* data,std::string element)
 		e->setUseAlphaChannel(true);
 		e->setImage(guiScalingImageButton(Environment->getVideoDriver(), texture, geom.X, geom.Y));
 		e->setPressedImage(guiScalingImageButton(Environment->getVideoDriver(), texture, geom.X, geom.Y));
-		e->setScaleImage(false);
+		e->setScaleImage(true);
 		spec.ftype = f_Button;
 		rect+=data->basepos-padding;
 		spec.rect=rect;
