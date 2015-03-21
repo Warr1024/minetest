@@ -63,8 +63,8 @@ video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITex
 
 	// Create a new destination image and scale the source into it.
 	video::IImage *destimg = driver->createImage(src->getColorFormat(),
-			core::dimension2d<u32>((u32)destrect.LowerRightCorner.X,
-			(u32)destrect.LowerRightCorner.Y));
+			core::dimension2d<u32>((u32)destrect.getWidth(),
+			(u32)destrect.getHeight()));
 	imageScaleNNAA(srcimg, srcrect, destimg);
 
 	// Convert the scaled image back into a texture.

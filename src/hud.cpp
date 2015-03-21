@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "camera.h"
 #include "porting.h"
 #include "fontengine.h"
-#include "guiScalingFilter.h"
+#include "guiscalingfilter.h"
 #include <IGUIStaticText.h>
 
 #ifdef HAVE_TOUCHSCREENGUI
