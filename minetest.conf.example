@@ -172,6 +172,11 @@
 #crosshair_alpha = 255
 #    Scale gui by a user specified value
 #gui_scaling = 1.0
+#    Use a nearest-neighbor-anti-alias filter to scale the GUI.
+#    This will smooth over some of the rough edges, and blend
+#    pixels when scaling down, at the cost of blurring some
+#    edge pixels when images are scaled by non-integer sizes.
+#gui_scaling_filter = false
 #    Sensitivity multiplier
 #mouse_sensitivity = 0.2
 #    Sound settings

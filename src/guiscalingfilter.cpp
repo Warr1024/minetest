@@ -1,0 +1,86 @@
+#include "guiscalingfilter.h"
+#include "imagefilters.h"
+#include "settings.h"
+#include "main.h"		// for g_settings
+#include <stdio.h>
+
+/* Maintain a static cache to store the images that correspond to textures
+ * in a format that's manipulable by code.  Some platforms exhibit issues
+ * converting textures back into images repeatedly, and some don't even
+ * allow it at all.
+ */
+std::map<io::path, video::IImage *> imgCache;
+
+/* Manually insert an image into the cache, useful to avoid texture-to-image
+ * conversion whenever we can intercept it.
+ */
+void guiScalingCache(io::path key, video::IImage *value) {
+	if (!g_settings->getBool("gui_scaling_filter"))
+		return;
+	value->grab();
+	imgCache[key] = value;
+}
+
+core::rect<s32> guiScalingSourceRect(const core::rect<s32> &srcrect,
+		const core::rect<s32> &destrect) {
+	return g_settings->getBool("gui_scaling_filter")
+		? core::rect<s32>(0, 0, destrect.getWidth(), destrect.getHeight())
+		: srcrect;
+}
+
+video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITexture *src,
+		const core::rect<s32> &srcrect, const core::rect<s32> &destrect) {
+
+	if (!g_settings->getBool("gui_scaling_filter"))
+		return src;
+
+	// Calculate scaled texture name.
+	char rectstr[200];
+	sprintf(rectstr, "%d:%d:%d:%d:%d:%d",
+		srcrect.UpperLeftCorner.X,
+		srcrect.UpperLeftCorner.Y,
+		srcrect.getWidth(),
+		srcrect.getHeight(),
+		destrect.getWidth(),
+		destrect.getHeight());
+	io::path origname = src->getName().getPath();
+	io::path scalename = origname + "@guiScalingFilter:" + rectstr;
+
+	// Search for existing scaled texture.
+	video::ITexture *scaled = driver->getTexture(scalename);
+	if(scaled)
+		return scaled;
+
+	// Try to find the texture converted to an image in the cache.
+	// If the image was not found, try to extract it from the texture.
+	video::IImage* srcimg = imgCache[origname];
+	if (srcimg == NULL) {
+		srcimg = driver->createImageFromData(src->getColorFormat(),
+			src->getSize(), src->lock(), false);
+		src->unlock();
+		imgCache[origname] = srcimg;
+	}
+
+	// Create a new destination image and scale the source into it.
+	video::IImage *destimg = driver->createImage(src->getColorFormat(),
+			core::dimension2d<u32>((u32)destrect.LowerRightCorner.X,
+			(u32)destrect.LowerRightCorner.Y));
+	imageScaleNNAA(srcimg, srcrect, destimg);
+
+	// Convert the scaled image back into a texture.
+	scaled = driver->addTexture(scalename, destimg, NULL);
+	destimg->drop();
+
+	return scaled;
+}
+
+void draw2DImageFilterScaled(video::IVideoDriver *driver, video::ITexture *txr,
+		const core::rect<s32> &destrect, const core::rect<s32> &srcrect,
+		const core::rect<s32> *cliprect = 0, const video::SColor *const colors = 0,
+		bool usealpha = false) {
+	driver->draw2DImage(
+			guiScalingResizeCached(driver, txr, srcrect, destrect),
+			destrect,
+			guiScalingSourceRect(srcrect, destrect),
+			cliprect, colors, usealpha || g_settings->getBool("gui_scaling_filter"));
+}

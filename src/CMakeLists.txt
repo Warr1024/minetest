@@ -405,10 +405,11 @@ set(client_SRCS
 	guiFormSpecMenu.cpp
 	guiKeyChangeMenu.cpp
 	guiPasswordChange.cpp
-	guiScalingFilter.cpp
+	guiscalingfilter.cpp
 	guiTable.cpp
 	guiVolumeChange.cpp
 	hud.cpp
+	imagefilters.cpp
 	keycode.cpp
 	localplayer.cpp
 	main.cpp
