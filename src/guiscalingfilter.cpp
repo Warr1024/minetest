@@ -28,6 +28,16 @@ core::rect<s32> guiScalingSourceRect(const core::rect<s32> &srcrect,
 		: srcrect;
 }
 
+u32 nextpower2(u32 orig) {
+	if ((orig & (orig - 1)) == 0)
+		return orig;
+	u32 p = 1;
+	while (orig) {
+		p <<= 1;
+		orig >>= 1;
+	}
+}
+
 video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITexture *src,
 		const core::rect<s32> &srcrect, const core::rect<s32> &destrect) {
 
@@ -67,6 +77,18 @@ video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITex
 			core::dimension2d<u32>((u32)destrect.getWidth(),
 			(u32)destrect.getHeight()));
 	imageScaleNNAA(srcimg, srcrect, destimg);
+
+	// Android is very picky about textures being powers of 2, so expand
+	// the image dimensions to the next power of 2, if necessary, for
+	// that platform.
+#ifdef __ANDROID__
+	video::IImage *po2img = driver->createImage(src->getColorFormat(),
+			core::dimension2d<u32>(nextpower2((u32)destrect.getWidth()),
+			nextpower2((u32)destrect.getHeight())));
+	destimg->copyTo(po2img);
+	destimg->drop();
+	destimg = po2img;
+#endif
 
 	// Convert the scaled image back into a texture.
 	scaled = driver->addTexture(scalename, destimg, NULL);
