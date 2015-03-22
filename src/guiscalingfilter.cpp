@@ -24,13 +24,6 @@ void guiScalingCache(io::path key, video::IVideoDriver *driver, video::IImage *v
 	imgCache[key] = copied;
 }
 
-core::rect<s32> guiScalingSourceRect(const core::rect<s32> &srcrect,
-		const core::rect<s32> &destrect) {
-	return g_settings->getBool("gui_scaling_filter")
-		? core::rect<s32>(0, 0, destrect.getWidth(), destrect.getHeight())
-		: srcrect;
-}
-
 u32 nextpower2(u32 orig) {
 	orig--;
 	orig |= orig >> 1;
@@ -68,6 +61,8 @@ video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITex
 	// If the image was not found, try to extract it from the texture.
 	video::IImage* srcimg = imgCache[origname];
 	if (srcimg == NULL) {
+		if (!g_settings->getBool("gui_scaling_filter_txr2img"))
+			return src;
 		srcimg = driver->createImageFromData(src->getColorFormat(),
 			src->getSize(), src->lock(), false);
 		src->unlock();
@@ -111,9 +106,14 @@ void draw2DImageFilterScaled(video::IVideoDriver *driver, video::ITexture *txr,
 		const core::rect<s32> &destrect, const core::rect<s32> &srcrect,
 		const core::rect<s32> *cliprect = 0, const video::SColor *const colors = 0,
 		bool usealpha = false) {
-	driver->draw2DImage(
-			guiScalingResizeCached(driver, txr, srcrect, destrect),
-			destrect,
-			guiScalingSourceRect(srcrect, destrect),
-			cliprect, colors, usealpha || g_settings->getBool("gui_scaling_filter"));
+
+	// Attempt to pre-scale image in software in high quality.
+	video::ITexture *scaled = guiScalingResizeCached(driver, txr, srcrect, destrect);
+
+	// Correct source rect based on scaled image.
+	const core::rect<s32> mysrcrect = (scaled != txr)
+		? core::rect<s32>(0, 0, destrect.getWidth(), destrect.getHeight())
+		: srcrect;
+
+	driver->draw2DImage(scaled, destrect, mysrcrect, cliprect, colors, usealpha);
 }
