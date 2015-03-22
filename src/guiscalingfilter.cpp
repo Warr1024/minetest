@@ -14,11 +14,14 @@ std::map<io::path, video::IImage *> imgCache;
 /* Manually insert an image into the cache, useful to avoid texture-to-image
  * conversion whenever we can intercept it.
  */
-void guiScalingCache(io::path key, video::IImage *value) {
+void guiScalingCache(io::path key, video::IVideoDriver *driver, video::IImage *value) {
 	if (!g_settings->getBool("gui_scaling_filter"))
 		return;
-	value->grab();
-	imgCache[key] = value;
+	video::IImage *copied = driver->createImage(value->getColorFormat(),
+			value->getDimension());
+	value->copyTo(copied);
+	copied->grab();
+	imgCache[key] = copied;
 }
 
 core::rect<s32> guiScalingSourceRect(const core::rect<s32> &srcrect,
@@ -35,7 +38,7 @@ u32 nextpower2(u32 orig) {
 	orig |= orig >> 4;
 	orig |= orig >> 8;
 	orig |= orig >> 16;
-	orig++;
+	return orig + 1;
 }
 
 video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITexture *src,

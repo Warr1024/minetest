@@ -6,7 +6,7 @@
 /* Manually insert an image into the cache, useful to avoid texture-to-image
  * conversion whenever we can intercept it.
  */
-void guiScalingCache(io::path key, video::IImage *value);
+void guiScalingCache(io::path key, video::IVideoDriver *driver, video::IImage *value);
 
 video::ITexture *guiScalingResizeCached(video::IVideoDriver *, video::ITexture *,
 		const core::rect<s32> &, const core::rect<s32> &);

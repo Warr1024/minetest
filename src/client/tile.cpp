@@ -623,7 +623,7 @@ u32 TextureSource::generateTexture(const std::string &name)
 #endif
 		// Create texture from resulting image
 		tex = driver->addTexture(name.c_str(), img);
-		guiScalingCache(io::path(name.c_str()), img);
+		guiScalingCache(io::path(name.c_str()), driver, img);
 		img->drop();
 	}
 
@@ -730,7 +730,7 @@ void TextureSource::rebuildImagesAndTextures()
 		video::ITexture *t = NULL;
 		if (img) {
 			t = driver->addTexture(ti->name.c_str(), img);
-			guiScalingCache(io::path(ti->name.c_str()), img);
+			guiScalingCache(io::path(ti->name.c_str()), driver, img);
 			img->drop();
 		}
 		video::ITexture *t_old = ti->texture;
@@ -852,7 +852,7 @@ video::ITexture* TextureSource::generateTextureFromMesh(
 		rawImage->drop();
 
 		video::ITexture *rtt = driver->addTexture(params.rtt_texture_name.c_str(), inventory_image);
-		guiScalingCache(io::path(params.rtt_texture_name.c_str()), inventory_image);
+		guiScalingCache(io::path(params.rtt_texture_name.c_str()), driver, inventory_image);
 		inventory_image->drop();
 
 		if (rtt == NULL) {
