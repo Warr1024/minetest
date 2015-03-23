@@ -30,13 +30,13 @@ void guiScalingCache(io::path key, video::IVideoDriver *driver, video::IImage *v
 
 // Manually clear the cache, e.g. when switching to different worlds.
 void guiScalingCacheClear(video::IVideoDriver *driver) {
-	for(std::map<io::path, video::IImage *>::iterator it = imgCache.begin();
+	for (std::map<io::path, video::IImage *>::iterator it = imgCache.begin();
 			it != imgCache.end(); it++) {
 		if (it->second != NULL)
 			it->second->drop();
 	}
 	imgCache.clear();
-	for(std::map<io::path, video::ITexture *>::iterator it = txrCache.begin();
+	for (std::map<io::path, video::ITexture *>::iterator it = txrCache.begin();
 			it != txrCache.end(); it++) {
 		if (it->second != NULL)
 			driver->removeTexture(it->second);
@@ -82,7 +82,7 @@ video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITex
 
 	// Search for existing scaled texture.
 	video::ITexture *scaled = txrCache[scalename];
-	if(scaled)
+	if (scaled)
 		return scaled;
 
 	// Try to find the texture converted to an image in the cache.
