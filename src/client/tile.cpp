@@ -854,7 +854,6 @@ video::ITexture* TextureSource::generateTextureFromMesh(
 		guiScalingCache(io::path(params.rtt_texture_name.c_str()), driver, inventory_image);
 
 		video::ITexture *rtt = driver->addTexture(params.rtt_texture_name.c_str(), inventory_image);
-		guiScalingCache(io::path(params.rtt_texture_name.c_str()), driver, inventory_image);
 		inventory_image->drop();
 
 		if (rtt == NULL) {
