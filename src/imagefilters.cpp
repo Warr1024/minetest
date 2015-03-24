@@ -1,4 +1,5 @@
 #include "imagefilters.h"
+#include <math.h>
 
 /* Fill in RGB values for transparent pixels, to correct for odd colors
  * appearing at borders when blending.  This is because many PNG optimizers
@@ -67,9 +68,8 @@ void imageCleanTransparent(video::IImage *src, u32 threshold) {
  */
 void imageScaleNNAA(video::IImage *src, const core::rect<s32> &srcrect, video::IImage *dest) {
 
-	double minsx, maxsx, minsy, maxsy, area, ra, ga, ba, aa, pw, ph, pa, tmp;
+	double sx, sy, minsx, maxsx, minsy, maxsy, area, ra, ga, ba, aa, pw, ph, pa, tmp;
 	u32 dy, dx;
-	s32 sy, sx, maxs32sx, maxs32sy;
 	video::SColor pxl;
 
 	// Cache rectsngle boundaries.
@@ -127,10 +127,8 @@ void imageScaleNNAA(video::IImage *src, const core::rect<s32> &srcrect, video::I
 		aa = 0;
 
 		// Loop over the integral pixel positions described by those bounds.
-		maxs32sx = (s32)maxsx;
-		maxs32sy = (s32)maxsy;
-		for (sy = (s32)minsy; sy <= maxs32sy; sy++)
-		for (sx = (s32)minsx; sx <= maxs32sx; sx++) {
+		for (sy = floor(minsy); sy < maxsy; sy++)
+		for (sx = floor(minsx); sx < maxsx; sx++) {
 
 			// Calculate width, height, then area of dest pixel
 			// that's covered by this source pixel.
@@ -148,7 +146,7 @@ void imageScaleNNAA(video::IImage *src, const core::rect<s32> &srcrect, video::I
 
 			// Get source pixel and add it to totals, weighted
 			// by covered area and alpha.
-			pxl = src->getPixel(sx, sy);
+			pxl = src->getPixel((u32)sx, (u32)sy);
 			area += pa;
 			ra += pa * pxl.getRed();
 			ga += pa * pxl.getGreen();
