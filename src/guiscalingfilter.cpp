@@ -2,6 +2,7 @@
 #include "imagefilters.h"
 #include "settings.h"
 #include "main.h"		// for g_settings
+#include "util/numeric.h"
 #include <stdio.h>
 
 /* Maintain a static cache to store the images that correspond to textures
@@ -43,20 +44,6 @@ void guiScalingCacheClear(video::IVideoDriver *driver) {
 	}
 	txrCache.clear();
 }
-
-#ifdef __ANDROID__
-// Compute next-higher power of 2 efficiently, for platforms that
-// require power-of-2 textures.
-u32 nextpower2(u32 orig) {
-	orig--;
-	orig |= orig >> 1;
-	orig |= orig >> 2;
-	orig |= orig >> 4;
-	orig |= orig >> 8;
-	orig |= orig >> 16;
-	return orig + 1;
-}
-#endif
 
 /* Get a cached, high-quality pre-scaled texture for display purposes.  If the
  * texture is not already cached, attempt to create it.  Returns a pre-scaled texture,
@@ -109,8 +96,8 @@ video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITex
 	// the image dimensions to the next power of 2, if necessary, for
 	// that platform.
 	video::IImage *po2img = driver->createImage(src->getColorFormat(),
-			core::dimension2d<u32>(nextpower2((u32)destrect.getWidth()),
-			nextpower2((u32)destrect.getHeight())));
+			core::dimension2d<u32>(npot2((u32)destrect.getWidth()),
+			npot2((u32)destrect.getHeight())));
 	destimg->copyTo(po2img);
 	destimg->drop();
 	destimg = po2img;

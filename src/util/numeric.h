@@ -413,3 +413,6 @@ inline bool is_power_of_two(u32 n)
 
 #endif
 
+// Compute next-higher power of 2 efficiently, e.g. for 
+// platforms that require power-of-2 textures.
+u32 nextpower2(u32 orig);
