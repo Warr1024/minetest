@@ -245,15 +245,3 @@ bool isBlockInSight(v3s16 blockpos_b, v3f camera_pos, v3f camera_dir,
 
 	return true;
 }
-
-// Compute next-higher power of 2 efficiently, e.g. for power-of-2 texture sizes.
-// Public Domain: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-inline u32 npot2(u32 orig) {
-        orig--;
-        orig |= orig >> 1;
-        orig |= orig >> 2;
-        orig |= orig >> 4;
-        orig |= orig >> 8;
-        orig |= orig >> 16;
-        return orig + 1;
-}
