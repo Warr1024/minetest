@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "imagefilters.h"
+#include "util/numeric.h"
 #include <math.h>
 
 /* Fill in RGB values for transparent pixels, to correct for odd colors
@@ -86,7 +87,7 @@ void imageCleanTransparent(video::IImage *src, u32 threshold) {
  */
 void imageScaleNNAA(video::IImage *src, const core::rect<s32> &srcrect, video::IImage *dest) {
 
-	double sx, sy, minsx, maxsx, minsy, maxsy, area, ra, ga, ba, aa, pw, ph, pa, tmp;
+	double sx, sy, minsx, maxsx, minsy, maxsy, area, ra, ga, ba, aa, pw, ph, pa;
 	u32 dy, dx;
 	video::SColor pxl;
 
@@ -106,35 +107,17 @@ void imageScaleNNAA(video::IImage *src, const core::rect<s32> &srcrect, video::I
 		// Do some basic clipping, and for mirrored/flipped rects,
 		// make sure min/max are in the right order.
 		minsx = sox + (dx * sw / dim.Width);
-		if (minsx < 0)
-			minsx = 0;
-		else if (minsx > sw)
-			minsx = sw;
+		minsx = rangelim(minsx, 0, sw);
 		maxsx = minsx + sw / dim.Width;
-		if (maxsx < 0)
-			maxsx = 0;
-		else if (maxsx > sw)
-			maxsx = sw;
-		if (minsx > maxsx) {
-			tmp = minsx;
-			minsx = maxsx;
-			maxsx = tmp;
-		}
+		maxsx = rangelim(maxsx, 0, sw);
+		if (minsx > maxsx)
+			SWAP(double, minsx, maxsx);
 		minsy = soy + (dy * sh / dim.Height);
-		if (minsy < 0)
-			minsy = 0;
-		else if (minsy > sh)
-			minsy = sh;
+		minsy = rangelim(minsy, 0, sh);
 		maxsy = minsy + sh / dim.Height;
-		if (maxsy < 0)
-			maxsy = 0;
-		else if (maxsy > sh)
-			maxsy = sh;
-		if (minsy > maxsy) {
-			tmp = minsy;
-			minsy = maxsy;
-			maxsy = tmp;
-		}
+		maxsy = rangelim(maxsy, 0, sh);
+		if (minsy > maxsy)
+			SWAP(double, minsy, maxsy);
 
 		// Total area, and integral of r, g, b values over that area,
 		// initialized to zero, to be summed up in next loops.
