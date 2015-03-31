@@ -135,12 +135,19 @@ void TouchScreenGUI::loadButtonTexture(button_info* btn, const char* path, rect<
 {
 	unsigned int tid;
 	video::ITexture *texture = guiScalingImageButton(m_device->getVideoDriver(),
-		m_texturesource->getTexture(path,&tid), button_rect.getWidth(), button_rect.getHeight());
+		m_texturesource->getTexture(path, &tid), button_rect.getWidth(), button_rect.getHeight());
 	if (texture) {
 		btn->guibutton->setUseAlphaChannel(true);
-		btn->guibutton->setImage(texture);
-		btn->guibutton->setPressedImage(texture);
-		btn->guibutton->setScaleImage(false);
+		if (g_settings->getBool("gui_scaling_filter")) {
+			rect<s32> txr_rect = rect<s32>(0, 0, button_rect.getWidth(), button_rect.getHeight());
+			btn->guibutton->setImage(texture, txr_rect);
+			btn->guibutton->setPressedImage(texture, txr_rect);
+			btn->guibutton->setScaleImage(false);
+		} else {
+			btn->guibutton->setImage(texture);
+			btn->guibutton->setPressedImage(texture);
+			btn->guibutton->setScaleImage(true);
+		}
 		btn->guibutton->setDrawBorder(false);
 		btn->guibutton->setText(L"");
 		}

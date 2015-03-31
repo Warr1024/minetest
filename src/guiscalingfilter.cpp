@@ -116,6 +116,7 @@ video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITex
 	video::IImage *po2img = driver->createImage(src->getColorFormat(),
 			core::dimension2d<u32>(npot2((u32)destrect.getWidth()),
 			npot2((u32)destrect.getHeight())));
+	po2img->fill(video::SColor(0, 0, 0, 0));
 	destimg->copyTo(po2img);
 	destimg->drop();
 	destimg = po2img;
