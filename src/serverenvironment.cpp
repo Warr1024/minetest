@@ -729,6 +729,7 @@ struct ActiveABM
 	int chance;
 	std::vector<content_t> required_neighbors;
 	bool check_required_neighbors; // false if required_neighbors is known to be empty
+	std::vector<ABMBatchNode> *batch;
 };
 
 class ABMHandler
@@ -774,6 +775,10 @@ public:
 				aabm.chance = chance;
 			}
 
+			aabm.batch = abm->getBatchExecution()
+				? new std::vector<ABMBatchNode>()
+				: NULL;
+
 			// Trigger neighbors
 			const std::vector<std::string> &required_neighbors_s =
 				abm->getRequiredNeighbors();
@@ -800,8 +805,13 @@ public:
 
 	~ABMHandler()
 	{
-		for (auto &aabms : m_aabms)
+		for (auto &aabms : m_aabms) {
+			// if(aabms)
+			// 	for (ActiveABM &aabm : *aabms)
+			// 		if(aabm.batch)
+			// 			delete aabm.batch;
 			delete aabms;
+		}
 	}
 
 	// Find out how many objects the given block and its neighbours contain.
@@ -863,6 +873,8 @@ public:
 		u32 active_object_count = this->countObjects(block, map, active_object_count_wider);
 		m_env->m_added_objects = 0;
 
+		bool any_batched = 0;
+
 		v3s16 p0;
 		for(p0.X=0; p0.X<MAP_BLOCKSIZE; p0.X++)
 		for(p0.Y=0; p0.Y<MAP_BLOCKSIZE; p0.Y++)
@@ -916,6 +928,15 @@ public:
 				}
 				neighbor_found:
 
+				if(aabm.batch) {
+					ABMBatchNode bm;
+					bm.pos = p;
+					bm.node = n;
+					aabm.batch->push_back(bm);
+					any_batched = 1;
+					continue;
+				}
+
 				abms_run++;
 				// Call all the trigger variations
 				aabm.abm->trigger(m_env, p, n);
@@ -930,6 +951,16 @@ public:
 			}
 		}
 		block->contents_cached = !block->do_not_cache_contents;
+
+		if(any_batched)
+			for (auto &aabms : m_aabms)
+				if(aabms)
+					for (ActiveABM &aabm : *aabms)
+						if(aabm.batch && !aabm.batch->empty()) {
+							aabm.abm->trigger(m_env, aabm.batch, active_object_count,
+								active_object_count_wider);
+							aabm.batch->clear();
+						}
 	}
 };
 

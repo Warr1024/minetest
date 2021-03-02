@@ -78,8 +78,17 @@ local function check_modname_prefix(name)
 end
 
 function core.register_abm(spec)
-	-- Add to core.registered_abms
 	assert(type(spec.action) == "function", "Required field 'action' of type function")
+		-- Add to core.registered_abms
+	if spec.batch_execution and (spec.batch_compatibility ~= false) then
+		local oldact = spec.action
+		function spec.action(batch, ...)
+			for i = 1, #batch do
+				local entry = batch[i]
+				oldact(entry[1], entry[2], ...)
+			end
+		end
+	end
 	core.registered_abms[#core.registered_abms + 1] = spec
 	spec.mod_origin = core.get_current_modname() or "??"
 end

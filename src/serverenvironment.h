@@ -43,6 +43,12 @@ class ServerActiveObject;
 class Server;
 class ServerScripting;
 
+struct ABMBatchNode
+{
+	v3s16 pos;
+	MapNode node;
+};
+
 /*
 	{Active, Loading} block modifier interface.
 
@@ -67,9 +73,13 @@ public:
 	virtual u32 getTriggerChance() = 0;
 	// Whether to modify chance to simulate time lost by an unnattended block
 	virtual bool getSimpleCatchUp() = 0;
+	// Whether to use batched-optimized action execution method
+	virtual bool getBatchExecution() = 0;
 	// This is called usually at interval for 1/chance of the nodes
 	virtual void trigger(ServerEnvironment *env, v3s16 p, MapNode n){};
 	virtual void trigger(ServerEnvironment *env, v3s16 p, MapNode n,
+		u32 active_object_count, u32 active_object_count_wider){};
+	virtual void trigger(ServerEnvironment *env, std::vector<ABMBatchNode>*,
 		u32 active_object_count, u32 active_object_count_wider){};
 };
 

@@ -55,7 +55,7 @@ struct EnumString ModApiEnvMod::es_ClearObjectsMode[] =
 
 ///////////////////////////////////////////////////////////////////////////////
 
-
+// Standard per-node ABM trigger
 void LuaABM::trigger(ServerEnvironment *env, v3s16 p, MapNode n,
 		u32 active_object_count, u32 active_object_count_wider)
 {
@@ -94,6 +94,62 @@ void LuaABM::trigger(ServerEnvironment *env, v3s16 p, MapNode n,
 	lua_pushnumber(L, active_object_count_wider);
 
 	int result = lua_pcall(L, 4, 0, error_handler);
+	if (result)
+		scriptIface->scriptError(result, "LuaABM::trigger");
+
+	lua_pop(L, 1); // Pop error handler
+}
+
+// Batch-optimized ABM trigger
+void LuaABM::trigger(ServerEnvironment *env, std::vector<ABMBatchNode> *batch,
+		u32 active_object_count, u32 active_object_count_wider)
+{
+	ServerScripting *scriptIface = env->getScriptIface();
+	scriptIface->realityCheck();
+
+	lua_State *L = scriptIface->getStack();
+	sanity_check(lua_checkstack(L, 20));
+	StackUnroller stack_unroller(L);
+
+	int error_handler = PUSH_ERROR_HANDLER(L);
+
+	// Get registered_abms
+	lua_getglobal(L, "core");
+	lua_getfield(L, -1, "registered_abms");
+	luaL_checktype(L, -1, LUA_TTABLE);
+	lua_remove(L, -2); // Remove core
+
+	// Get registered_abms[m_id]
+	lua_pushinteger(L, m_id);
+	lua_gettable(L, -2);
+	if(lua_isnil(L, -1))
+		FATAL_ERROR("");
+	lua_remove(L, -2); // Remove registered_abms
+
+	scriptIface->setOriginFromTable(-1);
+
+	// Call action
+	luaL_checktype(L, -1, LUA_TTABLE);
+	lua_getfield(L, -1, "action");
+	luaL_checktype(L, -1, LUA_TFUNCTION);
+	lua_remove(L, -2); // Remove registered_abms[m_id]
+	int index = 1;
+	lua_createtable(L, batch->size(), 0);
+	for(ABMBatchNode n : *batch) {
+		lua_pushnumber(L, index++);
+		lua_createtable(L, 2, 0);
+		lua_pushnumber(L, 1);
+		push_v3s16(L, n.pos);
+		lua_rawset(L, -3);
+		lua_pushnumber(L, 2);
+		pushnode(L, n.node, env->getGameDef()->ndef());
+		lua_rawset(L, -3);
+		lua_rawset(L, -3);
+	}
+	lua_pushnumber(L, active_object_count);
+	lua_pushnumber(L, active_object_count_wider);
+
+	int result = lua_pcall(L, 3, 0, error_handler);
 	if (result)
 		scriptIface->scriptError(result, "LuaABM::trigger");
 

@@ -151,12 +151,15 @@ void ScriptApiEnv::initializeEnvironment(ServerEnvironment *env)
 		bool simple_catch_up = true;
 		getboolfield(L, current_abm, "catch_up", simple_catch_up);
 
+		bool batch_execution = false;
+		getboolfield(L, current_abm, "batch_execution", batch_execution);
+
 		lua_getfield(L, current_abm, "action");
 		luaL_checktype(L, current_abm + 1, LUA_TFUNCTION);
 		lua_pop(L, 1);
 
 		LuaABM *abm = new LuaABM(L, id, trigger_contents, required_neighbors,
-			trigger_interval, trigger_chance, simple_catch_up);
+			trigger_interval, trigger_chance, simple_catch_up, batch_execution);
 
 		env->addActiveBlockModifier(abm);
 

@@ -7080,6 +7080,21 @@ Used by `minetest.register_abm`.
         -- by the area being unattended. Note that the `chance` value can often
         -- be reduced to 1.
 
+        batch_execution = false,
+        -- If true, execute the action as a batch/snapshot.  This is more optimized
+        -- and should run faster, but multiple calls to the action function are
+        -- run from a single snapshot, so the node contents and object counts may
+        -- not be updated between action calls for multiple nodes.  This should only
+        -- be used on actions that either do not depend on action counts or do not
+        -- modify them, and that do not affect other neighboring nodes.
+
+        batch_compatibility = true,
+        -- If explicitly false, and batch_execution = true, then pass raw batch
+        -- list to the action function once, instead of calling action for each
+        -- pos/node in the batch.  The action function's parameters will change to
+        -- (batch, active_object_count, active_object_count_wider), where batch is
+        -- an array of {pos, node} arrays.
+
         action = function(pos, node, active_object_count, active_object_count_wider),
         -- Function triggered for each qualifying node.
         -- `active_object_count` is number of active objects in the node's
