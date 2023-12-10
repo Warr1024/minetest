@@ -33,7 +33,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "noise.h"
 #include <cctype>
 #include <algorithm>
-#include "network/networkprotocol.h"
 
 Settings *g_settings = nullptr;
 static SettingsHierarchy g_hierarchy;
@@ -659,22 +658,6 @@ bool Settings::getNoiseParamsFromGroup(const std::string &name,
 	return true;
 }
 
-u16 Settings::getProtocolVersionMin() const
-{
-	u16 min_proto = getU16("protocol_version_min");
-	if (getBool("strict_protocol_version_checking"))
-		min_proto = LATEST_PROTOCOL_VERSION;
-	return rangelim(min_proto,
-		SERVER_PROTOCOL_VERSION_MIN,
-		SERVER_PROTOCOL_VERSION_MAX);
-}
-
-u16 Settings::getProtocolVersionMax() const
-{
-	return getBool("strict_protocol_version_checking")
-		? LATEST_PROTOCOL_VERSION
-		: SERVER_PROTOCOL_VERSION_MAX;
-}
 
 bool Settings::exists(const std::string &name) const
 {

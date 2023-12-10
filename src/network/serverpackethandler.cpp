@@ -147,8 +147,8 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 
 	client->net_proto_version = net_proto_version;
 
-	if (net_proto_version < g_settings->getProtocolVersionMin() ||
-			net_proto_version > g_settings->getProtocolVersionMax()) {
+	if (net_proto_version < Server::getProtocolVersionMin() ||
+			net_proto_version > Server::getProtocolVersionMax()) {
 		actionstream << "Server: A mismatched client tried to connect from " <<
 			addr_s << " proto_max=" << (int)max_net_proto_version << std::endl;
 		DenyAccess(peer_id, SERVER_ACCESSDENIED_WRONG_VERSION);
