@@ -172,6 +172,8 @@ public:
 	bool getNoiseParams(const std::string &name, NoiseParams &np) const;
 	bool getNoiseParamsFromValue(const std::string &name, NoiseParams &np) const;
 	bool getNoiseParamsFromGroup(const std::string &name, NoiseParams &np) const;
+	u16 getProtocolVersionMin() const;
+	u16 getProtocolVersionMax() const;
 
 	// return all keys used in this object
 	std::vector<std::string> getNames() const;

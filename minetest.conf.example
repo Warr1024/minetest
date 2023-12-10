@@ -766,7 +766,7 @@
 #    This allows more fine-grained control than strict_protocol_version_checking.
 #    Minetest may still enforce its own internal minimum, and enabling
 #    strict_protocol_version_checking will effectively override this.
-#    type: int min: 0 max: 65535
+#    type: int min: 1 max: 65535
 # protocol_version_min = 1
 
 #    Specifies URL from which client fetches media instead of using UDP.

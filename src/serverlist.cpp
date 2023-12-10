@@ -50,15 +50,11 @@ void sendAnnounce(AnnounceAction action,
 		server["address"] = g_settings->get("server_address");
 	}
 	if (action != AA_DELETE) {
-		u16 min_proto = g_settings->getU16("protocol_version_min");
-		if(min_proto < SERVER_PROTOCOL_VERSION_MIN)
-			min_proto = SERVER_PROTOCOL_VERSION_MIN;
-		bool strict_checking = g_settings->getBool("strict_protocol_version_checking");
 		server["name"]         = g_settings->get("server_name");
 		server["description"]  = g_settings->get("server_description");
 		server["version"]      = g_version_string;
-		server["proto_min"]    = strict_checking ? LATEST_PROTOCOL_VERSION : min_proto;
-		server["proto_max"]    = strict_checking ? LATEST_PROTOCOL_VERSION : SERVER_PROTOCOL_VERSION_MAX;
+		server["proto_min"]    = g_settings->getProtocolVersionMin();
+		server["proto_max"]    = g_settings->getProtocolVersionMax();
 		server["url"]          = g_settings->get("server_url");
 		server["creative"]     = g_settings->getBool("creative_mode");
 		server["damage"]       = g_settings->getBool("enable_damage");
