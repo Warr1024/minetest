@@ -88,6 +88,10 @@ void set_light_table(float gamma)
 			light_LUT[i] = std::min((u8)254, light_LUT[i - 1]) + 1;
 		}
 	}
+
+	// Cheat by poisoning light LUT zero level with some ambient glow to make
+	// it possible to see (especially with gamma / auto-exposure) in total dark.
+	light_LUT[0] = light_LUT[1];
 }
 
 #endif
