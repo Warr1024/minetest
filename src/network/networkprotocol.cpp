@@ -57,10 +57,15 @@
 			old servers.
 		Rename TOCLIENT_DEATHSCREEN to TOCLIENT_DEATHSCREEN_LEGACY
 		Rename TOSERVER_RESPAWN to TOSERVER_RESPAWN_LEGACY
+		Support float animation frame numbers in TOCLIENT_LOCAL_PLAYER_ANIMATIONS
 		[scheduled bump for 5.10.0]
+	PROTOCOL VERSION 47
+		Add particle blend mode "clip"
+		[scheduled bump for 5.11.0]
 */
 
-const u16 LATEST_PROTOCOL_VERSION = 46;
+// Note: Also update core.protocol_versions in builtin when bumping
+const u16 LATEST_PROTOCOL_VERSION = 47;
 
 // See also formspec [Version History] in doc/lua_api.md
 const u16 FORMSPEC_API_VERSION = 8;

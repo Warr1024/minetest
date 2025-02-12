@@ -1,21 +1,6 @@
-/*
-Minetest
-Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
+// Luanti
+// SPDX-License-Identifier: LGPL-2.1-or-later
+// Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 
 
 #include <cstdlib>
@@ -94,7 +79,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 static unsigned int font_line_height(gui::IGUIFont *font)
 {
-	return font->getDimension(L"Ay").Height + font->getKerningHeight();
+	return font->getDimension(L"Ay").Height + font->getKerning(L'A').Y;
 }
 
 inline u32 clamp_u8(s32 value)
@@ -3025,7 +3010,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	m_tabheader_upper_edge = 0;
 
 	{
-		v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
+		v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color").value_or(v3f());
 		m_fullscreen_bgcolor = video::SColor(
 			(u8) clamp_u8(g_settings->getS32("formspec_fullscreen_bg_opacity")),
 			clamp_u8(myround(formspec_bgcolor.X)),
@@ -3615,7 +3600,7 @@ void GUIFormSpecMenu::showTooltip(const std::wstring &text,
 	int tooltip_offset_x = m_btn_height;
 	int tooltip_offset_y = m_btn_height;
 
-	if (m_pointer_type == PointerType::Touch) {
+	if (RenderingEngine::getLastPointerType() == PointerType::Touch) {
 		tooltip_offset_x *= 3;
 		tooltip_offset_y  = 0;
 		if (m_pointer.X > (s32)screenSize.X / 2)
@@ -3625,10 +3610,25 @@ void GUIFormSpecMenu::showTooltip(const std::wstring &text,
 	// Calculate and set the tooltip position
 	s32 tooltip_x = m_pointer.X + tooltip_offset_x;
 	s32 tooltip_y = m_pointer.Y + tooltip_offset_y;
-	if (tooltip_x + tooltip_width > (s32)screenSize.X)
-		tooltip_x = (s32)screenSize.X - tooltip_width  - m_btn_height;
-	if (tooltip_y + tooltip_height > (s32)screenSize.Y)
-		tooltip_y = (s32)screenSize.Y - tooltip_height - m_btn_height;
+	// Bottom/Left limited positions (if the tooltip is too far out)
+	s32 tooltip_x_alt = (s32)screenSize.X - tooltip_width  - m_btn_height;
+	s32 tooltip_y_alt = (s32)screenSize.Y - tooltip_height - m_btn_height;
+
+	int collision = (tooltip_x_alt < tooltip_x) + 2 * (tooltip_y_alt < tooltip_y);
+	switch (collision) {
+	case 1: // x
+		tooltip_x = tooltip_x_alt;
+		break;
+	case 2: // y
+		tooltip_y = tooltip_y_alt;
+		break;
+	case 3: // both
+		tooltip_x = tooltip_x_alt;
+		tooltip_y = (s32)screenSize.Y - 2 * tooltip_height - m_btn_height;
+		break;
+	default: // OK
+		break;
+	}
 
 	m_tooltip_element->setRelativePosition(
 		core::rect<s32>(
@@ -3892,7 +3892,7 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 							fields[name] = "CHG:" + itos(e->getPos());
 						else
 							fields[name] = "VAL:" + itos(e->getPos());
- 					}
+					}
 				} else if (s.ftype == f_AnimatedImage) {
 					// No dynamic cast possible due to some distributions shipped
 					// without rtti support in Irrlicht
@@ -5056,7 +5056,7 @@ double GUIFormSpecMenu::calculateImgsize(const parserData &data)
 {
 	// must stay in sync with ClientDynamicInfo::calculateMaxFSSize
 
-    const double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+	const double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
 	const double gui_scaling = g_settings->getFloat("gui_scaling", 0.5f, 42.0f);
 
 	// Fixed-size mode

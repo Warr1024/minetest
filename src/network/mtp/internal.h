@@ -1,21 +1,6 @@
-/*
-Minetest
-Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
+// Luanti
+// SPDX-License-Identifier: LGPL-2.1-or-later
+// Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 
 #pragma once
 
@@ -202,6 +187,7 @@ struct BufferedPacket {
 	DISABLE_CLASS_COPY(BufferedPacket)
 
 	u16 getSeqnum() const;
+	void setSenderPeerId(session_t id);
 
 	inline size_t size() const { return m_data.size(); }
 
@@ -265,6 +251,8 @@ public:
 	BufferedPacketPtr popFirst();
 	BufferedPacketPtr popSeqnum(u16 seqnum);
 	void insert(BufferedPacketPtr &p_ptr, u16 next_expected);
+	/// Adjusts the sender peer ID for all packets
+	void fixPeerId(session_t id);
 
 	void incrementTimeouts(float dtime);
 	u32 getTimedOuts(float timeout);
@@ -322,7 +310,8 @@ enum ConnectionCommandType{
 	CONNCMD_SEND_TO_ALL,
 	CONCMD_ACK,
 	CONCMD_CREATE_PEER,
-	CONNCMD_RESEND_ONE
+	CONNCMD_RESEND_ONE,
+	CONNCMD_PEER_ID_SET
 };
 
 // This is very similar to ConnectionEvent
@@ -343,6 +332,7 @@ struct ConnectionCommand
 	static ConnectionCommandPtr disconnect();
 	static ConnectionCommandPtr disconnect_peer(session_t peer_id);
 	static ConnectionCommandPtr resend_one(session_t peer_id);
+	static ConnectionCommandPtr peer_id_set(session_t own_peer_id);
 	static ConnectionCommandPtr send(session_t peer_id, u8 channelnum, NetworkPacket *pkt, bool reliable);
 	static ConnectionCommandPtr ack(session_t peer_id, u8 channelnum, const Buffer<u8> &data);
 	static ConnectionCommandPtr createPeer(session_t peer_id, const Buffer<u8> &data);

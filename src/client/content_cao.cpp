@@ -1,21 +1,6 @@
-/*
-Minetest
-Copyright (C) 2010-2013 celeron55, Perttu Ahola <celeron55@gmail.com>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
+// Luanti
+// SPDX-License-Identifier: LGPL-2.1-or-later
+// Copyright (C) 2010-2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 
 #include "content_cao.h"
 #include <IBillboardSceneNode.h>
@@ -48,6 +33,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/shader.h"
 #include "client/minimap.h"
 #include <quaternion.h>
+#include <SMesh.h>
+#include <IMeshBuffer.h>
+#include <SMeshBuffer.h>
 
 class Settings;
 struct ToolCapabilities;
@@ -364,8 +352,6 @@ bool GenericCAO::collideWithObjects() const
 void GenericCAO::initialize(const std::string &data)
 {
 	processInitData(data);
-
-	m_enable_shaders = g_settings->getBool("enable_shaders");
 }
 
 void GenericCAO::processInitData(const std::string &data)
@@ -618,7 +604,7 @@ void GenericCAO::addToScene(ITextureSource *tsrc, scene::ISceneManager *smgr)
 
 	m_material_type_param = 0.5f; // May cut off alpha < 128 depending on m_material_type
 
-	if (m_enable_shaders) {
+	{
 		IShaderSource *shader_source = m_client->getShaderSource();
 		MaterialType material_type;
 
@@ -631,13 +617,6 @@ void GenericCAO::addToScene(ITextureSource *tsrc, scene::ISceneManager *smgr)
 
 		u32 shader_id = shader_source->getShader("object_shader", material_type, NDT_NORMAL);
 		m_material_type = shader_source->getShaderInfo(shader_id).material;
-	} else {
-		if (m_prop.use_texture_alpha) {
-			m_material_type = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
-			m_material_type_param = 1.0f / 256.f; // minimal alpha for texture rendering
-		} else {
-			m_material_type = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
-		}
 	}
 
 	auto grabMatrixNode = [this] {
@@ -680,66 +659,46 @@ void GenericCAO::addToScene(ITextureSource *tsrc, scene::ISceneManager *smgr)
 		}
 	} else if (m_prop.visual == "upright_sprite") {
 		grabMatrixNode();
-		scene::SMesh *mesh = new scene::SMesh();
-		double dx = BS * m_prop.visual_size.X / 2;
-		double dy = BS * m_prop.visual_size.Y / 2;
+		auto mesh = make_irr<scene::SMesh>();
+		f32 dx = BS * m_prop.visual_size.X / 2;
+		f32 dy = BS * m_prop.visual_size.Y / 2;
 		video::SColor c(0xFFFFFFFF);
 
-		{ // Front
-			scene::IMeshBuffer *buf = new scene::SMeshBuffer();
-			video::S3DVertex vertices[4] = {
-				video::S3DVertex(-dx, -dy, 0, 0,0,1, c, 1,1),
-				video::S3DVertex( dx, -dy, 0, 0,0,1, c, 0,1),
-				video::S3DVertex( dx,  dy, 0, 0,0,1, c, 0,0),
-				video::S3DVertex(-dx,  dy, 0, 0,0,1, c, 1,0),
-			};
-			if (m_is_player) {
-				// Move minimal Y position to 0 (feet position)
-				for (video::S3DVertex &vertex : vertices)
-					vertex.Pos.Y += dy;
+		video::S3DVertex vertices[4] = {
+			video::S3DVertex(-dx, -dy, 0, 0,0,1, c, 1,1),
+			video::S3DVertex( dx, -dy, 0, 0,0,1, c, 0,1),
+			video::S3DVertex( dx,  dy, 0, 0,0,1, c, 0,0),
+			video::S3DVertex(-dx,  dy, 0, 0,0,1, c, 1,0),
+		};
+		if (m_is_player) {
+			// Move minimal Y position to 0 (feet position)
+			for (auto &vertex : vertices)
+				vertex.Pos.Y += dy;
+		}
+		const u16 indices[] = {0,1,2,2,3,0};
+
+		for (int face : {0, 1}) {
+			auto buf = make_irr<scene::SMeshBuffer>();
+			// Front (0) or Back (1)
+			if (face == 1) {
+				for (auto &v : vertices)
+					v.Normal *= -1;
+				for (int i : {0, 2})
+					std::swap(vertices[i].Pos, vertices[i+1].Pos);
 			}
-			u16 indices[] = {0,1,2,2,3,0};
 			buf->append(vertices, 4, indices, 6);
 
 			// Set material
 			setMaterial(buf->getMaterial());
-			if (m_enable_shaders) {
-				buf->getMaterial().ColorParam = c;
-			}
+			buf->getMaterial().ColorParam = c;
 
 			// Add to mesh
-			mesh->addMeshBuffer(buf);
-			buf->drop();
+			mesh->addMeshBuffer(buf.get());
 		}
-		{ // Back
-			scene::IMeshBuffer *buf = new scene::SMeshBuffer();
-			video::S3DVertex vertices[4] = {
-				video::S3DVertex( dx,-dy, 0, 0,0,-1, c, 1,1),
-				video::S3DVertex(-dx,-dy, 0, 0,0,-1, c, 0,1),
-				video::S3DVertex(-dx, dy, 0, 0,0,-1, c, 0,0),
-				video::S3DVertex( dx, dy, 0, 0,0,-1, c, 1,0),
-			};
-			if (m_is_player) {
-				// Move minimal Y position to 0 (feet position)
-				for (video::S3DVertex &vertex : vertices)
-					vertex.Pos.Y += dy;
-			}
-			u16 indices[] = {0,1,2,2,3,0};
-			buf->append(vertices, 4, indices, 6);
 
-			// Set material
-			setMaterial(buf->getMaterial());
-			if (m_enable_shaders) {
-				buf->getMaterial().ColorParam = c;
-			}
-
-			// Add to mesh
-			mesh->addMeshBuffer(buf);
-			buf->drop();
-		}
-		m_meshnode = m_smgr->addMeshSceneNode(mesh, m_matrixnode);
+		mesh->recalculateBoundingBox();
+		m_meshnode = m_smgr->addMeshSceneNode(mesh.get(), m_matrixnode);
 		m_meshnode->grab();
-		mesh->drop();
 	} else if (m_prop.visual == "cube") {
 		grabMatrixNode();
 		scene::IMesh *mesh = createCubeMesh(v3f(BS,BS,BS));
@@ -809,7 +768,7 @@ void GenericCAO::addToScene(ITextureSource *tsrc, scene::ISceneManager *smgr)
 
 	/* Set VBO hint */
 	// wieldmesh sets its own hint, no need to handle it
-	if (m_enable_shaders && (m_meshnode || m_animated_meshnode)) {
+	if (m_meshnode || m_animated_meshnode) {
 		// sprite uses vertex animation
 		if (m_meshnode && m_prop.visual != "upright_sprite")
 			m_meshnode->getMesh()->setHardwareMappingHint(scene::EHM_STATIC);
@@ -907,10 +866,7 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 
 	// Encode light into color, adding a small boost
 	// based on the entity glow.
-	if (m_enable_shaders)
-		light = encode_light(light_at_pos, m_prop.glow);
-	else
-		final_color_blend(&light, light_at_pos, day_night_ratio);
+	light = encode_light(light_at_pos, m_prop.glow);
 
 	if (light != m_last_light) {
 		m_last_light = light;
@@ -926,19 +882,11 @@ void GenericCAO::setNodeLight(const video::SColor &light_color)
 		return;
 	}
 
-	if (m_enable_shaders) {
+	{
 		auto *node = getSceneNode();
 		if (!node)
 			return;
 		setColorParam(node, light_color);
-	} else {
-		if (m_meshnode) {
-			setMeshColor(m_meshnode->getMesh(), light_color);
-		} else if (m_animated_meshnode) {
-			setMeshColor(m_animated_meshnode->getMesh(), light_color);
-		} else if (m_spritenode) {
-			m_spritenode->setColor(light_color);
-		}
 	}
 }
 
@@ -1052,7 +1000,7 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 				walking = true;
 			}
 
-			v2s32 new_anim = v2s32(0,0);
+			v2f new_anim(0,0);
 			bool allow_update = false;
 
 			// increase speed if using fast or flying fast
@@ -1154,11 +1102,10 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 			box.MinEdge *= BS;
 			box.MaxEdge *= BS;
 			collisionMoveResult moveresult;
-			f32 pos_max_d = BS*0.125; // Distance per iteration
 			v3f p_pos = m_position;
 			v3f p_velocity = m_velocity;
 			moveresult = collisionMoveSimple(env,env->getGameDef(),
-					pos_max_d, box, m_prop.stepheight, dtime,
+					box, m_prop.stepheight, dtime,
 					&p_pos, &p_velocity, m_acceleration,
 					this, m_prop.collideWithObjects);
 			// Apply results
@@ -1460,8 +1407,8 @@ void GenericCAO::updateTextures(std::string mod)
 				});
 			}
 			// Set mesh color (only if lighting is disabled)
-			if (!m_prop.colors.empty() && m_prop.glow < 0)
-				setMeshColor(mesh, m_prop.colors[0]);
+			if (m_prop.glow < 0)
+				setMeshColor(mesh, {255, 255, 255, 255});
 		}
 	}
 	// Prevent showing the player after changing texture
@@ -1515,34 +1462,6 @@ void GenericCAO::updateBones(f32 dtime)
 		bone->setScale(props.getScale(bone->getScale()));
 	}
 
-	// search through bones to find mistakenly rotated bones due to bug in Irrlicht
-	for (u32 i = 0; i < m_animated_meshnode->getJointCount(); ++i) {
-		scene::IBoneSceneNode *bone = m_animated_meshnode->getJointNode(i);
-		if (!bone)
-			continue;
-
-		//If bone is manually positioned there is no need to perform the bug check
-		bool skip = false;
-		for (auto &it : m_bone_override) {
-			if (it.first == bone->getName()) {
-				skip = true;
-				break;
-			}
-		}
-		if (skip)
-			continue;
-
-		// Workaround for Irrlicht bug
-		// We check each bone to see if it has been rotated ~180deg from its expected position due to a bug in Irricht
-		// when using EJUOR_CONTROL joint control. If the bug is detected we update the bone to the proper position
-		// and update the bones transformation.
-		v3f bone_rot = bone->getRelativeTransformation().getRotationDegrees();
-		float offset = fabsf(bone_rot.X - bone->getRotation().X);
-		if (offset > 179.9f && offset < 180.1f) {
-			bone->setRotation(bone_rot);
-			bone->updateAbsolutePosition();
-		}
-	}
 	// The following is needed for set_bone_pos to propagate to
 	// attached objects correctly.
 	// Irrlicht ought to do this, but doesn't when using EJUOR_CONTROL.
@@ -1703,11 +1622,6 @@ void GenericCAO::processMessage(const std::string &data)
 		bool is_end_position = readU8(is);
 		float update_interval = readF32(is);
 
-		// Place us a bit higher if we're physical, to not sink into
-		// the ground due to sucky collision detection...
-		if(m_prop.physical)
-			m_position += v3f(0,0.002,0);
-
 		if(getParent() != NULL) // Just in case
 			return;
 
@@ -1799,10 +1713,9 @@ void GenericCAO::processMessage(const std::string &data)
 			phys.speed_walk = override_speed_walk;
 		}
 	} else if (cmd == AO_CMD_SET_ANIMATION) {
-		// TODO: change frames send as v2s32 value
 		v2f range = readV2F32(is);
 		if (!m_is_local_player) {
-			m_animation_range = v2s32((s32)range.X, (s32)range.Y);
+			m_animation_range = range;
 			m_animation_speed = readF32(is);
 			m_animation_blend = readF32(is);
 			// these are sent inverted so we get true when the server sends nothing
@@ -1812,7 +1725,7 @@ void GenericCAO::processMessage(const std::string &data)
 			LocalPlayer *player = m_env->getLocalPlayer();
 			if(player->last_animation == LocalPlayerAnimation::NO_ANIM)
 			{
-				m_animation_range = v2s32((s32)range.X, (s32)range.Y);
+				m_animation_range = range;
 				m_animation_speed = readF32(is);
 				m_animation_blend = readF32(is);
 				// these are sent inverted so we get true when the server sends nothing

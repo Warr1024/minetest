@@ -1,21 +1,6 @@
-/*
-Minetest
-Copyright (C) 2010-2013 celeron55, Perttu Ahola <celeron55@gmail.com>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
+// Luanti
+// SPDX-License-Identifier: LGPL-2.1-or-later
+// Copyright (C) 2010-2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 
 #pragma once
 
@@ -63,7 +48,7 @@ struct Nametag
 			return bgcolor.value();
 		else if (!use_fallback)
 			return video::SColor(0, 0, 0, 0);
-		else if (textcolor.getLuminance() > 186)
+		else if (textcolor.getBrightness() > 186)
 			// Dark background for light text
 			return video::SColor(50, 50, 50, 50);
 		else
@@ -84,6 +69,9 @@ class Camera
 public:
 	Camera(MapDrawControl &draw_control, Client *client, RenderingEngine *rendering_engine);
 	~Camera();
+
+	static void settingChangedCallback(const std::string &name, void *data);
+	void readSettings();
 
 	// Get camera scene node.
 	// It has the eye transformation, pitch and view bobbing applied.
@@ -161,6 +149,9 @@ public:
 
 	// Update the camera from the local player's position.
 	void update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio);
+
+	// Adjust the camera offset when needed
+	void updateOffset();
 
 	// Update render distance
 	void updateViewingRange();

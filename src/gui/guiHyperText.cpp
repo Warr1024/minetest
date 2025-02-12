@@ -1,21 +1,6 @@
-/*
-Minetest
-Copyright (C) 2019 EvicenceBKidscode / Pierre-Yves Rollo <dev@pyrollo.com>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
+// Luanti
+// SPDX-License-Identifier: LGPL-2.1-or-later
+// Copyright (C) 2019 EvicenceBKidscode / Pierre-Yves Rollo <dev@pyrollo.com>
 
 #include "guiHyperText.h"
 #include "guiScrollBar.h"
@@ -24,6 +9,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "IVideoDriver.h"
 #include "client/client.h"
 #include "client/renderingengine.h"
+#include "client/texturesource.h"
 #include "hud.h"
 #include "inventory.h"
 #include "util/string.h"
@@ -791,7 +777,7 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 										std::max(f.margin, p.margin);
 
 						} else if (f.rect.UpperLeftCorner.X - f.margin <= left &&
-							 	f.rect.LowerRightCorner.X + f.margin >= right) {
+								f.rect.LowerRightCorner.X + f.margin >= right) {
 							// float taking all space
 							left = right;
 						}
@@ -1028,10 +1014,6 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 		m_tsrc(tsrc), m_vscrollbar(nullptr),
 		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
 {
-
-#ifdef _DEBUG
-	setDebugName("GUIHyperText");
-#endif
 
 	IGUISkin *skin = 0;
 	if (Environment)
