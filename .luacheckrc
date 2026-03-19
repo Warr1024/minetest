@@ -15,15 +15,17 @@ read_globals = {
 	"dump", "dump2",
 	"fgettext", "fgettext_ne",
 	"vector",
+	"vector2",
 	"VoxelArea",
 	"VoxelManip",
 	"profiler",
 	"Settings",
-	"PerlinNoise", "PerlinNoiseMap",
+	"ValueNoise", "ValueNoiseMap",
+	"tracy",
 
 	string = {fields = {"split", "trim"}},
-	table  = {fields = {"copy", "getn", "indexof", "keyof", "insert_all"}},
-	math   = {fields = {"hypot", "round"}},
+	table  = {fields = {"copy", "copy_with_metatables", "getn", "indexof", "keyof", "insert_all", "shuffle"}},
+	math   = {fields = {"hypot", "round", "isfinite", "sign"}},
 }
 
 globals = {
@@ -33,7 +35,20 @@ globals = {
 	"_",
 }
 
-files["builtin/client/register.lua"] = {
+stds.menu_common = {
+	globals = {
+		"mt_color_grey", "mt_color_blue", "mt_color_lightblue", "mt_color_green",
+		"mt_color_dark_green", "mt_color_orange", "mt_color_red",
+	},
+}
+
+files["builtin/client/init.lua"] = {
+	globals = {
+		debug = {fields={"getinfo"}},
+	}
+}
+
+files["builtin/sscsm_client/init.lua"] = {
 	globals = {
 		debug = {fields={"getinfo"}},
 	}
@@ -57,6 +72,10 @@ files["builtin/common/vector.lua"] = {
 	globals = { "vector", "math" },
 }
 
+files["builtin/common/vector2.lua"] = {
+	globals = { "vector2", "math" },
+}
+
 files["builtin/game/voxelarea.lua"] = {
 	globals = { "VoxelArea" },
 }
@@ -73,9 +92,14 @@ files["builtin/common/filterlist.lua"] = {
 }
 
 files["builtin/mainmenu"] = {
+	std = "+menu_common",
 	globals = {
 		"gamedata",
 	},
+}
+
+files["builtin/common/settings"] = {
+	std = "+menu_common",
 }
 
 files["builtin/common/tests"] = {

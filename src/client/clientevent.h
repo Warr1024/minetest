@@ -6,7 +6,7 @@
 
 #include <string>
 #include "irrlichttypes.h"
-#include "client/hud.h" // HudElementStat
+#include "hud_element.h" // HudElementStat
 
 struct ParticleParameters;
 struct ParticleSpawnerParameters;
@@ -36,6 +36,7 @@ enum ClientEventType : u8
 	CE_SET_STARS,
 	CE_OVERRIDE_DAY_NIGHT_RATIO,
 	CE_CLOUD_PARAMS,
+	CE_UPDATE_CAMERA,
 	CLIENTEVENT_MAX,
 };
 
@@ -49,7 +50,7 @@ struct ClientEventHudAdd
 	u32 number, item, dir, style;
 	v2f align, offset;
 	v3f world_pos;
-	v2s32 size;
+	v2f size;
 	s16 z_index;
 };
 
@@ -66,11 +67,14 @@ struct ClientEventHudChange
 
 struct ClientEvent
 {
+	// TODO: should get rid of this ctor
+	ClientEvent() : type(CE_NONE) {}
+
+	ClientEvent(ClientEventType type) : type(type) {}
+
 	ClientEventType type;
 	union
 	{
-		// struct{
-		//} none;
 		struct
 		{
 			u16 amount;
@@ -86,8 +90,6 @@ struct ClientEvent
 			std::string *formspec;
 			std::string *formname;
 		} show_formspec;
-		// struct{
-		//} textures_updated;
 		ParticleParameters *spawn_particle;
 		struct
 		{

@@ -7,7 +7,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <list>
 #include <optional>
 
 #include "irrlichttypes.h"
@@ -65,7 +64,7 @@ public:
 
 	// Append chat line
 	// Removes oldest chat line if scrollback size is reached
-	void addLine(const std::wstring &name, const std::wstring &text);
+	void addLine(const EnrichedString &name, const EnrichedString &text);
 
 	// Remove all chat lines
 	void clear();
@@ -137,7 +136,7 @@ private:
 	// Enable clickable chat weblinks
 	bool m_cache_clickable_chat_weblinks;
 	// Color of clickable chat weblinks
-	irr::video::SColor m_cache_chat_weblink_color;
+	video::SColor m_cache_chat_weblink_color;
 
 	// Whether the lines were modified since last markLinesUnchanged()
 	// Is always set to true when m_unformatted is modified, because that's what

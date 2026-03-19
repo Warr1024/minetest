@@ -5,14 +5,12 @@
 #pragma once
 
 #include "irrlichttypes.h"
-#include "inventory.h"
+#include "inventory.h" // ItemStack
+#include "util/basic_macros.h"
 #include "util/numeric.h"
-#include "client/localplayer.h"
-#include <ICameraSceneNode.h>
-#include <ISceneNode.h>
 #include <plane3d.h>
 #include <array>
-#include <list>
+#include <vector>
 #include <optional>
 
 class LocalPlayer;
@@ -21,30 +19,27 @@ class Client;
 class RenderingEngine;
 class WieldMeshSceneNode;
 
+enum CameraMode : int;
+
+namespace scene {
+	class ICameraSceneNode;
+	class ISceneManager;
+	class ISceneNode;
+};
+
 struct Nametag
 {
-	scene::ISceneNode *parent_node;
+	scene::ISceneNode *parent_node = nullptr;
 	std::string text;
 	video::SColor textcolor;
 	std::optional<video::SColor> bgcolor;
-	v3f pos;
-
-	Nametag(scene::ISceneNode *a_parent_node,
-			const std::string &text,
-			const video::SColor &textcolor,
-			const std::optional<video::SColor> &bgcolor,
-			const v3f &pos):
-		parent_node(a_parent_node),
-		text(text),
-		textcolor(textcolor),
-		bgcolor(bgcolor),
-		pos(pos)
-	{
-	}
+	std::optional<u32> textsize;
+	v3f pos; // offset from parent node
+	bool scale_z;
 
 	video::SColor getBgColor(bool use_fallback) const
 	{
-		if (bgcolor)
+		if (bgcolor.has_value())
 			return bgcolor.value();
 		else if (!use_fallback)
 			return video::SColor(0, 0, 0, 0);
@@ -56,8 +51,6 @@ struct Nametag
 			return video::SColor(50, 255, 255, 255);
 	}
 };
-
-enum CameraMode {CAMERA_MODE_FIRST, CAMERA_MODE_THIRD, CAMERA_MODE_THIRD_FRONT};
 
 /*
 	Client camera class, manages the player and camera scene nodes, the viewing distance
@@ -88,10 +81,7 @@ public:
 	}
 
 	// Returns the absolute position of the head SceneNode in the world
-	inline v3f getHeadPosition() const
-	{
-		return m_headnode->getAbsolutePosition();
-	}
+	v3f getHeadPosition() const;
 
 	// Get the camera direction (in absolute camera coordinates).
 	// This has view bobbing applied.
@@ -166,17 +156,10 @@ public:
 	// Draw the wielded tool.
 	// This has to happen *after* the main scene is drawn.
 	// Warning: This clears the Z buffer.
-	void drawWieldedTool(irr::core::matrix4* translation=NULL);
+	void drawWieldedTool(core::matrix4* translation=NULL);
 
 	// Toggle the current camera mode
-	void toggleCameraMode() {
-		if (m_camera_mode == CAMERA_MODE_FIRST)
-			m_camera_mode = CAMERA_MODE_THIRD;
-		else if (m_camera_mode == CAMERA_MODE_THIRD)
-			m_camera_mode = CAMERA_MODE_THIRD_FRONT;
-		else
-			m_camera_mode = CAMERA_MODE_FIRST;
-	}
+	void toggleCameraMode();
 
 	// Set the current camera mode
 	inline void setCameraMode(CameraMode mode)
@@ -185,14 +168,12 @@ public:
 	}
 
 	//read the current camera mode
-	inline CameraMode getCameraMode()
+	inline CameraMode getCameraMode() const
 	{
 		return m_camera_mode;
 	}
 
-	Nametag *addNametag(scene::ISceneNode *parent_node,
-		const std::string &text, video::SColor textcolor,
-		std::optional<video::SColor> bgcolor, const v3f &pos);
+	Nametag *addNametag(const Nametag &params);
 
 	void removeNametag(Nametag *nametag);
 
@@ -257,8 +238,6 @@ private:
 	s32 m_view_bobbing_state = 0;
 	// Speed of view bobbing animation
 	f32 m_view_bobbing_speed = 0.0f;
-	// Fall view bobbing
-	f32 m_view_bobbing_fall = 0.0f;
 
 	// Digging animation frame (0 <= m_digging_anim < 1)
 	f32 m_digging_anim = 0.0f;
@@ -271,13 +250,12 @@ private:
 	f32 m_wield_change_timer = 0.125f;
 	ItemStack m_wield_item_next;
 
-	CameraMode m_camera_mode = CAMERA_MODE_FIRST;
+	CameraMode m_camera_mode;
 
-	f32 m_cache_fall_bobbing_amount;
 	f32 m_cache_view_bobbing_amount;
 	bool m_arm_inertia;
 
-	std::list<Nametag *> m_nametags;
+	std::vector<Nametag*> m_nametags;
 	bool m_show_nametag_backgrounds;
 
 	// Last known light color of the player

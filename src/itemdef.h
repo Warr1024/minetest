@@ -11,20 +11,15 @@
 #include <optional>
 #include <set>
 #include "itemgroup.h"
-#include "sound.h"
+#include "sound_spec.h"
 #include "texture_override.h" // TextureOverride
 #include "tool.h"
 #include "util/pointabilities.h"
 #include "util/pointedthing.h"
+#include "tileanimation.h"
 
-class IGameDef;
-class Client;
 struct ToolCapabilities;
-struct ItemMesh;
-struct ItemStack;
-typedef std::vector<video::SColor> Palette; // copied from src/client/texturesource.h
-namespace irr::video { class ITexture; }
-using namespace irr;
+struct ItemDefinition;
 
 /*
 	Base item definition
@@ -62,6 +57,28 @@ struct TouchInteraction
 	void deSerialize(std::istream &is);
 };
 
+struct ItemImageDef
+{
+	// May be extended to support meshes in the future
+	std::string name;
+	TileAnimationParams animation;
+
+	ItemImageDef &operator=(const std::string &other_name)
+	{
+		this->name = other_name;
+		return *this;
+	}
+
+	void reset()
+	{
+		animation.type = TileAnimationType::TAT_NONE;
+		name.clear();
+	}
+
+	void serialize(std::ostream &os, u16 protocol_version) const;
+	void deSerialize(std::istream &is, u16 protocol_version);
+};
+
 struct ItemDefinition
 {
 	/*
@@ -75,10 +92,10 @@ struct ItemDefinition
 	/*
 		Visual properties
 	*/
-	std::string inventory_image; // Optional for nodes, mandatory for tools/craftitems
-	std::string inventory_overlay; // Overlay of inventory_image.
-	std::string wield_image; // If empty, inventory_image or mesh (only nodes) is used
-	std::string wield_overlay; // Overlay of wield_image.
+	ItemImageDef inventory_image; // Optional for nodes, mandatory for tools/craftitems
+	ItemImageDef inventory_overlay; // Overlay of inventory_image.
+	ItemImageDef wield_image; // If empty, inventory_image or mesh (only nodes) is used
+	ItemImageDef wield_overlay; // Overlay of wield_image.
 	std::string palette_image; // If specified, the item will be colorized based on this
 	video::SColor color; // The fallback color of the node.
 	v3f wield_scale;
@@ -142,30 +159,6 @@ public:
 	virtual bool isKnown(const std::string &name) const=0;
 
 	virtual void serialize(std::ostream &os, u16 protocol_version)=0;
-
-	/* Client-specific methods */
-	// TODO: should be moved elsewhere in the future
-
-	// Get item inventory texture
-	virtual video::ITexture* getInventoryTexture(const ItemStack &item, Client *client) const
-	{ return nullptr; }
-
-	/**
-	 * Get wield mesh
-	 * @returns nullptr if there is an inventory image
-	 */
-	virtual ItemMesh* getWieldMesh(const ItemStack &item, Client *client) const
-	{ return nullptr; }
-
-	// Get item palette
-	virtual Palette* getPalette(const ItemStack &item, Client *client) const
-	{ return nullptr; }
-
-	// Returns the base color of an item stack: the color of all
-	// tiles that do not define their own color.
-	virtual video::SColor getItemstackColor(const ItemStack &stack,
-		Client *client) const
-	{ return video::SColor(0); }
 };
 
 class IWritableItemDefManager : public IItemDefManager

@@ -4,22 +4,18 @@
 
 
 #include "guiTable.h"
-#include <queue>
 #include <sstream>
 #include <utility>
 #include <cstring>
 #include <IGUISkin.h>
 #include <IGUIFont.h>
 #include "client/renderingengine.h"
-#include "debug.h"
 #include "irrlicht_changes/CGUITTFont.h"
 #include "log.h"
 #include "client/texturesource.h"
-#include "gettime.h"
 #include "util/string.h"
 #include "util/numeric.h"
 #include "util/string.h" // for parseColorString()
-#include "settings.h" // for settings
 #include "porting.h" // for dpi
 #include "client/guiscalingfilter.h"
 
@@ -32,7 +28,7 @@ GUITable::GUITable(gui::IGUIEnvironment *env,
 		core::rect<s32> rectangle,
 		ISimpleTextureSource *tsrc
 ):
-	gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
+	gui::IGUIElement(gui::EGUIET_TABLE, env, parent, id, rectangle),
 	m_tsrc(tsrc)
 {
 	assert(tsrc != NULL);
@@ -47,12 +43,11 @@ GUITable::GUITable(gui::IGUIEnvironment *env,
 	}
 
 	const s32 s = skin->getSize(gui::EGDS_SCROLLBAR_SIZE);
-	m_scrollbar = new GUIScrollBar(Environment, this, -1,
-			core::rect<s32>(RelativeRect.getWidth() - s,
-					0,
-					RelativeRect.getWidth(),
-					RelativeRect.getHeight()),
-			false, true, tsrc);
+	core::rect<s32> scrollbarrect = RelativeRect;
+	scrollbarrect.UpperLeftCorner.X += RelativeRect.getWidth() - s;
+
+	m_scrollbar = new GUIScrollBar(Environment, getParent(), -1,
+			scrollbarrect, false, true, tsrc);
 	m_scrollbar->setSubElement(true);
 	m_scrollbar->setTabStop(false);
 	m_scrollbar->setAlignment(gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT,
@@ -362,8 +357,7 @@ void GUITable::setTable(const TableOptions &options,
 				// Find content_index. Image indices are defined in
 				// column options so check active_image_indices.
 				s32 image_index = stoi(content[i * colcount + j]);
-				std::map<s32, s32>::iterator image_iter =
-					active_image_indices.find(image_index);
+				auto image_iter =active_image_indices.find(image_index);
 				if (image_iter != active_image_indices.end())
 					row->content_index = image_iter->second;
 
@@ -636,11 +630,6 @@ void GUITable::setDynamicData(const DynamicData &dyndata)
 	m_scrollbar->setPos(dyndata.scrollpos);
 }
 
-const c8* GUITable::getTypeName() const
-{
-	return "GUITable";
-}
-
 void GUITable::updateAbsolutePosition()
 {
 	IGUIElement::updateAbsolutePosition();
@@ -837,8 +826,10 @@ bool GUITable::OnEvent(const SEvent &event)
 			return true;
 		}
 		else if (event.KeyInput.Key == KEY_ESCAPE ||
-				event.KeyInput.Key == KEY_SPACE) {
-			// pass to parent
+				event.KeyInput.Key == KEY_SPACE ||
+				event.KeyInput.Key == KEY_TAB) {
+			// pass to parent for focus cycling (both plain Tab and Ctrl+Tab)
+			return IGUIElement::OnEvent(event);
 		}
 		else if (event.KeyInput.PressedDown && event.KeyInput.Char) {
 			// change selection based on text as it is typed
@@ -896,14 +887,6 @@ bool GUITable::OnEvent(const SEvent &event)
 
 		// Update tooltip
 		setToolTipText(cell ? m_strings[cell->tooltip_index].c_str() : L"");
-
-		// Fix for #1567/#1806:
-		// GUIScrollBar passes double click events to its parent,
-		// which we don't want. Detect this case and discard the event
-		if (event.MouseInput.Event != EMIE_MOUSE_MOVED &&
-				m_scrollbar->isVisible() &&
-				m_scrollbar->isPointInside(p))
-			return true;
 
 		if (event.MouseInput.isLeftPressed() &&
 				(isPointInside(p) ||
@@ -965,7 +948,7 @@ bool GUITable::OnEvent(const SEvent &event)
 
 s32 GUITable::allocString(const std::string &text)
 {
-	std::map<std::string, s32>::iterator it = m_alloc_strings.find(text);
+	auto it = m_alloc_strings.find(text);
 	if (it == m_alloc_strings.end()) {
 		s32 id = m_strings.size();
 		std::wstring wtext = utf8_to_wide(text);
@@ -979,7 +962,7 @@ s32 GUITable::allocString(const std::string &text)
 
 s32 GUITable::allocImage(const std::string &imagename)
 {
-	std::map<std::string, s32>::iterator it = m_alloc_images.find(imagename);
+	auto it = m_alloc_images.find(imagename);
 	if (it == m_alloc_images.end()) {
 		s32 id = m_images.size();
 		m_images.push_back(m_tsrc->getTexture(imagename));

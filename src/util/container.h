@@ -12,7 +12,7 @@
 #include <list>
 #include <vector>
 #include <map>
-#include <set>
+#include <unordered_set>
 #include <queue>
 #include <cassert>
 #include <limits>
@@ -32,7 +32,7 @@ public:
 	true: value added
 	false: value already exists
 	*/
-	bool push_back(const Value& value)
+	bool push_back(const Value &value)
 	{
 		if (m_set.insert(value).second)
 		{
@@ -48,18 +48,23 @@ public:
 		m_queue.pop();
 	}
 
-	const Value& front() const
+	const Value &front() const
 	{
 		return m_queue.front();
 	}
 
-	u32 size() const
+	size_t size() const
 	{
 		return m_queue.size();
 	}
 
+	bool empty() const
+	{
+		return m_queue.empty();
+	}
+
 private:
-	std::set<Value> m_set;
+	std::unordered_set<Value> m_set;
 	std::queue<Value> m_queue;
 };
 
@@ -100,7 +105,11 @@ public:
 		return result;
 	}
 
-	void clear() { m_values.clear(); }
+	void clear()
+	{
+		MutexAutoLock lock(m_mutex);
+		m_values.clear();
+	}
 
 private:
 	std::map<Key, Value> m_values;
@@ -357,11 +366,10 @@ public:
 		// This conditional block was converted from a ternary to ensure no
 		// temporary values are created in evaluating the return expression,
 		// which could cause a dangling reference.
-		if (it != m_values.end()) {
+		if (it != m_values.end())
 			return it->second;
-		} else {
+		else
 			return null_value;
-		}
 	}
 
 	void put(const K &key, const V &value) {
@@ -425,7 +433,7 @@ public:
 		return !!take(key);
 	}
 
-	// Warning: not constant-time!
+	/// @warning not constant-time!
 	size_t size() const {
 		if (m_iterating) {
 			// This is by no means impossible to determine, it's just annoying
@@ -441,7 +449,7 @@ public:
 		return n;
 	}
 
-	// Warning: not constant-time!
+	/// @warning not constant-time!
 	bool empty() const {
 		if (m_iterating)
 			return false; // maybe

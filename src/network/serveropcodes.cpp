@@ -178,12 +178,13 @@ const ClientCommandFactory clientCommandFactoryTable[TOCLIENT_NUM_MSG_TYPES] =
 	{ "TOCLIENT_STOP_SOUND",               0, true }, // 0x40
 	{ "TOCLIENT_PRIVILEGES",               0, true }, // 0x41
 	{ "TOCLIENT_INVENTORY_FORMSPEC",       0, true }, // 0x42
+	// ^ `channel` MUST be the same as TOCLIENT_SHOW_FORMSPEC
 	{ "TOCLIENT_DETACHED_INVENTORY",       0, true }, // 0x43
 	{ "TOCLIENT_SHOW_FORMSPEC",            0, true }, // 0x44
 	{ "TOCLIENT_MOVEMENT",                 0, true }, // 0x45
 	{ "TOCLIENT_SPAWN_PARTICLE",           0, true }, // 0x46
 	{ "TOCLIENT_ADD_PARTICLESPAWNER",      0, true }, // 0x47
-	null_command_factory, // 0x48
+	{ "TOCLIENT_CAMERA",                   0, true }, // 0x48
 	{ "TOCLIENT_HUDADD",                   1, true }, // 0x49
 	{ "TOCLIENT_HUDRM",                    1, true }, // 0x4a
 	{ "TOCLIENT_HUDCHANGE",                1, true }, // 0x4b
@@ -211,4 +212,5 @@ const ClientCommandFactory clientCommandFactoryTable[TOCLIENT_NUM_MSG_TYPES] =
 	{ "TOCLIENT_FORMSPEC_PREPEND",         0, true }, // 0x61
 	{ "TOCLIENT_MINIMAP_MODES",            0, true }, // 0x62
 	{ "TOCLIENT_SET_LIGHTING",             0, true }, // 0x63
+	{ "TOCLIENT_SPAWN_PARTICLE_BATCH",     0, true }, // 0x64
 };

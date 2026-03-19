@@ -1,4 +1,4 @@
-Luanti Lua Mainmenu API Reference 5.11.0
+Luanti Lua Mainmenu API Reference 5.16.0
 ========================================
 
 Introduction
@@ -23,8 +23,10 @@ Callbacks
 * `core.button_handler(fields)`: called when a button is pressed.
   * `fields` = `{name1 = value1, name2 = value2, ...}`
 * `core.event_handler(event)`
-  * `event`: `"MenuQuit"`, `"KeyEnter"`, `"ExitButton"`, `"EditBoxEnter"` or
-    `"FullscreenChange"`
+  * `event`: `"MenuQuit"` (derived from `quit`) or `"FullscreenChange"`
+    The main menu may issue custom events, such as `"Refresh"` (server list).
+* `core.on_before_close()`: called before the menu is closed, either to exit or
+  to join a game
 
 
 Gamedata
@@ -216,8 +218,10 @@ GUI
   * `minsize`: minimum tile size, images are scaled to at least this size prior
    doing tiling (background only)
 * `core.set_clouds(<true/false>)`
+* `core.set_clouds_color(colorString)`
+* `core.set_sky_color(colorString)`
+  * `colorString`: `"#RRGGBB"` format
 * `core.set_topleft_text(text)`
-* `core.show_keys_menu()`
 * `core.show_touchscreen_layout()`
 * `core.show_path_select_dialog(formname, caption, is_file_select)`
   * shows a path select dialog
@@ -322,6 +326,7 @@ Package - content which is downloadable from the content db, may or may not be i
           title            = <title of game>,
           menuicon_path    = <full path to menuicon>,
           author           = "author",
+          aliases          = {<alias> = true,},
           --DEPRECATED:
           addon_mods_paths = {[1] = <path>,},
       }
@@ -331,7 +336,7 @@ Package - content which is downloadable from the content db, may or may not be i
       ```lua
       {
           name             = "technical_id",
-          type             = "mod" or "modpack" or "game" or "txp",
+          type             = "mod" or "modpack" or "game" or "txp" or "unknown",
           title            = "Human readable title",
           description      = "description",
           author           = "author",
@@ -341,6 +346,10 @@ Package - content which is downloadable from the content db, may or may not be i
           optional_depends = {"mod", "names"}, -- mods only
       }
       ```
+* `core.get_mod_list(path, virtual_path)`
+    * Returns a flat list of mod and modpack information found within the specified path.
+    * Each entry consists of the fields `name`, `author`, `release`, `description`,
+      `path`, `virtual_path`, `is_name_explicit`, `is_modpack`, `modpack_depth`.
 * `core.check_mod_configuration(world_path, mod_paths)`
     * Checks whether configuration is valid.
     * `world_path`: path to the world

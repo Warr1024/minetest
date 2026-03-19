@@ -16,52 +16,52 @@ extern "C" {
 #include <lua.h>
 }
 
-#include <iostream>
 #include <vector>
 #include <array>
 
 #include "irrlichttypes_bloated.h"
-#include "util/string.h"
 #include "itemgroup.h"
-#include "itemdef.h"
 #include "util/pointabilities.h"
 // We do an explicit path include because by default c_content.h include src/client/hud.h
-// prior to the src/hud.h, which is not good on server only build
-#include "../../hud.h"
-#include "content/mods.h"
+// prior to the src/hud_element.h, which is not good on server only build
+#include "hud_element.h"
 
-namespace Json { class Value; }
-
-struct MapNode;
-class NodeDefManager;
-struct PointedThing;
-struct ItemStack;
-struct ItemDefinition;
-struct ToolCapabilities;
-struct ObjectProperties;
-struct SoundSpec;
-struct ServerPlayingSound;
+class IGameDef;
+class IItemDefManager;
 class Inventory;
 class InventoryList;
-struct NodeBox;
-struct ContentFeatures;
-struct TileDef;
-class IGameDef;
-struct DigParams;
-struct HitParams;
-struct EnumString;
-struct NoiseParams;
-class Schematic;
+class NodeDefManager;
 class ServerActiveObject;
+
 struct collisionMoveResult;
+struct ContentFeatures;
+struct DigParams;
+struct EnumString;
+struct FlagDesc;
+struct HitParams;
+struct ItemDefinition;
+struct ItemImageDef;
+struct ItemStack;
+struct MapNode;
+struct ModSpec;
+struct NodeBox;
+struct NoiseParams;
+struct ObjectProperties;
+struct PointedThing;
+struct ServerPlayingSound;
+struct SoundSpec;
+struct TileDef;
+struct ToolCapabilities;
+struct WearBarParams;
+
+namespace Json { class Value; }
 namespace treegen { struct TreeDef; }
 
 extern struct EnumString es_TileAnimationType[];
 extern struct EnumString es_ItemType[];
 extern struct EnumString es_TouchInteractionMode[];
 
-
-extern const std::array<const char *, 33> object_property_keys;
+extern const std::array<const char *, 35> object_property_keys;
 
 void read_content_features(lua_State *L, ContentFeatures &f, int index);
 void push_content_features(lua_State *L, const ContentFeatures &c);
@@ -84,6 +84,9 @@ ItemStack read_item(lua_State *L, int index, IItemDefManager *idef);
 
 struct TileAnimationParams read_animation_definition(lua_State *L, int index);
 
+ItemImageDef read_item_image_definition(lua_State *L, int index);
+void push_item_image_definition(lua_State *L, const ItemImageDef &item_image);
+
 PointabilityType read_pointability_type(lua_State *L, int index);
 Pointabilities read_pointabilities(lua_State *L, int index);
 void push_pointability_type(lua_State *L, PointabilityType pointable);
@@ -99,10 +102,10 @@ void read_item_definition(lua_State *L, int index,
 void push_item_definition(lua_State *L, const ItemDefinition &i);
 void push_item_definition_full(lua_State *L, const ItemDefinition &i);
 
+/// @param fallback set to true if reading from bare entity table (not initial_properties)
 void read_object_properties(lua_State *L, int index,
-		ServerActiveObject *sao,
-		ObjectProperties *prop,
-		IItemDefManager *idef);
+		ServerActiveObject *sao, ObjectProperties *prop,
+		IItemDefManager *idef, bool fallback = false);
 
 void push_object_properties(lua_State *L, const ObjectProperties *prop);
 
@@ -120,21 +123,21 @@ void read_groups(lua_State *L, int index, ItemGroupList &result);
 
 void push_groups(lua_State *L, const ItemGroupList &groups);
 
-//TODO rename to "read_enum_field"
+// TODO: rename to "read_enum_field" and replace with type-safe template
 int getenumfield(lua_State *L, int table, const char *fieldname,
 		const EnumString *spec, int default_);
 
 bool getflagsfield(lua_State *L, int table, const char *fieldname,
-		FlagDesc *flagdesc, u32 *flags, u32 *flagmask);
+		const FlagDesc *flagdesc, u32 *flags, u32 *flagmask);
 
-bool read_flags(lua_State *L, int index, FlagDesc *flagdesc,
+bool read_flags(lua_State *L, int index, const FlagDesc *flagdesc,
 		u32 *flags, u32 *flagmask);
 
-void push_flags_string(lua_State *L, FlagDesc *flagdesc,
+void push_flags_string(lua_State *L, const FlagDesc *flagdesc,
 		u32 flags, u32 flagmask);
 
 u32 read_flags_table(lua_State *L, int table,
-		FlagDesc *flagdesc, u32 *flagmask);
+		const FlagDesc *flagdesc, u32 *flagmask);
 
 void push_items(lua_State *L, const std::vector<ItemStack> &items);
 

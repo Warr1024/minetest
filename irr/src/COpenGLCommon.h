@@ -7,8 +7,12 @@
 #ifdef _IRR_COMPILE_WITH_OPENGL_
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(IRR_PREFER_SDL_GL_HEADER)
-#include <SDL_video.h>
-#include <SDL_opengl.h>
+	#ifdef _IRR_USE_SDL3_
+		#include <SDL3/SDL_opengl.h>
+	#else
+		#include <SDL_video.h>
+		#include <SDL_opengl.h>
+	#endif
 #else
 #include "vendor/gl.h"
 #endif
@@ -22,8 +26,6 @@
 // macro used with COpenGLDriver
 #define TEST_GL_ERROR(cls) (cls)->testGLError(__LINE__)
 
-namespace irr
-{
 namespace video
 {
 
@@ -45,7 +47,6 @@ typedef COpenGLCoreTexture<COpenGLDriver> COpenGLTexture;
 typedef COpenGLCoreRenderTarget<COpenGLDriver, COpenGLTexture> COpenGLRenderTarget;
 class COpenGLCacheHandler;
 
-}
 }
 
 #endif

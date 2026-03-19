@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lojban (Minetest)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-09 13:23+0100\n"
+"POT-Creation-Date: 2026-01-06 23:13+0100\n"
 "PO-Revision-Date: 2024-07-10 01:09+0000\n"
 "Last-Translator: Qimar <jbobaukensylitru@gmail.com>\n"
 "Language-Team: Lojban <https://hosted.weblate.org/projects/minetest/minetest/"
@@ -78,12 +78,24 @@ msgid "[all | <cmd>] [-t]"
 msgstr ""
 
 #: builtin/common/settings/components.lua
+msgid "Add keybinding"
+msgstr ""
+
+#: builtin/common/settings/components.lua
 msgid "Browse"
+msgstr ""
+
+#: builtin/common/settings/components.lua
+msgid "Conflicts with \"$1\""
 msgstr ""
 
 #: builtin/common/settings/components.lua
 msgid "Edit"
 msgstr "binxo"
+
+#: builtin/common/settings/components.lua
+msgid "Remove keybinding"
+msgstr ""
 
 #: builtin/common/settings/components.lua
 msgid "Select directory"
@@ -98,6 +110,10 @@ msgid "Set"
 msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "$1 spread"
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "(No description of setting given)"
 msgstr "to'i no da ve skicu le te tcimi'e toi"
 
@@ -106,18 +122,80 @@ msgid "2D Noise"
 msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"2D noise: flag on.\n"
+"3D noise: flag off."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"Amplifies every octave by (amplitude of the previous octave * Persistence)."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/content/dlg_install.lua
 #: builtin/mainmenu/content/dlg_overwrite.lua
-#: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/dlg_create_world.lua
+#: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/dlg_confirm_exit.lua
+#: builtin/mainmenu/dlg_create_world.lua
 #: builtin/mainmenu/dlg_delete_content.lua
 #: builtin/mainmenu/dlg_delete_world.lua builtin/mainmenu/dlg_register.lua
-#: builtin/mainmenu/dlg_rename_modpack.lua src/gui/guiKeyChangeMenu.cpp
-#: src/gui/guiOpenURL.cpp src/gui/guiPasswordChange.cpp
+#: builtin/mainmenu/dlg_rename_modpack.lua src/gui/guiOpenURL.cpp
+#: src/gui/guiPasswordChange.cpp
 msgid "Cancel"
 msgstr "je'enai"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "Controls how many octaves (layers) the noise will have."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"Each octave is a simple noise generator. Each one also adds more detail to "
+"the noise."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "Finally, all of the octaves will be combined to generate the noise."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"Having lots of octaves is not recommended because it increases terrain "
+"generation time."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Lacunarity"
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"Lower values make the terrain simple and higher values make the terrain "
+"rough."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"Lower values make the terrain smooth and higher values make the terrain have "
+"fine detail."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"Lower values will result in smoother noise and higher values will result in "
+"rougher noise."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"Making 3D noise eased is not recommended because it significantly increases "
+"the load."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"Maps noise gradient values onto a quintic S-curve before performing "
+"interpolation."
 msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
@@ -130,11 +208,19 @@ msgid "Offset"
 msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "Offsets the final noise by this value."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "Overrides the 'eased' flag based on the noise type."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Persistence"
 msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
-#: builtin/mainmenu/dlg_config_world.lua src/gui/guiKeyChangeMenu.cpp
+#: builtin/mainmenu/dlg_config_world.lua
 msgid "Save"
 msgstr "rejgau"
 
@@ -144,20 +230,51 @@ msgid "Scale"
 msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "Scales every octave by (scale of the previous octave / Lacunarity)."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "Scales the noise in the $1 axis by this value."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Seed"
 msgstr "cunso namcu"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
-msgid "X spread"
+msgid "Takes the absolute value of each octave while adding them together."
 msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
-msgid "Y spread"
+msgid "The first octave is amplified by 1."
 msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
-msgid "Z spread"
+#, fuzzy
+msgid "The first octave is scaled by 1."
+msgstr "le ti te minde cu na se curmi le samtcise'u"
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "The multiplier for the noise before the offset is added."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "The random seed for the noise. The same seed results in the same noise."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid ""
+"This is also the scale of the largest structures in the $1 direction of the "
+"noise."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "This results in smooth noise instead of gridlike noise."
+msgstr ""
+
+#: builtin/common/settings/dlg_change_mapgen_flags.lua
+msgid "This results in spiky noise."
 msgstr ""
 
 #. ~ "absvalue" is a noise parameter flag.
@@ -207,8 +324,18 @@ msgstr ""
 msgid "Auto"
 msgstr ""
 
-#: builtin/common/settings/dlg_settings.lua src/gui/guiKeyChangeMenu.cpp
-#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+#: builtin/common/settings/dlg_settings.lua
+#: builtin/mainmenu/content/dlg_contentdb.lua
+#: builtin/mainmenu/content/dlg_package.lua src/gui/guiVolumeChange.cpp
+msgid "Back"
+msgstr "xruti"
+
+#: builtin/common/settings/dlg_settings.lua
+msgid "Buttons with crosshair"
+msgstr ""
+
+#: builtin/common/settings/dlg_settings.lua src/gui/touchscreenlayout.cpp
+#: src/settings_translation_file.cpp
 msgid "Chat"
 msgstr "tavla"
 
@@ -234,6 +361,10 @@ msgid "General"
 msgstr ""
 
 #: builtin/common/settings/dlg_settings.lua
+msgid "Long tap"
+msgstr ""
+
+#: builtin/common/settings/dlg_settings.lua
 msgid "Movement"
 msgstr ""
 
@@ -241,6 +372,12 @@ msgstr ""
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "No results"
 msgstr ".i no da ckaji lo se sisku"
+
+#. ~ Indicates that the action does not have a corresponding keybinding.
+#: builtin/common/settings/dlg_settings.lua
+#, fuzzy
+msgid "Not bound"
+msgstr "facki fi noda"
 
 #: builtin/common/settings/dlg_settings.lua
 #, fuzzy
@@ -256,6 +393,10 @@ msgid "Search"
 msgstr "sisku"
 
 #: builtin/common/settings/dlg_settings.lua
+msgid "Short tap"
+msgstr ""
+
+#: builtin/common/settings/dlg_settings.lua
 msgid "Show advanced settings"
 msgstr ""
 
@@ -264,12 +405,28 @@ msgid "Show technical names"
 msgstr ""
 
 #: builtin/common/settings/dlg_settings.lua
+#, fuzzy
+msgid "Tap"
+msgstr "pagyca'o tekla"
+
+#: builtin/common/settings/dlg_settings.lua
+msgid "Tap with crosshair"
+msgstr ""
+
+#: builtin/common/settings/dlg_settings.lua
+msgid ""
+"These settings are unavailable due to your platform, hardware or in "
+"combination with the current settings."
+msgstr ""
+
+#: builtin/common/settings/dlg_settings.lua
 msgid "Touchscreen layout"
 msgstr ""
 
 #: builtin/common/settings/dlg_settings.lua
-msgid "pause_menu"
-msgstr ""
+#, fuzzy
+msgid "Unavailable"
+msgstr "ti'orkemsamtci to na kakne toi"
 
 #: builtin/common/settings/settingtypes.lua
 #, fuzzy
@@ -295,11 +452,6 @@ msgid "Custom"
 msgstr "steci"
 
 #: builtin/common/settings/shadows_component.lua
-#: src/settings_translation_file.cpp
-msgid "Dynamic shadows"
-msgstr "cenba ctino"
-
-#: builtin/common/settings/shadows_component.lua
 msgid "High"
 msgstr "mutce"
 
@@ -310,6 +462,10 @@ msgstr "milxe"
 #: builtin/common/settings/shadows_component.lua
 msgid "Medium"
 msgstr "no'e mutce"
+
+#: builtin/common/settings/shadows_component.lua
+msgid "Quality preset"
+msgstr ""
 
 #: builtin/common/settings/shadows_component.lua
 msgid "Very High"
@@ -407,11 +563,6 @@ msgid "All"
 msgstr ""
 
 #: builtin/mainmenu/content/dlg_contentdb.lua
-#: builtin/mainmenu/content/dlg_package.lua
-msgid "Back"
-msgstr "xruti"
-
-#: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "ContentDB is not available when Luanti was compiled without cURL"
 msgstr ""
 
@@ -439,7 +590,6 @@ msgid "Mods"
 msgstr "se samtcise'a"
 
 #: builtin/mainmenu/content/dlg_contentdb.lua
-#: builtin/mainmenu/content/dlg_package.lua
 msgid "No packages could be retrieved"
 msgstr ".i na kakne le ka kibycpa pa bakfu"
 
@@ -500,6 +650,7 @@ msgid "Error getting dependencies for package $1"
 msgstr ""
 
 #: builtin/mainmenu/content/dlg_install.lua
+#: builtin/mainmenu/content/dlg_package.lua
 msgid "Install"
 msgstr "samtcise'a"
 
@@ -548,6 +699,15 @@ msgid "Donate"
 msgstr ""
 
 #: builtin/mainmenu/content/dlg_package.lua
+msgid "Error loading package information"
+msgstr ""
+
+#: builtin/mainmenu/content/dlg_package.lua
+#, fuzzy
+msgid "Error loading reviews"
+msgstr ".i ca'o cupra le samtciselse'u"
+
+#: builtin/mainmenu/content/dlg_package.lua
 msgid "Forum Topic"
 msgstr ""
 
@@ -563,6 +723,10 @@ msgstr "samtcise'a"
 
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Issue Tracker"
+msgstr ""
+
+#: builtin/mainmenu/content/dlg_package.lua
+msgid "Reviews"
 msgstr ""
 
 #: builtin/mainmenu/content/dlg_package.lua
@@ -583,6 +747,10 @@ msgstr "ningau"
 
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Website"
+msgstr ""
+
+#: builtin/mainmenu/content/dlg_package.lua
+msgid "by $1"
 msgstr ""
 
 #: builtin/mainmenu/content/dlg_package.lua
@@ -622,9 +790,14 @@ msgstr ""
 msgid "Unable to install a $1 as a texture pack"
 msgstr ""
 
+#: builtin/mainmenu/content/pkgmgr.lua
+#, fuzzy
+msgid "World mods"
+msgstr "cmene le munje"
+
 #: builtin/mainmenu/dlg_clients_list.lua
 msgid ""
-"This is the list of clients connected to\n"
+"Players connected to\n"
 "$1"
 msgstr ""
 
@@ -667,6 +840,10 @@ msgid "Mod:"
 msgstr "se samtcise'a"
 
 #: builtin/mainmenu/dlg_config_world.lua
+msgid "Mods located inside the world folder."
+msgstr ""
+
+#: builtin/mainmenu/dlg_config_world.lua
 #, fuzzy
 msgid "No (optional) dependencies"
 msgstr "na'e se nitcu"
@@ -699,6 +876,19 @@ msgstr "munje"
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "enabled"
 msgstr "katci"
+
+#: builtin/mainmenu/dlg_confirm_exit.lua
+msgid "Always show this dialog."
+msgstr ""
+
+#: builtin/mainmenu/dlg_confirm_exit.lua
+#, fuzzy
+msgid "Are you sure you want to quit?"
+msgstr ".i xu do djica le nu vimcu la'o zoi. $1 .zoi"
+
+#: builtin/mainmenu/dlg_confirm_exit.lua
+msgid "Quit"
+msgstr ""
 
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "A world named \"$1\" already exists"
@@ -910,6 +1100,31 @@ msgstr ""
 msgid "Delete World \"$1\"?"
 msgstr ".i xu do djica le nu vimcu la'o zoi. $1 .zoi noi munje"
 
+#: builtin/mainmenu/dlg_rebind_keys.lua
+msgid "As a result, your keybindings may have been changed."
+msgstr ""
+
+#: builtin/mainmenu/dlg_rebind_keys.lua
+msgid "Check out the key settings or refer to the documentation:"
+msgstr ""
+
+#: builtin/mainmenu/dlg_rebind_keys.lua
+msgid "Close"
+msgstr ""
+
+#: builtin/mainmenu/dlg_rebind_keys.lua
+msgid "Keybindings changed"
+msgstr ""
+
+#: builtin/mainmenu/dlg_rebind_keys.lua
+#, fuzzy
+msgid "Open settings"
+msgstr "te tcimi'e"
+
+#: builtin/mainmenu/dlg_rebind_keys.lua
+msgid "The input handling system was reworked in Luanti 5.12.0."
+msgstr ""
+
 #: builtin/mainmenu/dlg_register.lua src/gui/guiPasswordChange.cpp
 #, fuzzy
 msgid "Confirm Password"
@@ -1019,6 +1234,10 @@ msgstr ""
 
 #: builtin/mainmenu/dlg_version_info.lua
 msgid "Visit website"
+msgstr ""
+
+#: builtin/mainmenu/init.lua
+msgid "Debug build, expect worse performance"
 msgstr ""
 
 #: builtin/mainmenu/init.lua src/client/game_formspec.cpp
@@ -1174,10 +1393,6 @@ msgid "New"
 msgstr "cnino"
 
 #: builtin/mainmenu/tab_local.lua
-msgid "No world created or selected!"
-msgstr ".i do na cupra ja cuxna lo munje"
-
-#: builtin/mainmenu/tab_local.lua
 msgid "Play Game"
 msgstr "co'a kelci"
 
@@ -1214,13 +1429,6 @@ msgstr "co'u cmima lu'i ro nelci se tcita"
 #: builtin/mainmenu/tab_online.lua
 msgid "Address"
 msgstr "judri"
-
-#: builtin/mainmenu/tab_online.lua
-#, fuzzy
-msgid ""
-"Clients:\n"
-"$1"
-msgstr "lo samtciselse'u"
 
 #: builtin/mainmenu/tab_online.lua
 msgid "Creative mode"
@@ -1264,6 +1472,13 @@ msgstr ""
 #: builtin/mainmenu/tab_online.lua
 msgid "Ping"
 msgstr ".pin. temci"
+
+#: builtin/mainmenu/tab_online.lua
+#, fuzzy
+msgid ""
+"Players:\n"
+"$1"
+msgstr "lo samtciselse'u"
 
 #: builtin/mainmenu/tab_online.lua
 msgid ""
@@ -1325,6 +1540,11 @@ msgstr ".i ca'o samymo'i le tengu datnyvei"
 msgid "Rebuilding shaders..."
 msgstr ""
 
+#: src/client/client.cpp src/util/screenshot.cpp
+#, fuzzy, c-format
+msgid "Saved screenshot to \"%s\""
+msgstr "vidnyxra"
+
 #: src/client/clientlauncher.cpp
 #, fuzzy
 msgid "Could not find or load game: "
@@ -1353,14 +1573,15 @@ msgid "Provided password file failed to open: "
 msgstr ""
 
 #: src/client/clientlauncher.cpp
-msgid "Provided world path doesn't exist: "
+msgid "World does not exist and no game selected to create one."
 msgstr ""
 
 #: src/client/clientmedia.cpp src/client/game.cpp
 msgid "Media..."
 msgstr ""
 
-#: src/client/game.cpp src/client/shader.cpp src/server.cpp
+#: src/client/game.cpp src/client/render/pipeline.cpp src/client/shader.cpp
+#: src/server.cpp
 msgid ""
 "\n"
 "Check debug.txt for details."
@@ -1778,10 +1999,6 @@ msgid "Profiler shown (page %d of %d)"
 msgstr ""
 
 #: src/client/keycode.cpp
-msgid "Apps"
-msgstr ""
-
-#: src/client/keycode.cpp
 msgid "Backspace"
 msgstr "prula'i vimcu tekla"
 
@@ -1811,46 +2028,16 @@ msgid "Down Arrow"
 msgstr "dizlo tekla"
 
 #: src/client/keycode.cpp
-msgid "End"
-msgstr "fanmo tekla"
-
-#: src/client/keycode.cpp
-#, fuzzy
-msgid "Erase EOF"
-msgstr "la'o gy.Erase OEF.gy."
-
-#: src/client/keycode.cpp
-msgid "Execute"
-msgstr ""
-
-#: src/client/keycode.cpp
-msgid "Help"
-msgstr "sidju"
-
-#: src/client/keycode.cpp
-msgid "Home"
+msgid "End Key"
 msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
-msgid "IME Accept"
-msgstr "fitytu'i"
+msgid "Help Key"
+msgstr "bavla'i vimcu tekla"
 
 #: src/client/keycode.cpp
-msgid "IME Convert"
-msgstr ""
-
-#: src/client/keycode.cpp
-msgid "IME Escape"
-msgstr ""
-
-#: src/client/keycode.cpp
-#, fuzzy
-msgid "IME Mode Change"
-msgstr "la'o gy.Mode Change.gy."
-
-#: src/client/keycode.cpp
-msgid "IME Nonconvert"
+msgid "Home Key"
 msgstr ""
 
 #: src/client/keycode.cpp
@@ -1862,8 +2049,9 @@ msgid "Left Arrow"
 msgstr "zunle tekla"
 
 #: src/client/keycode.cpp
-msgid "Left Button"
-msgstr "zunle sma'acu bo tekla"
+#, fuzzy
+msgid "Left Click"
+msgstr "zunle kontrol zei tekla"
 
 #: src/client/keycode.cpp
 msgid "Left Control"
@@ -1877,18 +2065,26 @@ msgstr ""
 msgid "Left Shift"
 msgstr "zunle cift zei tekla"
 
+#. ~ Name of key
 #: src/client/keycode.cpp
 msgid "Left Windows"
 msgstr "zunle uindos zei tekla"
 
-#. ~ Key name, common on Windows keyboards
 #: src/client/keycode.cpp
 msgid "Menu Key"
 msgstr ""
 
 #: src/client/keycode.cpp
-msgid "Middle Button"
-msgstr "midju sma'acu bo tekla"
+msgid "Middle Click"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Mouse X1"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Mouse X2"
+msgstr ""
 
 #: src/client/keycode.cpp
 msgid "Num Lock"
@@ -1955,11 +2151,6 @@ msgid "Numpad 9"
 msgstr ""
 
 #: src/client/keycode.cpp
-#, fuzzy
-msgid "OEM Clear"
-msgstr "la'o gy.OEM Clear.gy."
-
-#: src/client/keycode.cpp
 msgid "Page Down"
 msgstr "papri dizlo tekla"
 
@@ -1990,8 +2181,9 @@ msgid "Right Arrow"
 msgstr "pritu tekla"
 
 #: src/client/keycode.cpp
-msgid "Right Button"
-msgstr "pritu sma'acu bo tekla"
+#, fuzzy
+msgid "Right Click"
+msgstr "pritu kontrol zei tekla"
 
 #: src/client/keycode.cpp
 msgid "Right Control"
@@ -2005,56 +2197,41 @@ msgstr ""
 msgid "Right Shift"
 msgstr "pritu cift zei tekla"
 
+#. ~ Name of key
 #: src/client/keycode.cpp
 msgid "Right Windows"
 msgstr "pritu uindos zei tekla"
 
 #: src/client/keycode.cpp
+#, c-format
+msgid "Scancode: %d"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Scroll Lock"
 msgstr "muvdu stela tekla"
 
-#. ~ Key name
 #: src/client/keycode.cpp
-msgid "Select"
-msgstr ""
+#, fuzzy
+msgid "Select Key"
+msgstr "bavla'i vimcu tekla"
 
 #: src/client/keycode.cpp
 msgid "Shift Key"
 msgstr "cift zei tekla"
 
 #: src/client/keycode.cpp
-msgid "Sleep"
-msgstr ""
-
-#: src/client/keycode.cpp
-msgid "Snapshot"
-msgstr ""
-
-#: src/client/keycode.cpp
 msgid "Space"
 msgstr "se ragve tekla"
 
 #: src/client/keycode.cpp
-msgid "Tab"
-msgstr "pagyca'o tekla"
+#, fuzzy
+msgid "Tab Key"
+msgstr "dicra tekla"
 
 #: src/client/keycode.cpp
 msgid "Up Arrow"
 msgstr "galtu tekla"
-
-#: src/client/keycode.cpp
-#, fuzzy
-msgid "X Button 1"
-msgstr "la'o gy.X Button 1.gy."
-
-#: src/client/keycode.cpp
-#, fuzzy
-msgid "X Button 2"
-msgstr "la'o gy.X Button 2.gy."
-
-#: src/client/keycode.cpp
-msgid "Zoom Key"
-msgstr ""
 
 #: src/client/minimap.cpp
 msgid "Minimap hidden"
@@ -2074,9 +2251,19 @@ msgstr ""
 msgid "Minimap in texture mode"
 msgstr ""
 
+#: src/client/render/pipeline.cpp
+#, c-format
+msgid "Failed to create the texture \"%s\" for the rendering pipeline."
+msgstr ""
+
 #: src/client/shader.cpp
 #, fuzzy, c-format
 msgid "Failed to compile the \"%s\" shader."
+msgstr ".i da nabmi fi le nu kibycpa la'o zoi. $1 .zoi"
+
+#: src/client/shader.cpp
+#, fuzzy, c-format
+msgid "Failed to find \"%s\" shader files."
 msgstr ".i da nabmi fi le nu kibycpa la'o zoi. $1 .zoi"
 
 #: src/client/shader.cpp
@@ -2105,6 +2292,11 @@ msgstr ""
 msgid "Some mods have unsatisfied dependencies:"
 msgstr ".i nitcu no da"
 
+#: src/gui/guiButtonKey.h
+#, fuzzy
+msgid "Press Button"
+msgstr "zunle sma'acu bo tekla"
+
 #: src/gui/guiChatConsole.cpp
 #, fuzzy
 msgid "Failed to open webpage"
@@ -2117,173 +2309,6 @@ msgstr ""
 #: src/gui/guiFormSpecMenu.cpp
 msgid "Proceed"
 msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "\"Aux1\" = climb down"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp
-#, fuzzy
-msgid "Autoforward"
-msgstr "za'i ca'u muvdu"
-
-#: src/gui/guiKeyChangeMenu.cpp src/settings_translation_file.cpp
-msgid "Automatic jumping"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-msgid "Aux1"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Backward"
-msgstr "ti'a muvdu"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Block bounds"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-#, fuzzy
-msgid "Change camera"
-msgstr "gafygau lo lerpoijaspu"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Command"
-msgstr "minde"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Console"
-msgstr "samtrotci"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Dec. range"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Dec. volume"
-msgstr "jdikygau lo ni sance"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Double tap \"jump\" to toggle fly"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-msgid "Drop"
-msgstr "falcru"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Forward"
-msgstr "ca'u muvdu"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Inc. range"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Inc. volume"
-msgstr "zengau lo ni sance"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-msgid "Inventory"
-msgstr "sorcu"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-msgid "Jump"
-msgstr "plipe"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Key already in use"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings."
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Left"
-msgstr "zu'e muvdu"
-
-#: src/gui/guiKeyChangeMenu.cpp
-#, fuzzy
-msgid "Local command"
-msgstr "minde"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Mute"
-msgstr "sance fanta"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Next item"
-msgstr "se lamli'e fi lu'i le dacti"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Prev. item"
-msgstr "lamli'e fi lu'i le dacti"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-msgid "Range select"
-msgstr "cuxna fi lu'i le se kuspe"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Right"
-msgstr "ri'u muvdu"
-
-#: src/gui/guiKeyChangeMenu.cpp
-msgid "Screenshot"
-msgstr "vidnyxra"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-msgid "Sneak"
-msgstr "masno cadzu"
-
-#: src/gui/guiKeyChangeMenu.cpp
-#, fuzzy
-msgid "Toggle HUD"
-msgstr "mu'e co'a jonai mo'u vofli"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-#, fuzzy
-msgid "Toggle chat log"
-msgstr "mu'e co'a jonai mo'u sutra"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-#, fuzzy
-msgid "Toggle fast"
-msgstr "mu'e co'a jonai mo'u sutra"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-#, fuzzy
-msgid "Toggle fly"
-msgstr "mu'e co'a jonai mo'u vofli"
-
-#: src/gui/guiKeyChangeMenu.cpp
-#, fuzzy
-msgid "Toggle fog"
-msgstr "mu'e co'a jonai mo'u vofli"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-#, fuzzy
-msgid "Toggle minimap"
-msgstr "mu'e co'a jonai mo'u sutra"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-msgid "Toggle noclip"
-msgstr ""
-
-#: src/gui/guiKeyChangeMenu.cpp
-#, fuzzy
-msgid "Toggle pitchmove"
-msgstr "mu'e co'a jonai mo'u sutra"
-
-#: src/gui/guiKeyChangeMenu.cpp src/gui/touchscreenlayout.cpp
-msgid "Zoom"
-msgstr "jbiji'u"
-
-#: src/gui/guiKeyChangeMenu.cpp
-#, fuzzy
-msgid "press key"
-msgstr ".i ko da'ergau pa batke"
 
 #: src/gui/guiOpenURL.cpp
 msgid "Open"
@@ -2315,10 +2340,6 @@ msgstr "lo slabu lerpoijaspu"
 #: src/gui/guiPasswordChange.cpp
 msgid "Passwords do not match!"
 msgstr ".i lu'i le re lerpoijaspu na simxu le ka mintu"
-
-#: src/gui/guiVolumeChange.cpp src/gui/touchscreenlayout.cpp
-msgid "Exit"
-msgstr "sisti"
 
 #: src/gui/guiVolumeChange.cpp
 #, fuzzy
@@ -2361,18 +2382,88 @@ msgstr ""
 msgid "Tap outside to deselect."
 msgstr ""
 
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+msgid "Aux1"
+msgstr ""
+
+#: src/gui/touchscreenlayout.cpp
+#, fuzzy
+msgid "Change camera"
+msgstr "gafygau lo lerpoijaspu"
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+msgid "Dig/punch/use"
+msgstr ""
+
+#: src/gui/touchscreenlayout.cpp
+msgid "Drop"
+msgstr "falcru"
+
+#: src/gui/touchscreenlayout.cpp
+msgid "Exit"
+msgstr "sisti"
+
+#: src/gui/touchscreenlayout.cpp
+msgid "Inventory"
+msgstr "sorcu"
+
 #: src/gui/touchscreenlayout.cpp
 msgid "Joystick"
 msgstr ""
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+msgid "Jump"
+msgstr "plipe"
 
 #: src/gui/touchscreenlayout.cpp
 msgid "Overflow menu"
 msgstr ""
 
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+#, fuzzy
+msgid "Place/use"
+msgstr "le nu finti kelci"
+
+#: src/gui/touchscreenlayout.cpp
+msgid "Range select"
+msgstr "cuxna fi lu'i le se kuspe"
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+msgid "Sneak"
+msgstr "masno cadzu"
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle chat log"
+msgstr "mu'e co'a jonai mo'u sutra"
+
 #: src/gui/touchscreenlayout.cpp
 #, fuzzy
 msgid "Toggle debug"
 msgstr "mu'e co'a jonai mo'u vofli"
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle fast"
+msgstr "mu'e co'a jonai mo'u sutra"
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle fly"
+msgstr "mu'e co'a jonai mo'u vofli"
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle minimap"
+msgstr "mu'e co'a jonai mo'u sutra"
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+msgid "Toggle noclip"
+msgstr ""
+
+#: src/gui/touchscreenlayout.cpp src/settings_translation_file.cpp
+msgid "Zoom"
+msgstr "jbiji'u"
 
 #: src/network/clientpackethandler.cpp
 msgid ""
@@ -2564,12 +2655,11 @@ msgstr ""
 msgid ""
 "3D support.\n"
 "Currently supported:\n"
-"-    none: no 3d output.\n"
-"-    anaglyph: cyan/magenta color 3d.\n"
-"-    interlaced: odd/even line based polarization screen support.\n"
-"-    topbottom: split screen top/bottom.\n"
-"-    sidebyside: split screen side by side.\n"
-"-    crossview: Cross-eyed 3d"
+"-    none: no 3D output\n"
+"-    anaglyph: cyan/magenta color 3D\n"
+"-    topbottom: split screen top/bottom\n"
+"-    sidebyside: split screen side-by-side\n"
+"-    crossview: cross-eyed 3D"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2628,7 +2718,7 @@ msgid "Adjust the detected display density, used for scaling UI elements."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-#, c-format
+#, no-c-format
 msgid ""
 "Adjusts the density of the floatland layer.\n"
 "Increase value to increase density. Can be positive or negative.\n"
@@ -2658,6 +2748,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Allows liquids to be translucent."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Also used for climbing down and descending in water if aux1_descends is "
+"disabled."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2724,6 +2820,14 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Applies a post-processing filter to detect and smoothen high-contrast "
+"edges.\n"
+"Provides balance between speed and image quality.\n"
+"fxaa can used in combination with the other anti-aliasing methods"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Apply dithering to reduce color banding artifacts.\n"
 "Dithering significantly increases the size of losslessly-compressed\n"
 "screenshots and it works incorrectly if the display or operating system\n"
@@ -2734,10 +2838,6 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Apply specular shading to nodes."
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Arm inertia"
 msgstr ""
 
@@ -2745,6 +2845,10 @@ msgstr ""
 msgid ""
 "Arm inertia, gives a more realistic movement of\n"
 "the arm when the camera moves."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Array texture max layers"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2777,6 +2881,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Audio"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Automatic jumping"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2890,6 +2998,23 @@ msgid "Camera smoothing in cinematic mode"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid ""
+"Caps the maximum number of layers used with array textures (if supported).\n"
+"This is only useful for debugging."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Capture Tracy zones"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Capture Tracy zones with the profiler's instrumentation.\n"
+"You need to build with Tracy to use this, see doc/developing/profiling.md\n"
+"for details."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Cave noise"
 msgstr ""
 
@@ -2978,6 +3103,10 @@ msgid "Chat weblinks"
 msgstr ".i ca viska le tavla .uidje"
 
 #: src/settings_translation_file.cpp
+msgid "Choose theme colors for the main menu background."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Chunk size"
 msgstr ""
 
@@ -2989,6 +3118,11 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Client"
+msgstr "lo samtciselse'u"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Client Debugging"
 msgstr "lo samtciselse'u"
 
 #: src/settings_translation_file.cpp
@@ -3079,6 +3213,10 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Command"
+msgstr "minde"
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Compression level to use when saving mapblocks to disk.\n"
 "-1 - use default compression level\n"
@@ -3092,6 +3230,10 @@ msgid ""
 "-1 - use default compression level\n"
 "0 - least compression, fastest\n"
 "9 - best compression, slowest"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Confirmation dialog before closing"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3210,6 +3352,15 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Decrease view range"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Decrease volume"
+msgstr "jdikygau lo ni sance"
+
+#: src/settings_translation_file.cpp
 msgid "Dedicated server step"
 msgstr ""
 
@@ -3321,7 +3472,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Delay between mesh updates on the client in ms. Increasing this will slow\n"
-"down the rate of mesh updates, thus reducing jitter on slower clients."
+"down the rate of mesh updates, which can help reduce jitter."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3366,6 +3517,10 @@ msgid "Developer Options"
 msgstr "datni"
 
 #: src/settings_translation_file.cpp
+msgid "Disable if you only want to instrument with Tracy."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Disallow empty passwords"
 msgstr ""
 
@@ -3401,6 +3556,11 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Drop item"
+msgstr "lamli'e fi lu'i le dacti"
+
+#: src/settings_translation_file.cpp
 msgid "Dump the mapgen debug information."
 msgstr ""
 
@@ -3415,6 +3575,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "Dungeon noise"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Dynamic shadows"
+msgstr "cenba ctino"
 
 #: src/settings_translation_file.cpp
 msgid "Effects"
@@ -3446,6 +3610,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Enable IPv6 support for server.\n"
+"Note that clients will be able to connect with both IPv4 and IPv6.\n"
+"Ignored if bind_address is set."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Enable Lua modding support on client.\n"
 "This support is experimental and API can change."
 msgstr ""
@@ -3466,6 +3637,10 @@ msgid "Enable Raytraced Culling"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Enable a confirmation dialog before closing."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Enable automatic exposure correction\n"
 "When enabled, the post-processing engine will\n"
@@ -3482,6 +3657,11 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "Enable console window"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Enable dynamic shadows"
+msgstr "cenba ctino"
 
 #: src/settings_translation_file.cpp
 msgid "Enable joysticks"
@@ -3544,12 +3724,6 @@ msgstr ""
 msgid ""
 "Enable view bobbing and amount of view bobbing.\n"
 "For example: 0 for no view bobbing; 1.0 for normal; 2.0 for double."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Enable/disable running an IPv6 server.\n"
-"Ignored if bind_address is set."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3621,7 +3795,7 @@ msgid "FPS"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "FPS when unfocused or paused"
+msgid "FPS when unfocused"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -3629,13 +3803,13 @@ msgid "Factor noise"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Fall bobbing factor"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 #, fuzzy
 msgid "Fallback font path"
 msgstr "no"
+
+#: src/settings_translation_file.cpp
+msgid "Fast approximate antialiasing"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Fast mode acceleration"
@@ -4011,11 +4185,147 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Hotbar slot 1"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 10"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 11"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 12"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 13"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 14"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 15"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 16"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 17"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 18"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 19"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 2"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 20"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 21"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 22"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 23"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 24"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 25"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 26"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 27"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 28"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 29"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 30"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 31"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 32"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 4"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 5"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 6"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 7"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 8"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar slot 9"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Hotbar: Enable mouse wheel for selection"
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Hotbar: Invert mouse wheel direction"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar: select next item"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Hotbar: select previous item"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4093,14 +4403,15 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"If enabled, actions are recorded for rollback.\n"
-"This option is only read when server starts."
+"If enabled, invalid world data won't cause the server to shut down.\n"
+"Only enable this if you know what you are doing."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"If enabled, invalid world data won't cause the server to shut down.\n"
-"Only enable this if you know what you are doing."
+"If enabled, node and inventory actions are recorded for rollback.\n"
+"This option is only read on server start. Note that the engine will not\n"
+"automatically clean old entries from the rollback database."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4117,6 +4428,17 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "If enabled, the \"Aux1\" key will toggle when pressed."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"If enabled, the \"Sneak\" key will toggle when pressed.\n"
+"This functionality is ignored when fly is enabled."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, no-c-format
 msgid ""
 "If enabled, the server will perform map block occlusion culling based on\n"
 "on the eye position of the player. This can reduce the number of blocks\n"
@@ -4169,8 +4491,18 @@ msgid "In-game chat console background color (R,G,B)."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, no-c-format
 msgid "In-game chat console height, between 0.1 (10%) and 1.0 (100%)."
 msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Increase view range"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Increase volume"
+msgstr "zengau lo ni sance"
 
 #: src/settings_translation_file.cpp
 msgid "Initial vertical speed when jumping, in nodes per second."
@@ -4204,6 +4536,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Instrument the methods of entities on registration."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Interaction style"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4321,6 +4657,62 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Jumping speed"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for decrementing the selected value in Quicktune."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Key for digging, punching or using something.\n"
+"(Note: The actual meaning might vary on a per-game basis.)"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for incrementing the selected value in Quicktune."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for moving fast in fast mode."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for opening the chat window to type commands."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for opening the chat window to type local commands."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Key for placing an item/block or for using something.\n"
+"(Note: The actual meaning might vary on a per-game basis.)"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for switching to the next entry in Quicktune."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for switching to the previous entry in Quicktune."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for toggling the camera update. Only usable with 'debug' privilege."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for toggling the display of mapblock boundaries."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Key for toggling the display of the profiler. Used for development."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Keybindings"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4505,6 +4897,11 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "Loading Block Modifiers"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Local command"
+msgstr "minde"
 
 #: src/settings_translation_file.cpp
 msgid "Lower Y limit of dungeons."
@@ -4702,7 +5099,7 @@ msgid "Maximum FPS"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Maximum FPS when the window is not focused, or when the game is paused."
+msgid "Maximum FPS when the window is not focused."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4764,7 +5161,9 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Maximum number of mapblocks for client to be kept in memory.\n"
-"Set to -1 for unlimited amount."
+"Note that there is an internal dynamic minimum number of blocks that\n"
+"won't be deleted, depending on the current view range.\n"
+"Set to -1 for no limit."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4802,12 +5201,12 @@ msgid "Maximum simultaneous block sends per client"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Maximum size of the outgoing chat queue"
+msgid "Maximum size of the client's outgoing chat queue"
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Maximum size of the outgoing chat queue.\n"
+"Maximum size of the client's outgoing chat queue.\n"
 "0 to disable queueing and -1 to make the queue size unlimited."
 msgstr ""
 
@@ -4825,6 +5224,14 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Maximum users"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Measure time samples"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Menu theme"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4884,6 +5291,12 @@ msgid "Mod channels"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid ""
+"Modifier key bind for closing your world.\n"
+"Requires ESC + the selected key to work."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Modifies the size of the HUD elements."
 msgstr ""
 
@@ -4924,6 +5337,24 @@ msgid "Mouse sensitivity multiplier."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Move backward"
+msgstr "ti'a muvdu"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Move forward"
+msgstr "za'i ca'u muvdu"
+
+#: src/settings_translation_file.cpp
+msgid "Move left"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Move right"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Movement threshold"
 msgstr ""
 
@@ -4932,10 +5363,8 @@ msgid "Mud noise"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Multiplier for fall bobbing.\n"
-"For example: 0 for no view bobbing; 1.0 for normal; 2.0 for double."
-msgstr ""
+msgid "Mute"
+msgstr "sance fanta"
 
 #: src/settings_translation_file.cpp
 msgid "Mute sound"
@@ -4986,10 +5415,6 @@ msgid "Node highlighting"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Node specular"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "NodeTimer interval"
 msgstr ""
 
@@ -5003,16 +5428,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Number of emerge threads to use.\n"
-"Value 0:\n"
-"-    Automatic selection. The number of emerge threads will be\n"
-"-    'number of processors - 2', with a lower limit of 1.\n"
-"Any other value:\n"
-"-    Specifies the number of emerge threads, with a lower limit of 1.\n"
-"WARNING: Increasing the number of emerge threads increases engine mapgen\n"
-"speed, but this may harm game performance by interfering with other\n"
-"processes, especially in singleplayer and/or when running Lua code in\n"
-"'on_generated'. For many users the optimum setting may be '1'."
+"Number of emerge threads (responsible for map generation and loading) to "
+"use.\n"
+"If 0 then the engine will automatically choose a suitable value depending\n"
+"on the hardware and type of map generator.\n"
+"WARNING: There are known bugs in the default map generators (v6, v7, ...)\n"
+"when using more than 1 thread. The automatic choice will avoid this."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5029,7 +5450,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Number of threads to use for mesh generation.\n"
-"Value of 0 (default) will let Luanti autodetect the number of available "
+"Value of 0 (default) will let Luanti automatically choose the number of "
 "threads."
 msgstr ""
 
@@ -5042,9 +5463,17 @@ msgid "Occlusion Culling"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid ""
-"Opaqueness (alpha) of the shadow behind the default font, between 0 and 255."
+msgid "Opaqueness (alpha) of the shadow behind the font."
 msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Open chat"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Open inventory"
+msgstr "sorcu"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -5166,9 +5595,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Prometheus listener address.\n"
-"If Luanti is compiled with ENABLE_PROMETHEUS option enabled,\n"
-"enable metrics listener for Prometheus on that address.\n"
-"Metrics can be fetched on http://127.0.0.1:30000/metrics"
+"If Luanti is compiled with Prometheus support, this setting\n"
+"enables the metrics listener for Prometheus on that address.\n"
+"By default you can fetch metrics from http://127.0.0.1:30000/metrics.\n"
+"An empty value disables the metrics listener."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5182,6 +5612,22 @@ msgstr "le ve judrnporte favatcini na mapti "
 
 #: src/settings_translation_file.cpp
 msgid "Punch gesture"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Quicktune: decrement value"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Quicktune: increment value"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Quicktune: select next entry"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Quicktune: select previous entry"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5252,6 +5698,11 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Return to Main Menu"
+msgstr "sisti tu'a le se kelci"
+
+#: src/settings_translation_file.cpp
 msgid "Ridge mountain spread noise"
 msgstr ""
 
@@ -5320,8 +5771,7 @@ msgid ""
 "Save window size automatically when modified.\n"
 "If true, screen size is saved in screen_w and screen_h, and whether the "
 "window\n"
-"is maximized is stored in window_maximized.\n"
-"(Autosaving window_maximized only works if compiled with SDL.)"
+"is maximized is stored in window_maximized."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5349,6 +5799,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "Screen width"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Screenshot"
+msgstr "vidnyxra"
 
 #: src/settings_translation_file.cpp
 msgid "Screenshot folder"
@@ -5403,11 +5857,6 @@ msgid ""
 "If Post Processing is disabled, changing FSAA requires a restart.\n"
 "Also, if Post Processing is disabled, FSAA will not work together with\n"
 "undersampling or a non-default \"3d_mode\" setting.\n"
-"\n"
-"* FXAA - Fast approximate antialiasing\n"
-"Applies a post-processing filter to detect and smoothen high-contrast "
-"edges.\n"
-"Provides balance between speed and image quality.\n"
 "\n"
 "* SSAA - Super-sampling antialiasing\n"
 "Renders higher-resolution image of the scene, then scales down to reduce\n"
@@ -5613,7 +6062,7 @@ msgid "Shadow filter quality"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Shadow map max distance in nodes to render shadows"
+msgid "Shadow map render distance"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5626,8 +6075,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Shadow offset (in pixels) of the default font. If 0, then shadow will not be "
-"drawn."
+"Shadow offset (in pixels) for all fonts. If 0, then no shadow will be drawn."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5927,16 +6375,33 @@ msgid ""
 "The gesture for punching players/entities.\n"
 "This can be overridden by games and mods.\n"
 "\n"
-"* short_tap\n"
+"* Short tap\n"
 "Easy to use and well-known from other games that shall not be named.\n"
 "\n"
-"* long_tap\n"
+"* Long tap\n"
 "Known from the classic Luanti mobile controls.\n"
 "Combat is more or less impossible."
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "The identifier of the joystick to use"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"The kind of digging/placing controls used.\n"
+"\n"
+"* Tap\n"
+"Long/short tap anywhere on the screen to interact.\n"
+"Interaction happens at finger position.\n"
+"\n"
+"* Tap with crosshair\n"
+"Long/short tap anywhere on the screen to interact.\n"
+"Interaction happens at crosshair position.\n"
+"\n"
+"* Buttons with crosshair\n"
+"Use dedicated dig/place buttons to interact.\n"
+"Interaction happens at crosshair position."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5983,7 +6448,7 @@ msgstr ""
 msgid ""
 "The rendering back-end.\n"
 "Note: A restart is required after changing this!\n"
-"OpenGL is the default for desktop, and OGLES2 for Android."
+"By default OpenGL3 is preferred on desktop, or OGLES2 on Android."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6064,11 +6529,83 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"To reduce lag, block transfers are slowed down when a player is building "
+"To save bandwidth, block transfers are slowed down when a player is building "
 "something.\n"
-"This determines how long they are slowed down after placing or removing a "
-"node."
+"This determines how long the throttling lasts after placing a node."
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle Aux1 key"
+msgstr "mu'e plipe"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle HUD"
+msgstr "mu'e co'a jonai mo'u vofli"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle Sneak key"
+msgstr "mu'e co'a jonai mo'u vofli"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle automatic forward"
+msgstr "za'i ca'u muvdu"
+
+#: src/settings_translation_file.cpp
+msgid "Toggle block bounds"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle camera mode"
+msgstr "mu'e co'a jonai mo'u sutra"
+
+#: src/settings_translation_file.cpp
+msgid "Toggle camera update"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle cinematic mode"
+msgstr "le nu finti kelci"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle debug info"
+msgstr "mu'e co'a jonai mo'u vofli"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle fog"
+msgstr "mu'e co'a jonai mo'u vofli"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle fullscreen"
+msgstr "mu'e co'a jonai mo'u vofli"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle large chat console"
+msgstr "mu'e co'a jonai mo'u sutra"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle pitchmove"
+msgstr "mu'e co'a jonai mo'u sutra"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle profiler"
+msgstr "mu'e co'a jonai mo'u vofli"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Toggle unlimited view range"
+msgstr "na jvinu jimte"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6210,16 +6747,6 @@ msgid "Use bilinear filtering when scaling textures."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Use crosshair for touch screen"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Use crosshair to select object instead of whole screen.\n"
-"If enabled, a crosshair will be shown and will be used for selecting object."
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "Use mipmaps when scaling textures. May slightly increase performance,\n"
 "especially when using a high-resolution texture pack.\n"
@@ -6313,8 +6840,9 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Vertical screen synchronization. Your system may still force VSync on even "
-"if this is disabled."
+"Vertical screen synchronization.\n"
+"Note: A restart is required after changing this!\n"
+"Your system may still force VSync and ignore this setting."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6503,6 +7031,10 @@ msgid "Width of the selection box lines around nodes."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Will also disable autoforward, when active."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Window maximized"
 msgstr ""
 
@@ -6529,7 +7061,7 @@ msgid ""
 "World-aligned textures may be scaled to span several nodes. However,\n"
 "the server may not send the scale you want, especially if you use\n"
 "a specially-designed texture pack; with this option, the client tries\n"
-"to determine the scale automatically basing on the texture size.\n"
+"to determine the scale automatically based on the texture size.\n"
 "See also texture_min_size.\n"
 "Warning: This option is EXPERIMENTAL!"
 msgstr ""
@@ -6600,292 +7132,7 @@ msgstr ""
 msgid "cURL parallel limit"
 msgstr ""
 
-#~ msgid "- Address: "
-#~ msgstr "- judri: "
-
-#~ msgid "- Creative Mode: "
-#~ msgstr "- finti se kelci: "
-
-#~ msgid "- Port: "
-#~ msgstr "- judrnporte: "
-
-#~ msgid "3D Clouds"
-#~ msgstr "cibyca'u dilnu"
-
-#~ msgid "Address / Port"
-#~ msgstr "lo samjudri jo'u judrnporte"
-
-#~ msgid "All Settings"
-#~ msgstr "se cmima ro te tcimi'e"
-
-#~ msgid "All packages"
-#~ msgstr "se cmima ro bakfu"
-
-#~ msgid "Are you sure to reset your singleplayer world?"
-#~ msgstr ".i xu do djica le nu xruti le do nonselkansa munje"
-
-#, fuzzy
-#~ msgid "Automatic forward key"
-#~ msgstr "za'i ca'u muvdu"
-
-#, fuzzy
-#~ msgid "Aux1 key"
-#~ msgstr "mu'e plipe"
-
-#~ msgid "Back to Main Menu"
-#~ msgstr "xruti fi tu'a le ralju liste"
-
-#, fuzzy
-#~ msgid "Backward key"
-#~ msgstr "za'i ti'a muvdu"
-
-#~ msgid "Basic"
-#~ msgstr "jicmu"
-
-#~ msgid "Bilinear Filter"
-#~ msgstr "puvyrelyli'iju'e"
-
-#, fuzzy
-#~ msgid "Bump Mapping"
-#~ msgstr "lo puvrmipmepi"
-
-#, fuzzy
-#~ msgid "Change keys"
-#~ msgstr "samta'a"
-
-#, fuzzy
-#~ msgid "Cinematic mode"
-#~ msgstr "le nu finti kelci"
-
-#, fuzzy
-#~ msgid "Cinematic mode key"
-#~ msgstr "le nu finti kelci"
-
-#, fuzzy
-#~ msgid "Command key"
-#~ msgstr "minde"
-
-#~ msgid "Configure"
-#~ msgstr "tcimi'e"
-
-#~ msgid "Connect"
-#~ msgstr "co'a samjo'e"
-
-#, fuzzy
-#~ msgid "Connected Glass"
-#~ msgstr "lo jorne blaci"
-
-#~ msgid "Creative"
-#~ msgstr "finti se kelci"
-
-#~ msgid "Credits"
-#~ msgstr "liste lu'i ro gunka"
-
-#, fuzzy
-#~ msgid "Dig key"
-#~ msgstr "za'i ri'u muvdu"
-
-#~ msgid "Digging particles"
-#~ msgstr "kakpa kantu"
-
-#, fuzzy
-#~ msgid "Disable anticheat"
-#~ msgstr "lo kantu"
-
-#~ msgid "Download a game, such as Minetest Game, from minetest.net"
-#~ msgstr ""
-#~ ".i ko kibycpa pa se kelci to mupli fa la .maintest. se kelci toi la'o "
-#~ "zoi. minetest.net .zoi"
-
-#~ msgid "Download one from minetest.net"
-#~ msgstr ".i ko kibycpa pa se kelci la'o zoi. minetest.net .zoi"
-
-#~ msgid "Downloading and installing $1, please wait..."
-#~ msgstr ".i ca'o kibycpa la'o zoi. $1 .zoi je cu samtcise'a ri .i ko denpa"
-
-#, fuzzy
-#~ msgid "Enable"
-#~ msgstr "katci"
-
-#, fuzzy
-#~ msgid "Enable VBO"
-#~ msgstr "selpli"
-
-#, fuzzy
-#~ msgid "Fancy Leaves"
-#~ msgstr "lo tolkli pezli"
-
-#, fuzzy
-#~ msgid "Forward key"
-#~ msgstr "za'i ca'u muvdu"
-
-#, fuzzy
-#~ msgid "Hide: Temporary Settings"
-#~ msgstr "te tcimi'e"
-
-#~ msgid "Invalid gamespec."
-#~ msgstr ".i le se kelci ve skicu vreji na drani"
-
-#, fuzzy
-#~ msgid "Inventory key"
-#~ msgstr "lo dacti uidje"
-
-#, fuzzy
-#~ msgid "Jump key"
-#~ msgstr "mu'e plipe"
-
-#, fuzzy
-#~ msgid "Left key"
-#~ msgstr "za'i zu'e muvdu"
-
-#~ msgid "Main"
-#~ msgstr "ralju"
-
-#, fuzzy
-#~ msgid "Main menu style"
-#~ msgstr "lo ralju"
-
-#~ msgid "Mipmap"
-#~ msgstr "lo puvrmipmepi"
-
-#~ msgid "Mipmap + Aniso. Filter"
-#~ msgstr "lo puvrmipmepi .e lo puvytolmanfyju'e"
-
-#, fuzzy
-#~ msgid "Mute key"
-#~ msgstr "ko da'ergau le batke"
-
-#~ msgid "Name / Password"
-#~ msgstr "lo cmene .e lo lerpoijaspu"
-
-#~ msgid "Name/Password"
-#~ msgstr "cmene .i lerpoijaspu"
-
-#~ msgid "No"
-#~ msgstr "na go'i"
-
-#, fuzzy
-#~ msgid "Node Highlighting"
-#~ msgstr "lo xutla se gusni"
-
-#, fuzzy
-#~ msgid "Node Outlining"
-#~ msgstr "lo xutla se gusni"
-
-#~ msgid "Ok"
-#~ msgstr "je'e"
-
-#, fuzzy
-#~ msgid "Opaque Leaves"
-#~ msgstr "lo tolkli pezli"
-
-#~ msgid "Opaque Water"
-#~ msgstr "tolkli djacu"
-
-#~ msgid "Particles"
-#~ msgstr "kantu"
-
-#, fuzzy
-#~ msgid "Pitch move key"
-#~ msgstr "le nu finti kelci"
-
-#, fuzzy
-#~ msgid "Place key"
-#~ msgstr "le nu finti kelci"
-
-#~ msgid "Player name"
-#~ msgstr "plicme"
-
-#~ msgid "Please enter a valid integer."
-#~ msgstr ".i ko samci'a da poi drani le ka lerpoi fi pa mulna'u"
-
-#~ msgid "Please enter a valid number."
-#~ msgstr ".i ko samci'a da poi drani fi le ka lerpoi fi pa namcu"
-
-#, fuzzy
-#~ msgid "Range select key"
-#~ msgstr "mu'e cuxna fi le'i se kuspe"
-
-#~ msgid "Reset singleplayer world"
-#~ msgstr "xruti le nonselkansa munje"
-
-#, fuzzy
-#~ msgid "Right key"
-#~ msgstr "za'i ri'u muvdu"
-
-#, fuzzy
-#~ msgid "Server / Singleplayer"
-#~ msgstr "pa kelci"
-
-#~ msgid "Shaders"
-#~ msgstr "ti'orkemsamtci"
-
-#, fuzzy
-#~ msgid "Shaders (experimental)"
-#~ msgstr "ti'orkemsamtci to na kakne toi"
-
-#, fuzzy
-#~ msgid "Shaders are disabled."
-#~ msgstr "na sutra klama kakne"
-
-#, fuzzy
-#~ msgid "Simple Leaves"
-#~ msgstr "lo sampu pezli"
-
-#, fuzzy
-#~ msgid "Smooth Lighting"
-#~ msgstr "lo xutla se gusni"
-
-#, fuzzy
-#~ msgid "Special key"
-#~ msgstr "za'i masno cadzu"
-
-#~ msgid "Start Singleplayer"
-#~ msgstr "co'a nonselkansa kelci"
-
-#~ msgid "The value must be at least $1."
-#~ msgstr ".i sarcu fa le nu le namcu cu dubjavmau li $1"
-
-#~ msgid "The value must not be larger than $1."
-#~ msgstr ".i sarcu fa le nu le namcu na zmadu li $1"
-
-#, fuzzy
-#~ msgid "Tone Mapping"
-#~ msgstr "lo puvrmipmepi"
-
-#~ msgid "Trilinear Filter"
-#~ msgstr "puvycibli'iju'e"
-
-#~ msgid "Uninstall Package"
-#~ msgstr "to'e samtcise'a le bakfu"
-
-#~ msgid "View more information in a web browser"
-#~ msgstr "tcidu tu'a lo drata lo kibro"
-
-#, fuzzy
-#~ msgid "Waving Leaves"
-#~ msgstr "lo melbi pezli"
-
-#, fuzzy
-#~ msgid "Waving Liquids"
-#~ msgstr ".i ca'o samymo'i lo me la'o gy.node.gy."
-
-#, fuzzy
-#~ msgid "Waving Plants"
-#~ msgstr "lo melbi pezli"
-
-#~ msgid "Yes"
-#~ msgstr "go'i"
-
-#, fuzzy
-#~ msgid "You died."
-#~ msgstr ".i do morsi"
-
-#~ msgid "You have no games installed."
-#~ msgstr ".i do samtcise'a no se kelci"
-
-#~ msgid "needs_fallback_font"
-#~ msgstr "no"
-
-#~ msgid "ok"
-#~ msgstr "je'e"
+#: src/util/screenshot.cpp
+#, c-format
+msgid "Failed to save screenshot to \"%s\""
+msgstr ""

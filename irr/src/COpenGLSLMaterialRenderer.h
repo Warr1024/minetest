@@ -15,8 +15,6 @@
 
 #include "COpenGLCommon.h"
 
-namespace irr
-{
 namespace video
 {
 
@@ -98,7 +96,7 @@ protected:
 
 	bool Alpha;
 	bool Blending;
-	bool AlphaTest;
+	bool Skinning = false;
 
 	struct SUniformInfo
 	{
@@ -107,13 +105,11 @@ protected:
 		GLint location;
 	};
 
-	GLhandleARB Program;
 	GLuint Program2;
 	core::array<SUniformInfo> UniformInfo;
 	s32 UserData;
 };
 
 } // end namespace video
-} // end namespace irr
 
 #endif // compile with OpenGL

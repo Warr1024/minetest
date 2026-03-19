@@ -20,15 +20,16 @@
 #define _B3D_READER_DEBUG
 #endif
 
-namespace irr
-{
 namespace scene
 {
 
 //! Constructor
 CB3DMeshFileLoader::CB3DMeshFileLoader(scene::ISceneManager *smgr) :
-		AnimatedMesh(0), B3DFile(0), VerticesStart(0), NormalsInFile(false),
-		HasVertexColors(false), ShowWarning(true)
+		B3DFile(nullptr),
+		VerticesStart(0),
+		NormalsInFile(false),
+		HasVertexColors(false),
+		ShowWarning(true)
 {}
 
 //! returns true if the file maybe is able to be loaded by this class
@@ -45,21 +46,17 @@ bool CB3DMeshFileLoader::isALoadableFileExtension(const io::path &filename) cons
 IAnimatedMesh *CB3DMeshFileLoader::createMesh(io::IReadFile *file)
 {
 	if (!file)
-		return 0;
+		return nullptr;
 
 	B3DFile = file;
-	AnimatedMesh = new scene::SkinnedMeshBuilder();
+	AnimatedMesh = scene::SkinnedMeshBuilder(SkinnedMesh::SourceFormat::B3D);
 	ShowWarning = true; // If true a warning is issued if too many textures are used
 	VerticesStart = 0;
 
-	if (load()) {
-		return AnimatedMesh->finalize();
-	} else {
-		AnimatedMesh->drop();
-		AnimatedMesh = 0;
-	}
+	if (!load())
+		return nullptr;
 
-	return AnimatedMesh;
+	return std::move(AnimatedMesh).finalize();
 }
 
 bool CB3DMeshFileLoader::load()
@@ -132,7 +129,7 @@ bool CB3DMeshFileLoader::load()
 
 bool CB3DMeshFileLoader::readChunkNODE(SkinnedMesh::SJoint *inJoint)
 {
-	SkinnedMesh::SJoint *joint = AnimatedMesh->addJoint(inJoint);
+	SkinnedMesh::SJoint *joint = AnimatedMesh.addJoint(inJoint);
 	joint->Name = readString();
 
 #ifdef _B3D_READER_DEBUG
@@ -143,31 +140,25 @@ bool CB3DMeshFileLoader::readChunkNODE(SkinnedMesh::SJoint *inJoint)
 	os::Printer::log(logStr.c_str(), joint->Name.value_or("").c_str(), ELL_DEBUG);
 #endif
 
-	f32 position[3], scale[3], rotation[4];
+	core::Transform transform;
+	{
+		f32 t[3], s[3], r[4];
 
-	readFloats(position, 3);
-	readFloats(scale, 3);
-	readFloats(rotation, 4);
+		readFloats(t, 3);
+		readFloats(s, 3);
+		readFloats(r, 4);
 
-	joint->Animatedposition = core::vector3df(position[0], position[1], position[2]);
-	joint->Animatedscale = core::vector3df(scale[0], scale[1], scale[2]);
-	joint->Animatedrotation = core::quaternion(rotation[1], rotation[2], rotation[3], rotation[0]);
-
-	// Build LocalMatrix:
-
-	core::matrix4 positionMatrix;
-	positionMatrix.setTranslation(joint->Animatedposition);
-	core::matrix4 scaleMatrix;
-	scaleMatrix.setScale(joint->Animatedscale);
-	core::matrix4 rotationMatrix;
-	joint->Animatedrotation.getMatrix_transposed(rotationMatrix);
-
-	joint->LocalMatrix = positionMatrix * rotationMatrix * scaleMatrix;
+		joint->transform = transform = {
+			{t[0], t[1], t[2]},
+			{r[1], r[2], r[3], r[0]},
+			{s[0], s[1], s[2]},
+		};
+	}
 
 	if (inJoint)
-		joint->GlobalMatrix = inJoint->GlobalMatrix * joint->LocalMatrix;
+		joint->GlobalMatrix = inJoint->GlobalMatrix * transform.buildMatrix();
 	else
-		joint->GlobalMatrix = joint->LocalMatrix;
+		joint->GlobalMatrix = transform.buildMatrix();
 
 	while (B3dStack.getLast().startposition + B3dStack.getLast().length > B3DFile->getPos()) // this chunk repeats
 	{
@@ -241,7 +232,7 @@ bool CB3DMeshFileLoader::readChunkMESH(SkinnedMesh::SJoint *inJoint)
 			if (!readChunkVRTS(inJoint))
 				return false;
 		} else if (strncmp(B3dStack.getLast().name, "TRIS", 4) == 0) {
-			scene::SSkinMeshBuffer *meshBuffer = AnimatedMesh->addMeshBuffer();
+			scene::SSkinMeshBuffer *meshBuffer = AnimatedMesh.addMeshBuffer();
 
 			if (brushID == -1) { /* ok */
 			} else if (brushID < 0 || (u32)brushID >= Materials.size()) {
@@ -251,7 +242,7 @@ bool CB3DMeshFileLoader::readChunkMESH(SkinnedMesh::SJoint *inJoint)
 				meshBuffer->Material = Materials[brushID].Material;
 			}
 
-			if (readChunkTRIS(meshBuffer, AnimatedMesh->getMeshBufferCount() - 1, VerticesStart) == false)
+			if (readChunkTRIS(meshBuffer, AnimatedMesh.getMeshBufferCount() - 1, VerticesStart) == false)
 				return false;
 
 			if (!NormalsInFile) {
@@ -549,11 +540,10 @@ bool CB3DMeshFileLoader::readChunkBONE(SkinnedMesh::SJoint *inJoint)
 			if (AnimatedVertices_VertexID[globalVertexID] == -1) {
 				os::Printer::log("B3dMeshLoader: Weight has bad vertex id (no link to meshbuffer index found)");
 			} else if (strength > 0) {
-				SkinnedMesh::SWeight *weight = AnimatedMesh->addWeight(inJoint);
-				weight->strength = strength;
-				// Find the meshbuffer and Vertex index from the Global Vertex ID:
-				weight->vertex_id = AnimatedVertices_VertexID[globalVertexID];
-				weight->buffer_id = AnimatedVertices_BufferID[globalVertexID];
+				AnimatedMesh.addWeight(inJoint,
+						AnimatedVertices_BufferID[globalVertexID],
+						AnimatedVertices_VertexID[globalVertexID],
+						strength);
 			}
 		}
 	}
@@ -599,15 +589,15 @@ bool CB3DMeshFileLoader::readChunkKEYS(SkinnedMesh::SJoint *inJoint)
 		f32 data[4];
 		if (flags & 1) {
 			readFloats(data, 3);
-			AnimatedMesh->addPositionKey(inJoint, frame - 1, {data[0], data[1], data[2]});
+			AnimatedMesh.addPositionKey(inJoint, frame - 1, {data[0], data[1], data[2]});
 		}
 		if (flags & 2) {
 			readFloats(data, 3);
-			AnimatedMesh->addScaleKey(inJoint, frame - 1, {data[0], data[1], data[2]});
+			AnimatedMesh.addScaleKey(inJoint, frame - 1, {data[0], data[1], data[2]});
 		}
 		if (flags & 4) {
 			readFloats(data, 4);
-			AnimatedMesh->addRotationKey(inJoint, frame - 1, core::quaternion(data[1], data[2], data[3], data[0]));
+			AnimatedMesh.addRotationKey(inJoint, frame - 1, core::quaternion(data[1], data[2], data[3], data[0]));
 		}
 	}
 
@@ -625,15 +615,13 @@ bool CB3DMeshFileLoader::readChunkANIM()
 	os::Printer::log(logStr.c_str(), ELL_DEBUG);
 #endif
 
-	s32 animFlags;  // not stored\used
-	s32 animFrames; // not stored\used
-	f32 animFPS;    // not stored\used
+	s32 animFlags;  // not stored/used
+	s32 animFrames; // not stored/used
+	f32 animFPS;    // not stored/used
 
 	B3DFile->read(&animFlags, sizeof(s32));
 	B3DFile->read(&animFrames, sizeof(s32));
 	readFloats(&animFPS, 1);
-	if (animFPS > 0.f)
-		AnimatedMesh->setAnimationSpeed(animFPS);
 	os::Printer::log("FPS", io::path((double)animFPS), ELL_DEBUG);
 
 #ifdef __BIG_ENDIAN__
@@ -856,4 +844,3 @@ void CB3DMeshFileLoader::readFloats(f32 *vec, u32 count)
 }
 
 } // end namespace scene
-} // end namespace irr

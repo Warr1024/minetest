@@ -17,7 +17,6 @@
 
 #include "debug.h"
 #include "exceptions.h"
-#include "settings.h"
 #include "remoteplayer.h"
 #include "server/player_sao.h"
 #include <cstdlib>
@@ -97,7 +96,7 @@ void Database_PostgreSQL::ping()
 
 bool Database_PostgreSQL::initialized() const
 {
-	return (PQstatus(m_conn) == CONNECTION_OK);
+	return m_conn && PQstatus(m_conn) == CONNECTION_OK;
 }
 
 PGresult *Database_PostgreSQL::checkResults(PGresult *result, bool clear)
@@ -164,9 +163,9 @@ void MapDatabasePostgreSQL::createDatabase()
 {
 	createTableIfNotExists("blocks",
 		"CREATE TABLE blocks ("
-			"posX INT NOT NULL,"
-			"posY INT NOT NULL,"
-			"posZ INT NOT NULL,"
+			"posX smallint NOT NULL,"
+			"posY smallint NOT NULL,"
+			"posZ smallint NOT NULL,"
 			"data BYTEA,"
 			"PRIMARY KEY (posX,posY,posZ)"
 			");"

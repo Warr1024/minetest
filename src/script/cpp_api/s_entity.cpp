@@ -197,13 +197,17 @@ void ScriptApiEntity::luaentity_GetProperties(u16 id,
 	// Set default values that differ from ObjectProperties defaults
 	prop->hp_max = 10;
 
+	auto *idef = getServer()->idef();
+
 	// Deprecated: read object properties directly
+	// TODO: this should be changed to not read the legacy place
+	// if `initial_properties` exists!
 	logDeprecationForExistingProperties(L, -1, entity_name);
-	read_object_properties(L, -1, self, prop, getServer()->idef());
+	read_object_properties(L, -1, self, prop, idef, true);
 
 	// Read initial_properties
 	lua_getfield(L, -1, "initial_properties");
-	read_object_properties(L, -1, self, prop, getServer()->idef());
+	read_object_properties(L, -1, self, prop, idef);
 	lua_pop(L, 1);
 }
 
@@ -243,7 +247,7 @@ void ScriptApiEntity::luaentity_Step(u16 id, float dtime,
 //                       tool_capabilities, direction, damage)
 bool ScriptApiEntity::luaentity_Punch(u16 id,
 		ServerActiveObject *puncher, float time_from_last_punch,
-		const ToolCapabilities *toolcap, v3f dir, s32 damage)
+		const ToolCapabilities &toolcap, v3f dir, s32 damage)
 {
 	SCRIPTAPI_PRECHECKHEADER
 
@@ -266,7 +270,7 @@ bool ScriptApiEntity::luaentity_Punch(u16 id,
 	else
 		lua_pushnil(L);
 	lua_pushnumber(L, time_from_last_punch);
-	push_tool_capabilities(L, *toolcap);
+	push_tool_capabilities(L, toolcap);
 	push_v3f(L, dir);
 	lua_pushnumber(L, damage);
 

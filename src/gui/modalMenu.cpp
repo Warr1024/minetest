@@ -3,17 +3,14 @@
 // Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 // Copyright (C) 2018 stujones11, Stuart Jones <stujones111@gmail.com>
 
-#include <cstdlib>
 #include <IEventReceiver.h>
 #include <IGUIComboBox.h>
 #include <IGUIEditBox.h>
 #include "client/renderingengine.h"
 #include "modalMenu.h"
-#include "gettext.h"
 #include "gui/guiInventoryList.h"
 #include "porting.h"
 #include "settings.h"
-#include "touchcontrols.h"
 
 PointerAction PointerAction::fromEvent(const SEvent &event) {
 	switch (event.EventType) {
@@ -92,12 +89,8 @@ void GUIModalMenu::draw()
 void GUIModalMenu::quitMenu()
 {
 	allowFocusRemoval(true);
-	// This removes Environment's grab on us
-	Environment->removeFocus(this);
 	m_menumgr->deletingMenu(this);
 	this->remove();
-	if (g_touchcontrols)
-		g_touchcontrols->show();
 }
 
 static bool isChild(gui::IGUIElement *tocheck, gui::IGUIElement *parent)
@@ -147,12 +140,13 @@ bool GUIModalMenu::remapClickOutside(const SEvent &event)
 	if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP &&
 			current.isRelated(last)) {
 		SEvent translated{};
-		translated.EventType            = EET_KEY_INPUT_EVENT;
-		translated.KeyInput.Key         = KEY_ESCAPE;
-		translated.KeyInput.Control     = false;
-		translated.KeyInput.Shift       = false;
-		translated.KeyInput.PressedDown = true;
-		translated.KeyInput.Char        = 0;
+		translated.EventType              = EET_KEY_INPUT_EVENT;
+		translated.KeyInput.Key           = KEY_ESCAPE;
+		translated.KeyInput.SystemKeyCode = EscapeKey.getScancode();
+		translated.KeyInput.Control       = false;
+		translated.KeyInput.Shift         = false;
+		translated.KeyInput.PressedDown   = true;
+		translated.KeyInput.Char          = 0;
 		OnEvent(translated);
 		return true;
 	}
@@ -245,12 +239,13 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 #ifdef __ANDROID__
 	// display software keyboard when clicking edit boxes
 	if (event.EventType == EET_MOUSE_INPUT_EVENT &&
-			event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN &&
-			!porting::hasPhysicalKeyboardAndroid()) {
+			((event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN &&
+			!porting::hasPhysicalKeyboardAndroid()) ||
+			event.MouseInput.Event == EMIE_LMOUSE_DOUBLE_CLICK)) {
 		gui::IGUIElement *hovered =
 			Environment->getRootGUIElement()->getElementFromPoint(
 				core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y));
-		if ((hovered) && (hovered->getType() == irr::gui::EGUIET_EDIT_BOX)) {
+		if ((hovered) && (hovered->getType() == gui::EGUIET_EDIT_BOX)) {
 			bool retval = hovered->OnEvent(event);
 			if (retval)
 				Environment->setFocus(hovered);
@@ -275,7 +270,9 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 
 			porting::showTextInputDialog("",
 					wide_to_utf8(((gui::IGUIEditBox *) hovered)->getText()), type);
-			return retval;
+			// Since we have opened the dialog, we have to return true to mark
+			// the event as handled (avoids double-opening).
+			return true;
 		}
 	}
 

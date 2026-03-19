@@ -3,11 +3,11 @@
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include <algorithm>
+#include <cassert>
 
 #include "CSceneManager.h"
 #include "IVideoDriver.h"
 #include "IFileSystem.h"
-#include "SAnimatedMesh.h"
 #include "CMeshCache.h"
 #include "IGUIEnvironment.h"
 #include "IMaterialRenderer.h"
@@ -22,7 +22,7 @@
 #include "CB3DMeshFileLoader.h"
 #include "CGLTFMeshFileLoader.h"
 #include "CBillboardSceneNode.h"
-#include "CAnimatedMeshSceneNode.h"
+#include "AnimatedMeshSceneNode.h"
 #include "CCameraSceneNode.h"
 #include "CMeshSceneNode.h"
 #include "CDummyTransformationSceneNode.h"
@@ -30,8 +30,6 @@
 
 #include "CSceneCollisionManager.h"
 
-namespace irr
-{
 namespace scene
 {
 
@@ -41,7 +39,7 @@ CSceneManager::CSceneManager(video::IVideoDriver *driver,
 		ISceneNode(0, 0),
 		Driver(driver),
 		CursorControl(cursorControl),
-		ActiveCamera(0), Parameters(0),
+		ActiveCamera(0),
 		MeshCache(cache), CurrentRenderPass(ESNRP_NONE)
 {
 	// root node's scene manager
@@ -58,9 +56,6 @@ CSceneManager::CSceneManager(video::IVideoDriver *driver,
 		MeshCache = new CMeshCache();
 	else
 		MeshCache->grab();
-
-	// set scene parameters
-	Parameters = new io::CAttributes();
 
 	// create collision manager
 	CollisionManager = new CSceneCollisionManager(this, Driver);
@@ -104,9 +99,6 @@ CSceneManager::~CSceneManager()
 	if (MeshCache)
 		MeshCache->drop();
 
-	if (Parameters)
-		Parameters->drop();
-
 	// remove all nodes before dropping the driver
 	// as render targets may be destroyed twice
 
@@ -145,6 +137,7 @@ IAnimatedMesh *CSceneManager::getUncachedMesh(io::IReadFile *file, const io::pat
 			file->seek(0);
 			IAnimatedMesh *msh = (*it)->createMesh(file);
 			if (msh) {
+				msh->prepareForAnimation(Driver->getMaxJointTransforms());
 				MeshCache->addMesh(cachename, msh);
 				msh->drop();
 				os::Printer::log("Loaded mesh", filename, ELL_DEBUG);
@@ -185,7 +178,7 @@ IMeshSceneNode *CSceneManager::addMeshSceneNode(IMesh *mesh, ISceneNode *parent,
 }
 
 //! adds a scene node for rendering an animated mesh model
-IAnimatedMeshSceneNode *CSceneManager::addAnimatedMeshSceneNode(IAnimatedMesh *mesh, ISceneNode *parent, s32 id,
+AnimatedMeshSceneNode *CSceneManager::addAnimatedMeshSceneNode(IAnimatedMesh *mesh, ISceneNode *parent, s32 id,
 		const core::vector3df &position, const core::vector3df &rotation,
 		const core::vector3df &scale, bool alsoAddIfMeshPointerZero)
 {
@@ -195,8 +188,8 @@ IAnimatedMeshSceneNode *CSceneManager::addAnimatedMeshSceneNode(IAnimatedMesh *m
 	if (!parent)
 		parent = this;
 
-	IAnimatedMeshSceneNode *node =
-			new CAnimatedMeshSceneNode(mesh, parent, this, id, position, rotation, scale);
+	auto *node =
+			new AnimatedMeshSceneNode(mesh, parent, this, id, position, rotation, scale);
 	node->drop();
 
 	return node;
@@ -305,7 +298,7 @@ void CSceneManager::render()
 //! returns the axis aligned bounding box of this node
 const core::aabbox3d<f32> &CSceneManager::getBoundingBox() const
 {
-	_IRR_DEBUG_BREAK_IF(true) // Bounding Box of Scene Manager should never be used.
+	assert(false); // Bounding Box of Scene Manager should never be used.
 
 	static const core::aabbox3d<f32> dummy{{0.0f, 0.0f, 0.0f}};
 	return dummy;
@@ -471,8 +464,7 @@ void CSceneManager::drawAll()
 	Driver->setTransform(video::ETS_WORLD, core::IdentityMatrix);
 	for (u32 i = video::ETS_COUNT - 1; i >= video::ETS_TEXTURE_0; --i)
 		Driver->setTransform((video::E_TRANSFORMATION_STATE)i, core::IdentityMatrix);
-	// TODO: This should not use an attribute here but a real parameter when necessary (too slow!)
-	Driver->setAllowZWriteOnTransparent(Parameters->getAttributeAsBool(ALLOW_ZWRITE_ON_TRANSPARENT));
+	Driver->setAllowZWriteOnTransparent(true);
 
 	// do animations and other stuff.
 	OnAnimate(os::Timer::getTime());
@@ -742,12 +734,6 @@ void CSceneManager::clear()
 	removeAll();
 }
 
-//! Returns interface to the parameters set in this scene.
-io::IAttributes *CSceneManager::getParameters()
-{
-	return Parameters;
-}
-
 //! Returns current render pass.
 E_SCENE_NODE_RENDER_PASS CSceneManager::getSceneNodeRenderPass() const
 {
@@ -774,7 +760,7 @@ ISceneManager *CSceneManager::createNewSceneManager(bool cloneContent)
 //! Get a skinned mesh, which is not available as header-only code
 SkinnedMesh *CSceneManager::createSkinnedMesh()
 {
-	return new SkinnedMesh();
+	return new SkinnedMesh(SkinnedMesh::SourceFormat::OTHER);
 }
 
 // creates a scenemanager
@@ -784,4 +770,3 @@ ISceneManager *createSceneManager(video::IVideoDriver *driver, gui::ICursorContr
 }
 
 } // end namespace scene
-} // end namespace irr

@@ -6,14 +6,15 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <IrrlichtDevice.h>
 #include "client/shadows/dynamicshadows.h"
 #include <ISceneNode.h>
 #include <ISceneManager.h>
 
-class ShadowDepthShaderCB;
-class shadowScreenQuad;
-class shadowScreenQuadCB;
+class ShadowDepthUniformSetter;
+class ShadowScreenQuad;
+class ShadowScreenQuadUniformSetter;
 class IWritableShaderSource;
 
 enum E_SHADOW_MODE : u8
@@ -28,7 +29,8 @@ struct NodeToApply
 			E_SHADOW_MODE m = E_SHADOW_MODE::ESM_BOTH) :
 			node(n),
 			shadowMode(m){};
-	bool operator<(const NodeToApply &other) const { return node < other.node; };
+
+	bool operator==(scene::ISceneNode *n) const { return node == n; }
 
 	scene::ISceneNode *node;
 
@@ -49,7 +51,8 @@ public:
 	// the shaders are dealt with.
 	static void preInit(IWritableShaderSource *shsrc);
 
-	void initialize();
+	/// @return shadows supported?
+	bool initialize();
 
 	/// Adds a directional light shadow map (Usually just one (the sun) except in
 	/// Tattoine ).
@@ -68,6 +71,7 @@ public:
 	void removeNodeFromShadowList(scene::ISceneNode *node);
 
 	void update(video::ITexture *outputTarget = nullptr);
+	/// Force shadow map to be re-drawn in one go next frame
 	void setForceUpdateShadowMap() { m_force_update_shadow_map = true; }
 	void drawDebug();
 
@@ -82,13 +86,14 @@ public:
 	void setShadowIntensity(float shadow_intensity);
 	void setShadowTint(video::SColor shadow_tint) { m_shadow_tint = shadow_tint; }
 
-	s32 getShadowSamples() const { return m_shadow_samples; }
 	float getShadowStrength() const { return m_shadows_enabled ? m_shadow_strength : 0.0f; }
 	video::SColor getShadowTint() const { return m_shadow_tint; }
 	float getTimeOfDay() const { return m_time_day; }
 
 	f32 getPerspectiveBiasXY() { return m_perspective_bias_xy; }
 	f32 getPerspectiveBiasZ() { return m_perspective_bias_z; }
+
+	static bool isSupported(video::IVideoDriver *driver);
 
 private:
 	video::ITexture *getSMTexture(const std::string &shadow_map_name,
@@ -99,7 +104,6 @@ private:
 			scene::E_SCENE_NODE_RENDER_PASS pass =
 					scene::ESNRP_SOLID);
 	void renderShadowObjects(video::ITexture *target, DirectionalLight &light);
-	void mixShadowsQuad();
 	void updateSMTextures();
 
 	void disable();
@@ -122,9 +126,8 @@ private:
 	video::SColor m_shadow_tint;
 	float m_shadow_strength_gamma;
 	float m_shadow_map_max_distance;
-	float m_shadow_map_texture_size;
+	u32 m_shadow_map_texture_size;
 	float m_time_day;
-	int m_shadow_samples;
 	bool m_shadow_map_texture_32bit;
 	bool m_shadows_enabled;
 	bool m_shadows_supported;
@@ -135,25 +138,22 @@ private:
 	f32 m_perspective_bias_xy;
 	f32 m_perspective_bias_z;
 
-	video::ECOLOR_FORMAT m_texture_format{video::ECOLOR_FORMAT::ECF_R16F};
-	video::ECOLOR_FORMAT m_texture_format_color{video::ECOLOR_FORMAT::ECF_R16G16};
+	video::ECOLOR_FORMAT m_texture_format{video::ECF_R16F};
+	video::ECOLOR_FORMAT m_texture_format_color{video::ECF_R16G16};
 
 	// Shadow Shader stuff
 
 	void createShaders();
-	std::string readShaderFile(const std::string &path);
 
-	s32 depth_shader{-1};
-	s32 depth_shader_entities{-1};
-	s32 depth_shader_trans{-1};
-	s32 mixcsm_shader{-1};
+	// _a suffix is with support for array textures
+	video::E_MATERIAL_TYPE depth_shader{video::EMT_INVALID},
+		depth_shader_a{video::EMT_INVALID};
+	video::E_MATERIAL_TYPE depth_shader_trans{video::EMT_INVALID},
+		depth_shader_trans_a{video::EMT_INVALID};
 
-	ShadowDepthShaderCB *m_shadow_depth_cb{nullptr};
-	ShadowDepthShaderCB *m_shadow_depth_entity_cb{nullptr};
-	ShadowDepthShaderCB *m_shadow_depth_trans_cb{nullptr};
+	std::vector<ShadowDepthUniformSetter*> m_shadow_depth_cb;
 
-	shadowScreenQuad *m_screen_quad{nullptr};
-	shadowScreenQuadCB *m_shadow_mix_cb{nullptr};
+	ShadowScreenQuad *m_screen_quad{nullptr};
 };
 
 /**
@@ -163,4 +163,4 @@ private:
  * @param client Reference to the client context.
  * @return A new ShadowRenderer instance or nullptr if shadows are disabled or not supported.
  */
-ShadowRenderer *createShadowRenderer(IrrlichtDevice *device, Client *client);
+std::unique_ptr<ShadowRenderer> createShadowRenderer(IrrlichtDevice *device, Client *client);

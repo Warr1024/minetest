@@ -13,15 +13,16 @@
 #include <sstream>
 #include "debug.h"
 #include "log.h"
-#include "util/serialize.h"
 #include "filesys.h"
 #include "noise.h"
 #include <cctype>
+#include <set>
 #include <algorithm>
 
 Settings *g_settings = nullptr;
 static SettingsHierarchy g_hierarchy;
 std::string g_settings_path;
+bool g_first_run = false;
 
 std::unordered_map<std::string, const FlagDesc *> Settings::s_flags;
 

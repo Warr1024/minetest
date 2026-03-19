@@ -6,7 +6,7 @@
 #include "client/shader.h"
 #include "clouds.h"
 #include "constants.h"
-#include "debug.h"
+#include "util/numeric.h"
 #include "irrlicht_changes/printing.h"
 #include "noise.h"
 #include "profiler.h"
@@ -51,6 +51,13 @@ Clouds::Clouds(scene::ISceneManager* mgr, IShaderSource *ssrc,
 		&cloud_3d_setting_changed, this);
 
 	updateBox();
+
+	// Neither EAC_BOX (the default) nor EAC_FRUSTUM_BOX will correctly cull
+	// the clouds.
+	// And yes, the bounding box is correct. You can check using the #if 0'd
+	// code in render() and see for yourself.
+	// So I give up and let's disable culling.
+	setAutomaticCulling(scene::EAC_OFF);
 
 	m_meshbuffer.reset(new scene::SMeshBuffer());
 	m_meshbuffer->setHardwareMappingHint(scene::EHM_DYNAMIC);
@@ -101,7 +108,6 @@ void Clouds::updateMesh()
 		return;
 	}
 
-	ScopeProfiler sp(g_profiler, "Clouds::updateMesh()", SPT_AVG);
 	m_mesh_origin = m_origin;
 	m_last_noise_center = center_of_drawing_in_noise_i;
 	m_mesh_valid = true;
@@ -366,6 +372,19 @@ void Clouds::render()
 	if (SceneManager->getSceneNodeRenderPass() != scene::ESNRP_TRANSPARENT)
 		return;
 
+#if 0
+	{ // proof that m_box is correct
+		video::SMaterial tmp;
+		tmp.Thickness = 1.f;
+		driver->setTransform(video::ETS_WORLD, core::IdentityMatrix);
+		driver->setMaterial(tmp);
+		aabb3f tmpbox = m_box;
+		tmpbox.MinEdge.X = tmpbox.MinEdge.Z = -1000 * BS;
+		tmpbox.MaxEdge.X = tmpbox.MaxEdge.Z = 1000 * BS;
+		driver->draw3DBox(tmpbox, video::SColor(255, 255, 0x4d, 0));
+	}
+#endif
+
 	updateMesh();
 
 	// Update position
@@ -386,7 +405,7 @@ void Clouds::render()
 	const float cloud_full_radius = cloud_size * m_cloud_radius_i;
 
 	// Get fog parameters for setting them back later
-	video::SColor fog_color(0,0,0,0);
+	video::SColor fog_color;
 	video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
 	f32 fog_start = 0;
 	f32 fog_end = 0;
@@ -425,14 +444,14 @@ void Clouds::update(const v3f &camera_p, const video::SColorf &color_diffuse)
 
 	// is the camera inside the cloud mesh?
 	m_camera_pos = camera_p;
-	m_camera_inside_cloud = false; // default
+	m_camera_inside_cloud = false;
 	if (is3D()) {
 		float camera_height = camera_p.Y - BS * m_camera_offset.Y;
 		if (camera_height >= m_box.MinEdge.Y &&
 				camera_height <= m_box.MaxEdge.Y) {
 			v2f camera_in_noise;
-			camera_in_noise.X = floor((camera_p.X - m_origin.X) / cloud_size + 0.5);
-			camera_in_noise.Y = floor((camera_p.Z - m_origin.Y) / cloud_size + 0.5);
+			camera_in_noise.X = floorf((camera_p.X - m_origin.X) / cloud_size + 0.5f);
+			camera_in_noise.Y = floorf((camera_p.Z - m_origin.Y) / cloud_size + 0.5f);
 			bool filled = gridFilled(camera_in_noise.X, camera_in_noise.Y);
 			m_camera_inside_cloud = filled;
 		}
@@ -454,7 +473,7 @@ void Clouds::readSettings()
 bool Clouds::gridFilled(int x, int y) const
 {
 	float cloud_size_noise = cloud_size / (BS * 200.f);
-	float noise = noise2d_perlin(
+	float noise = noise2d_fractal(
 			(float)x * cloud_size_noise,
 			(float)y * cloud_size_noise,
 			m_seed, 3, 0.5);

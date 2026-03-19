@@ -1,20 +1,7 @@
---Luanti
---Copyright (C) 2014 sapier
---Copyright (C) 2018 rubenwardy <rw@rubenwardy.com>
---
---This program is free software; you can redistribute it and/or modify
---it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
---(at your option) any later version.
---
---This program is distributed in the hope that it will be useful,
---but WITHOUT ANY WARRANTY; without even the implied warranty of
---MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
---GNU Lesser General Public License for more details.
---
---You should have received a copy of the GNU Lesser General Public License along
---with this program; if not, write to the Free Software Foundation, Inc.,
---51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-- Luanti
+-- Copyright (C) 2014 sapier
+-- Copyright (C) 2018 rubenwardy <rw@rubenwardy.com>
+-- SPDX-License-Identifier: LGPL-2.1-or-later
 
 
 local function get_content_icons(packages_with_updates)
@@ -74,6 +61,7 @@ local function get_formspec(tabview, name, tabdata)
 	if update_count == 0 then
 		contentdb_label = fgettext("Browse online content")
 	else
+		-- TRANSLATORS: $1 = number of available updates
 		contentdb_label = fgettext("Browse online content [$1]", update_count)
 	end
 
@@ -97,15 +85,26 @@ local function get_formspec(tabview, name, tabdata)
 	end
 
 	if selected_pkg then
-		-- Check for screenshot being available
-		local screenshotfilename = selected_pkg.path .. DIR_DELIM .. "screenshot.png"
-		local screenshotfile, error = io.open(screenshotfilename, "r")
+		local valid_screenshots = {
+			-- See also contentdb/app/tasks/importtasks.py, def import_repo_screenshot
+			selected_pkg.path .. DIR_DELIM .. "screenshot.png",
+			selected_pkg.path .. DIR_DELIM .. "screenshot.jpg",
+			selected_pkg.path .. DIR_DELIM .. "screenshot.jpeg",
+		}
 
+		-- Check for screenshot being available
 		local modscreenshot
-		if not error then
-			screenshotfile:close()
-			modscreenshot = screenshotfilename
-		else
+		for _, screenshotfilename in ipairs(valid_screenshots) do
+			local screenshotfile, err = io.open(screenshotfilename, "r")
+			if not err then
+				screenshotfile:close()
+				modscreenshot = screenshotfilename
+				break
+			end
+		end
+
+		-- Fallback to no_screenshot if no screenshot is avaliable
+		if not modscreenshot then
 			modscreenshot = defaulttexturedir .. "no_screenshot.png"
 		end
 
@@ -284,6 +283,7 @@ return {
 		if update_count == 0 then
 			return fgettext("Content")
 		else
+			-- TRANSLATORS: $1 = number of available updates
 			return fgettext("Content [$1]", update_count)
 		end
 	end,

@@ -7,28 +7,22 @@
 #include "irrlichttypes_bloated.h"
 #include "light.h"
 #include "util/pointer.h"
-#include <string>
 #include <vector>
 
 class NodeDefManager;
 class Map;
 
-/*
-	Naming scheme:
-	- Material = irrlicht's Material class
-	- Content = (content_t) content of a node
-	- Tile = TileSpec at some side of a node of some content type
-*/
+// content_t denotes the content of a node
 typedef u16 content_t;
 #define CONTENT_MAX UINT16_MAX
 
 /*
-	The maximum node ID that can be registered by mods. This must
-	be significantly lower than the maximum content_t value, so that
-	there is enough room for dummy node IDs, which are created when
+	The maximum node ID that can be registered by mods. This is
+	somewhat lower than the maximum content_t value, so that
+	there is enough room for dummy node IDs. These are created when
 	a MapBlock containing unknown node names is loaded from disk.
 */
-#define MAX_REGISTERED_CONTENT 0x7fffU
+static constexpr content_t MAX_REGISTERED_CONTENT = CONTENT_MAX - CONTENT_MAX / 10;
 
 /*
 	A solid walkable node with the texture unknown_node.png.
@@ -99,9 +93,6 @@ enum Rotation {
 #define LIQUID_LEVEL_MASK 0x07
 #define LIQUID_FLOW_DOWN_MASK 0x08
 
-//#define LIQUID_LEVEL_MASK 0x3f // better finite water
-//#define LIQUID_FLOW_DOWN_MASK 0x40 // not used when finite water
-
 /* maximum amount of liquid in a block */
 #define LIQUID_LEVEL_MAX LIQUID_LEVEL_MASK
 #define LIQUID_LEVEL_SOURCE (LIQUID_LEVEL_MAX+1)
@@ -145,7 +136,7 @@ struct alignas(u32) MapNode
 
 	MapNode() = default;
 
-	MapNode(content_t content, u8 a_param1=0, u8 a_param2=0) noexcept
+	constexpr MapNode(content_t content, u8 a_param1=0, u8 a_param2=0) noexcept
 		: param0(content),
 		  param1(a_param1),
 		  param2(a_param2)
@@ -156,6 +147,10 @@ struct alignas(u32) MapNode
 		return (param0 == other.param0
 				&& param1 == other.param1
 				&& param2 == other.param2);
+	}
+	bool operator!=(const MapNode &other) const noexcept
+	{
+		return !(*this == other);
 	}
 
 	// To be used everywhere
@@ -183,14 +178,6 @@ struct alignas(u32) MapNode
 	{
 		param2 = p;
 	}
-
-	/*!
-	 * Returns the color of the node.
-	 *
-	 * \param f content features of this node
-	 * \param color output, contains the node's color.
-	 */
-	void getColor(const ContentFeatures &f, video::SColor *color) const;
 
 	inline void setLight(LightBank bank, u8 a_light, ContentLightingFlags f) noexcept
 	{
@@ -292,7 +279,7 @@ struct alignas(u32) MapNode
 
 	static u32 serializedLength(u8 version);
 	void serialize(u8 *dest, u8 version) const;
-	void deSerialize(u8 *source, u8 version);
+	void deSerialize(const u8 *source, u8 version);
 
 	// Serializes or deserializes a list of nodes in bulk format (first the
 	// content of all nodes, then the param1 of all nodes, then the param2
@@ -301,9 +288,10 @@ struct alignas(u32) MapNode
 	//   content_width = the number of bytes of content per node
 	//   params_width = the number of bytes of params per node
 	//   compressed = true to zlib-compress output
+	//   is_mono_block = if true, nodes is array of size 1
 	static Buffer<u8> serializeBulk(int version,
 			const MapNode *nodes, u32 nodecount,
-			u8 content_width, u8 params_width);
+			u8 content_width, u8 params_width, bool is_mono_block = false);
 	static void deSerializeBulk(std::istream &is, int version,
 			MapNode *nodes, u32 nodecount,
 			u8 content_width, u8 params_width);

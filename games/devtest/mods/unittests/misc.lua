@@ -52,6 +52,7 @@ local function test_dynamic_media(cb, player)
 	local ok = core.dynamic_add_media({
 		filepath = path,
 		to_player = player:get_player_name(),
+		client_cache = false,
 	}, function(name)
 		if not call_ok then
 			return cb("impossible condition")
@@ -66,18 +67,6 @@ local function test_dynamic_media(cb, player)
 	-- if the callback isn't called this test will just hang :shrug:
 end
 unittests.register("test_dynamic_media", test_dynamic_media, {async=true, player=true})
-
-local function test_v3f_metatable(player)
-	assert(vector.check(player:get_pos()))
-end
-unittests.register("test_v3f_metatable", test_v3f_metatable, {player=true})
-
-local function test_v3s16_metatable(player, pos)
-	local node = core.get_node(pos)
-	local found_pos = core.find_node_near(pos, 0, node.name, true)
-	assert(vector.check(found_pos))
-end
-unittests.register("test_v3s16_metatable", test_v3s16_metatable, {map=true})
 
 local function test_clear_meta(_, pos)
 	local ref = core.get_meta(pos)
@@ -189,6 +178,29 @@ local function test_write_json()
 end
 unittests.register("test_write_json", test_write_json)
 
+local function lint_json_files()
+	-- Check that files we ship with Luanti are valid JSON
+	local stack = {core.get_builtin_path()}
+	local checked = 0
+	while #stack > 0 do
+		local path = table.remove(stack)
+		for _, name in ipairs(core.get_dir_list(path, true)) do
+			stack[#stack+1] = path .. "/" .. name
+		end
+		for _, name in ipairs(core.get_dir_list(path, false)) do
+			if name:match("%.json$") then
+				local f = io.open(path .. "/" .. name, "rb")
+				print(path .. "/" .. name)
+				assert(core.parse_json(f:read("*all"), -1) ~= nil)
+				f:close()
+				checked = checked + 1
+			end
+		end
+	end
+	assert(checked > 0, "no files found?!")
+end
+unittests.register("lint_json_files", lint_json_files)
+
 local function test_game_info()
 	local info = core.get_game_info()
 	local game_conf = Settings(info.path .. "/game.conf")
@@ -219,6 +231,9 @@ local function test_mapgen_edges(cb)
 	end
 	local emerges_left = 2
 	local function emerge_block(blockpos, action, blocks_left, finished)
+		-- FIXME: EMERGE_CANCELLED can also mean that the block was already being
+		-- emerged. It's unlikely but this can break the test and we can't
+		-- really tell...
 		if action ~= core.EMERGE_CANCELLED then
 			table.insert(finished, blockpos)
 		end
@@ -307,7 +322,7 @@ local function test_mapgen_env(cb)
 end
 unittests.register("test_mapgen_env", test_mapgen_env, {async=true})
 
-local function test_ipc_vector_preserve(cb)
+local function test_ipc_vector_preserve()
 	-- the IPC also uses register_portable_metatable
 	core.ipc_set("unittests:v", vector.new(4, 0, 4))
 	local v = core.ipc_get("unittests:v")
@@ -316,7 +331,7 @@ local function test_ipc_vector_preserve(cb)
 end
 unittests.register("test_ipc_vector_preserve", test_ipc_vector_preserve)
 
-local function test_ipc_poll(cb)
+local function test_ipc_poll()
 	core.ipc_set("unittests:flag", nil)
 	assert(core.ipc_poll("unittests:flag", 1) == false)
 
@@ -330,3 +345,32 @@ local function test_ipc_poll(cb)
 	print("delta: " .. (core.get_us_time() - t0) .. "us")
 end
 unittests.register("test_ipc_poll", test_ipc_poll)
+
+local function test_sandbox()
+	if not core.settings:get_bool("secure.enable_security") then
+		core.log("warning", "Lua sandbox disabled, skipping test")
+		return
+	end
+	-- this would point to _G but we have it unset
+	assert(package.loaded == nil)
+	-- string metatable must match global string table
+	assert(rawequal(getmetatable("").__index, string))
+	-- (some) entirely dangerous functions
+	assert(debug.getupvalue == nil)
+	assert(debug.setlocal == nil)
+	assert(debug.getmetatable == nil)
+	assert(os.execute == nil)
+	assert(io.popen == nil)
+	-- getinfo should not allow access to functions
+	assert(debug.getinfo(1).func == nil)
+	assert(debug.getinfo(function() end, "f").func ~= nil)
+end
+unittests.register("test_sandbox", test_sandbox)
+
+local function test_str_pack_unpack()
+	local fmt = "> d!2 xh"
+	assert(fmt:packsize() == 12) -- 8 double, 1 padding, 1 implicit align, 2 short
+	local a, b = fmt:unpack(fmt:pack(42.3, -384))
+	assert(a == 42.3 and b == -384)
+end
+unittests.register("test_str_pack_unpack", test_str_pack_unpack)

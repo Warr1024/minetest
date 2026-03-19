@@ -48,8 +48,8 @@
 // not represent the full range, but rather the largest safe range, of values on
 // all supported architectures.  Note: This definition makes assumptions on
 // platform float-to-int conversion behavior.
-#define F1000_MIN ((float)(s32)((float)(-0x7FFFFFFF - 1) / FIXEDPOINT_FACTOR))
-#define F1000_MAX ((float)(s32)((float)(0x7FFFFFFF) / FIXEDPOINT_FACTOR))
+static constexpr float F1000_MIN = (s32)((float)(S32_MIN) / FIXEDPOINT_FACTOR);
+static constexpr float F1000_MAX = (s32)((float)(S32_MAX) / FIXEDPOINT_FACTOR);
 
 #define STRING_MAX_LEN 0xFFFF
 #define WIDE_STRING_MAX_LEN 0xFFFF
@@ -159,7 +159,7 @@ inline void writeU64(u8 *data, u64 i)
 
 inline u8 readU8(const u8 *data)
 {
-	return ((u8)data[0] << 0);
+	return data[0];
 }
 
 inline s8 readS8(const u8 *data)
@@ -377,11 +377,25 @@ inline void writeV3F32(u8 *data, v3f p)
 //// Iostream wrapper for data read/write
 ////
 
+inline bool canRead(std::istream &is)
+{
+	return is.peek() != EOF;
+}
+
+// Assuming -O3 on GCC 14.2.0, this function results in 55% less machine code
+// generated for the `is.eof()` branch in `MAKE_STREAM_READ_FXN`.
+static void serialize_throw_eof()
+{
+	throw SerializationError("EOF");
+}
+
 #define MAKE_STREAM_READ_FXN(T, N, S)    \
 	inline T read ## N(std::istream &is) \
 	{                                    \
 		char buf[S] = {0};               \
 		is.read(buf, sizeof(buf));       \
+		if (is.eof())                    \
+			serialize_throw_eof();       \
 		return read ## N((u8 *)buf);     \
 	}
 
@@ -435,12 +449,12 @@ MAKE_STREAM_WRITE_FXN(video::SColor, ARGB8, 4);
 //// More serialization stuff
 ////
 
-inline float clampToF1000(float v)
+[[nodiscard]] inline float clampToF1000(float v)
 {
 	return core::clamp(v, F1000_MIN, F1000_MAX);
 }
 
-inline v3f clampToF1000(v3f v)
+[[nodiscard]] inline v3f clampToF1000(v3f v)
 {
 	return {clampToF1000(v.X), clampToF1000(v.Y), clampToF1000(v.Z)};
 }
@@ -469,3 +483,10 @@ std::string serializeJsonStringIfNeeded(std::string_view s);
 
 // Parses a string serialized by serializeJsonStringIfNeeded.
 std::string deSerializeJsonStringIfNeeded(std::istream &is);
+
+// Serializes an array of strings (max 2^16 chars each)
+// Output is well suited for compression :)
+std::string serializeString16Array(const std::vector<std::string> &array);
+
+// Deserializes a string array
+std::vector<std::string> deserializeString16Array(std::istream &is);

@@ -14,6 +14,7 @@
 #include "util/numeric.h"
 #include "util/serialize.h"
 #include "serialization.h"
+#include "servermap.h"
 #include "filesys.h"
 #include "voxelalgorithms.h"
 #include "porting.h"
@@ -127,7 +128,7 @@ void Schematic::blitToVManip(MMVManip *vm, v3s16 p, Rotation rot, bool force_pla
 			i_start  = sx - 1;
 			i_step_x = zstride;
 			i_step_z = -xstride;
-			SWAP(s16, sx, sz);
+			std::swap(sx, sz);
 			break;
 		case ROTATE_180:
 			i_start  = zstride * (sz - 1) + sx - 1;
@@ -138,7 +139,7 @@ void Schematic::blitToVManip(MMVManip *vm, v3s16 p, Rotation rot, bool force_pla
 			i_start  = zstride * (sz - 1);
 			i_step_x = -zstride;
 			i_step_z = xstride;
-			SWAP(s16, sx, sz);
+			std::swap(sx, sz);
 			break;
 		default:
 			i_start  = 0;
@@ -222,7 +223,6 @@ void Schematic::placeOnMap(ServerMap *map, v3s16 p, u32 flags,
 	Rotation rot, bool force_place)
 {
 	std::map<v3s16, MapBlock *> modified_blocks;
-	std::map<v3s16, MapBlock *>::iterator it;
 
 	assert(map != NULL);
 	assert(schemdata != NULL);

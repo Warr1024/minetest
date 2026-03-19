@@ -2,6 +2,59 @@
 -- away, but they can be garbage collected (due to __mode = "k").
 _G._bench_content_ids_data = setmetatable({}, {__mode = "k"})
 
+-- funcs is a table [name] = func of functions under test.
+-- benchmark is a function that takes a function under test and runs the benchmark on it.
+local function register_benchmark(name, benchmark, funcs)
+	core.register_chatcommand("bench_" .. name, {
+		description = "Benchmark: " .. name,
+		func = function(pname, param)
+			core.chat_send_player(pname, "Running benchmark: " .. name .. ", warming up...")
+			for _, func in pairs(funcs) do
+				benchmark(func)
+			end
+			core.chat_send_player(pname, "Warming up finished, now benchmarking...")
+			for fname, func in pairs(funcs) do
+				local t = core.get_us_time()
+				benchmark(func)
+				local dt_us = core.get_us_time() - t
+				core.chat_send_player(pname, ("%s took %.2f ms"):format(fname, dt_us / 1e3))
+			end
+			return true
+		end,
+	})
+end
+
+local function benchmark_table_copy(copy)
+	local v = {x = 1, y = 2, z = 3}
+	for _ = 1, 1e6 do
+		local w = copy(v)
+		assert(w.y == 2)
+	end
+end
+
+register_benchmark("table_copy_vecs", benchmark_table_copy, {
+	["no closures (builtin)"] = table.copy,
+	["with closures"] = function(value)
+		local seen = {}
+		local function copy(val)
+			if type(val) ~= "table" then
+				return val
+			end
+			local t = val
+			if seen[t] then
+				return seen[t]
+			end
+			local res = {}
+			seen[t] = res
+			for k, v in pairs(t) do
+				res[copy(k)] = copy(v)
+			end
+			return res
+		end
+		return copy(value)
+	end,
+})
+
 local function bench_name2content()
 	local t = {}
 	_G._bench_content_ids_data[t] = true
@@ -106,7 +159,7 @@ core.register_chatcommand("bench_bulk_set_node", {
 		core.chat_send_player(name, "Warming up finished, now benchmarking ...")
 
 		local start_time = core.get_us_time()
-		for i=1,#pos_list do
+		for i = 1, #pos_list do
 			core.set_node(pos_list[i], {name = "mapgen_stone"})
 		end
 		local middle_time = core.get_us_time()
@@ -116,6 +169,7 @@ core.register_chatcommand("bench_bulk_set_node", {
 			((middle_time - start_time)) / 1000,
 			((end_time - middle_time)) / 1000
 		)
+		print(msg)
 		return true, msg
 	end,
 })
@@ -129,16 +183,13 @@ core.register_chatcommand("bench_bulk_get_node", {
 			return false, "No player."
 		end
 		local pos_list = get_positions_cube(player:get_pos())
+		local dummy = 0
 		local function bench()
 			local start_time = core.get_us_time()
-			for i=1,#pos_list do
+			for i = 1, #pos_list do
 				local n = core.get_node(pos_list[i])
-				-- Make sure the name lookup is never optimized away.
-				-- Table allocation might still be omitted. But only accessing
-				-- the name of a node is a common pattern anyways.
-				if n.name == "benchmarks:nonexistent_node" then
-					error("should never happen")
-				end
+				-- Make sure the name lookup is not optimized away (can this even happen?)
+				dummy = dummy + #n.name
 			end
 			return core.get_us_time() - start_time
 		end
@@ -151,6 +202,115 @@ core.register_chatcommand("bench_bulk_get_node", {
 
 		local msg = string.format("Benchmark results: core.get_node loop 1: %.2f ms",
 				result_us / 1000)
+		print(msg)
+		return true, msg
+	end,
+})
+
+core.register_chatcommand("bench_bulk_get_node_raw", {
+	params = "",
+	description = "Benchmark: Bulk-get 99×99×99 nodes with raw API",
+	func = function(name, param)
+		local player = core.get_player_by_name(name)
+		if not player then
+			return false, "No player."
+		end
+		local pos_list = get_positions_cube(player:get_pos())
+		local dummy = 0
+		local function bench()
+			local start_time = core.get_us_time()
+			for i = 1, #pos_list do
+				local pos_i = pos_list[i]
+				local nid = core.get_node_raw(pos_i.x, pos_i.y, pos_i.z)
+				-- Make sure the result is not optimized away
+				dummy = dummy + nid
+			end
+			return core.get_us_time() - start_time
+		end
+
+		core.chat_send_player(name, "Benchmarking core.get_node_raw. Warming up ...")
+		bench()
+
+		core.chat_send_player(name, "Warming up finished, now benchmarking ...")
+		local result_us = bench()
+
+		local msg = string.format("Benchmark results: core.get_node_raw loop 1: %.2f ms",
+				result_us / 1000)
+		print(msg)
+		return true, msg
+	end,
+})
+
+core.register_chatcommand("bench_bulk_get_node_raw2", {
+	params = "",
+	description = "Benchmark: Bulk-get 99×99×99 nodes with raw API and lookup names",
+	func = function(name, param)
+		local player = core.get_player_by_name(name)
+		if not player then
+			return false, "No player."
+		end
+		local pos_list = get_positions_cube(player:get_pos())
+		local dummy = 0
+		local function bench()
+			local start_time = core.get_us_time()
+			for i = 1, #pos_list do
+				local pos_i = pos_list[i]
+				local nid = core.get_node_raw(pos_i.x, pos_i.y, pos_i.z)
+				local name = core.get_name_from_content_id(nid)
+				-- Make sure the name lookup is not optimized away
+				dummy = dummy + #name
+			end
+			return core.get_us_time() - start_time
+		end
+
+		core.chat_send_player(name, "Benchmarking core.get_node_raw+get_name_from_content_id. Warming up ...")
+		bench()
+
+		core.chat_send_player(name, "Warming up finished, now benchmarking ...")
+		local result_us = bench()
+
+		local msg = string.format("Benchmark results: core.get_node_raw+get_name_from_content_id loop 1: %.2f ms",
+				result_us / 1000)
+		print(msg)
+		return true, msg
+	end,
+})
+
+core.register_chatcommand("bench_bulk_get_node_vm", {
+	params = "",
+	description = "Benchmark: Bulk-get 99×99×99 nodes with voxel manipulator",
+	func = function(name, param)
+		local player = core.get_player_by_name(name)
+		if not player then
+			return false, "No player."
+		end
+		local pos = player:get_pos()
+		local dummy = 0
+		local function bench()
+			local start_time = core.get_us_time()
+			local vm = core.get_voxel_manip(pos:offset(1,1,1), pos:offset(100,100,100))
+			local data = vm:get_data()
+			local mid_time = core.get_us_time()
+			-- Note that the VManip will actually retrieve more than just the 100³ nodes
+			-- and also we don't need to iterate pos_list here, so it's not an entirely
+			-- fair comparison.
+			for i = 1, 99*99*99 do
+				local nid = data[i]
+				-- Make sure the table lookup is not optimized away
+				dummy = dummy + nid
+			end
+			return core.get_us_time() - start_time, mid_time - start_time
+		end
+
+		core.chat_send_player(name, "Benchmarking core.get_voxel_vmanip+get_data+loop . Warming up ...")
+		bench()
+
+		core.chat_send_player(name, "Warming up finished, now benchmarking ...")
+		local result_us, get_data_us = bench()
+
+		local msg = string.format("Benchmark results: core.get_voxel_vmanip+get_data+loop loop 1: %.2f ms of which get_data() %.2f ms",
+				result_us / 1000, get_data_us / 1000)
+		print(msg)
 		return true, msg
 	end,
 })
@@ -174,7 +334,7 @@ core.register_chatcommand("bench_bulk_swap_node", {
 		core.chat_send_player(name, "Warming up finished, now benchmarking ...")
 
 		local start_time = core.get_us_time()
-		for i=1,#pos_list do
+		for i = 1, #pos_list do
 			core.swap_node(pos_list[i], {name = "mapgen_stone"})
 		end
 		local middle_time = core.get_us_time()
@@ -184,6 +344,7 @@ core.register_chatcommand("bench_bulk_swap_node", {
 			((middle_time - start_time)) / 1000,
 			((end_time - middle_time)) / 1000
 		)
+		print(msg)
 		return true, msg
 	end,
 })

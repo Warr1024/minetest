@@ -6,24 +6,23 @@
 #include "CMeshBuffer.h"
 #include "client.h"
 #include "mapblock.h"
-#include "map.h"
-#include "noise.h"
-#include "profiler.h"
+#include "node_visuals.h"
+#include "porting.h"
 #include "shader.h"
 #include "mesh.h"
 #include "minimap.h"
 #include "content_mapblock.h"
-#include "util/directiontables.h"
 #include "util/tracy_wrapper.h"
 #include "client/meshgen/collector.h"
 #include "client/renderingengine.h"
 #include <array>
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 #include "client/texturesource.h"
 #include <SMesh.h>
 #include <IMeshBuffer.h>
-#include <SMeshBuffer.h>
+#include <CMeshBuffer.h>
 
 /*
 	MeshMakeData
@@ -49,15 +48,6 @@ void MeshMakeData::fillBlockDataBegin(const v3s16 &blockpos)
 	VoxelArea voxel_area(blockpos_nodes - v3s16(1,1,1) * MAP_BLOCKSIZE,
 			blockpos_nodes + v3s16(1,1,1) * (m_side_length + MAP_BLOCKSIZE) - v3s16(1,1,1));
 	m_vmanip.addArea(voxel_area);
-}
-
-void MeshMakeData::fillBlockData(const v3s16 &bp, MapNode *data)
-{
-	v3s16 data_size(MAP_BLOCKSIZE, MAP_BLOCKSIZE, MAP_BLOCKSIZE);
-	VoxelArea data_area(v3s16(0,0,0), data_size - v3s16(1,1,1));
-
-	v3s16 blockpos_nodes = bp * MAP_BLOCKSIZE;
-	m_vmanip.copyFrom(data, data_area, v3s16(0,0,0), blockpos_nodes, data_size);
 }
 
 void MeshMakeData::fillSingleNode(MapNode data, MapNode padding)
@@ -175,7 +165,7 @@ static u16 getSmoothLightCombined(const v3s16 &p,
 		if (f.light_source > light_source_max)
 			light_source_max = f.light_source;
 		// Check f.solidness because fast-style leaves look better this way
-		if (f.param_type == CPT_LIGHT && f.solidness != 2) {
+		if (f.param_type == CPT_LIGHT && f.visuals->solidness != 2) {
 			u8 light_level_day = n.getLight(LIGHTBANK_DAY, f.getLightingFlags());
 			u8 light_level_night = n.getLight(LIGHTBANK_NIGHT, f.getLightingFlags());
 			if (light_level_day == LIGHT_SUN)
@@ -325,7 +315,7 @@ void final_color_blend(video::SColor *result,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	};
 
-	b += emphase_blue_when_dark[irr::core::clamp((s32) ((r + g + b) / 3 * 255),
+	b += emphase_blue_when_dark[core::clamp((s32) ((r + g + b) / 3 * 255),
 		0, 255) / 8] / 255.0f;
 
 	result->setRed(core::clamp((s32) (r * 255.0f), 0, 255));
@@ -344,13 +334,13 @@ void getNodeTileN(MapNode mn, const v3s16 &p, u8 tileindex, MeshMakeData *data, 
 {
 	const NodeDefManager *ndef = data->m_nodedef;
 	const ContentFeatures &f = ndef->get(mn);
-	tile = f.tiles[tileindex];
+	tile = f.visuals->tiles[tileindex];
 	bool has_crack = p == data->m_crack_pos_relative;
 	for (TileLayer &layer : tile.layers) {
-		if (layer.texture_id == 0)
+		if (layer.empty())
 			continue;
 		if (!layer.has_color)
-			mn.getColor(f, &(layer.color));
+			f.visuals->getColor(mn.param2, &(layer.color));
 		// Apply temporary crack
 		if (has_crack)
 			layer.material_flags |= MATERIAL_FLAG_CRACK;
@@ -424,20 +414,6 @@ void getNodeTile(MapNode mn, const v3s16 &p, const v3s16 &dir, MeshMakeData *dat
 	};
 	getNodeTileN(mn, p, dir_to_tile[facedir][dir_i].tile, data, tile);
 	tile.rotation = tile.world_aligned ? TileRotation::None : dir_to_tile[facedir][dir_i].rotation;
-}
-
-static void applyTileColor(PreMeshBuffer &pmb)
-{
-	video::SColor tc = pmb.layer.color;
-	if (tc == video::SColor(0xFFFFFFFF))
-		return;
-	for (video::S3DVertex &vertex : pmb.vertices) {
-		video::SColor *c = &vertex.Color;
-		c->set(c->getAlpha(),
-			c->getRed() * tc.getRed() / 255,
-			c->getGreen() * tc.getGreen() / 255,
-			c->getBlue() * tc.getBlue() / 255);
-	}
 }
 
 /*
@@ -611,6 +587,47 @@ void PartialMeshBuffer::draw(video::IVideoDriver *driver) const
 	MapBlockMesh
 */
 
+static void applyColorAndMerge(std::vector<PreMeshBuffer> &prebuffers)
+{
+	// TODO: we should change the meshgen so it already applies the tile color
+	// so that we don't need to this extra step.
+	// However currently the CAO code relies on the ability to erase the vertex
+	// colors (light data) before applying the tile colors.
+
+	for (auto &p : prebuffers) {
+		// bake color into vertices
+		p.applyTileColor();
+		// erase color information for later comparisons
+		p.layer.has_color = false;
+		p.layer.color = 0;
+	}
+
+	std::unordered_map<TileLayer, size_t> seen;
+	for (size_t i = 0; i < prebuffers.size(); i++) {
+		PreMeshBuffer &p = prebuffers[i];
+		auto it = seen.find(p.layer);
+		if (it == seen.end()) { // first time
+			seen[p.layer] = i;
+			continue;
+		}
+		// merge
+		auto &dst = prebuffers[it->second];
+		assert(p.layer == dst.layer);
+		if (dst.append(p)) {
+			p = PreMeshBuffer();
+		} else {
+			// other buffer full, this one becomes the new target
+			it->second = i;
+		}
+	}
+
+	// remove all empty buffers
+	prebuffers.erase(std::remove_if(prebuffers.begin(), prebuffers.end(),
+		[] (const PreMeshBuffer &p) {
+		return p.empty();
+	}), prebuffers.end());
+}
+
 MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data):
 	m_tsrc(client->getTextureSource()),
 	m_shdrsrc(client->getShaderSource()),
@@ -640,7 +657,7 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data):
 			if (data->m_vmanip.getNodeNoEx(p).getContent() != CONTENT_IGNORE) {
 				MinimapMapblock *block = new MinimapMapblock;
 				m_minimap_mapblocks[mesh_grid.getOffsetIndex(ofs)] = block;
-				block->getMinimapNodes(&data->m_vmanip, p);
+				block->getMinimapNodes(&data->m_vmanip, data->m_nodedef, p);
 			}
 		}
 	}
@@ -664,67 +681,44 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data):
 	for (int layer = 0; layer < MAX_TILE_LAYERS; layer++) {
 		scene::SMesh *mesh = static_cast<scene::SMesh *>(m_mesh[layer].get());
 
-		for(u32 i = 0; i < collector.prebuffers[layer].size(); i++)
-		{
-			PreMeshBuffer &p = collector.prebuffers[layer][i];
+		applyColorAndMerge(collector.prebuffers[layer]);
 
-			applyTileColor(p);
+		for (size_t i = 0; i < collector.prebuffers[layer].size(); i++) {
+			PreMeshBuffer &p = collector.prebuffers[layer][i];
+			// Note that the buffer index matters, so 'continue' is forbidden here.
+			assert(!p.empty());
 
 			// Generate animation data
-			// - Cracks
-			if (p.layer.material_flags & MATERIAL_FLAG_CRACK) {
-				// Find the texture name plus ^[crack:N:
-				std::ostringstream os(std::ios::binary);
-				os << m_tsrc->getTextureName(p.layer.texture_id) << "^[crack";
-				if (p.layer.material_flags & MATERIAL_FLAG_CRACK_OVERLAY)
-					os << "o";  // use ^[cracko
-				u8 tiles = p.layer.scale;
-				if (tiles > 1)
-					os << ":" << (u32)tiles;
-				os << ":" << (u32)p.layer.animation_frame_count << ":";
-				m_crack_materials.insert(std::make_pair(
-						std::pair<u8, u32>(layer, i), os.str()));
-				// Replace tile texture with the cracked one
-				p.layer.texture = m_tsrc->getTextureForMesh(
-						os.str() + "0",
-						&p.layer.texture_id);
-			}
-			// - Texture animation
 			if (p.layer.material_flags & MATERIAL_FLAG_ANIMATION) {
 				// Add to MapBlockMesh in order to animate these tiles
-				auto &info = m_animation_info[{layer, i}];
-				info.tile = p.layer;
-				info.frame = 0;
-				// Replace tile texture with the first animation frame
-				p.layer.texture = (*p.layer.frames)[0].texture;
+				m_animation_info.emplace(std::make_pair(layer, i), AnimationInfo(p.layer));
 			}
 
 			// Create material
 			video::SMaterial material;
-			material.BackfaceCulling = true;
 			material.FogEnable = true;
-			material.setTexture(0, p.layer.texture);
 			material.forEachTexture([] (auto &tex) {
 				tex.MinFilter = video::ETMINF_NEAREST_MIPMAP_NEAREST;
 				tex.MagFilter = video::ETMAGF_NEAREST;
 			});
-			/*
-			 * The second layer is for overlays, but uses the same vertex positions
-			 * as the first, which quickly leads to z-fighting.
-			 * To fix this we can offset the polygons in the direction of the camera.
-			 * This only affects the depth buffer and leads to no visual gaps in geometry.
-			 */
-			if (layer == 1) {
-				material.PolygonOffsetSlopeScale = -1;
-				material.PolygonOffsetDepthBias = -1;
-			}
 
 			{
 				material.MaterialType = m_shdrsrc->getShaderInfo(
 						p.layer.shader_id).material;
-				p.layer.applyMaterialOptionsWithShaders(material);
+				p.layer.applyMaterialOptions(material, layer);
 			}
 
+			// Handle crack
+			if (p.layer.material_flags & MATERIAL_FLAG_CRACK) {
+				auto *t = m_tsrc->getTextureForMesh("crack_anylength.png");
+				material.setTexture(TEXTURE_LAYER_CRACK, t);
+				material.MaterialTypeParam =
+					packCrackMaterialParam(-1, MYMAX(1, p.layer.scale));
+
+				m_crack_materials.emplace_back(layer, i);
+			}
+
+			// Add to buffer
 			scene::SMeshBuffer *buf = new scene::SMeshBuffer();
 			buf->Material = material;
 			if (p.layer.isTransparent()) {
@@ -788,26 +782,14 @@ bool MapBlockMesh::animate(bool faraway, float time, int crack,
 
 	// Cracks
 	if (crack != m_last_crack) {
-		for (auto &crack_material : m_crack_materials) {
-			scene::IMeshBuffer *buf = m_mesh[crack_material.first.first]->
-				getMeshBuffer(crack_material.first.second);
+		for (auto &it : m_crack_materials) {
+			scene::IMeshBuffer *buf = m_mesh[it.first]->getMeshBuffer(it.second);
+			assert(buf);
+			video::SMaterial &mat = buf->getMaterial();
 
-			// Create new texture name from original
-			std::string s = crack_material.second + itos(crack);
-			u32 new_texture_id = 0;
-			video::ITexture *new_texture =
-					m_tsrc->getTextureForMesh(s, &new_texture_id);
-			buf->getMaterial().setTexture(0, new_texture);
-
-			// If the current material is also animated, update animation info
-			auto anim_it = m_animation_info.find(crack_material.first);
-			if (anim_it != m_animation_info.end()) {
-				TileLayer &tile = anim_it->second.tile;
-				tile.texture = new_texture;
-				tile.texture_id = new_texture_id;
-				// force animation update
-				anim_it->second.frame = -1;
-			}
+			auto pair = unpackCrackMaterialParam(mat.MaterialTypeParam);
+			pair.first = crack;
+			mat.MaterialTypeParam = packCrackMaterialParam(pair.first, pair.second);
 		}
 
 		m_last_crack = crack;
@@ -815,20 +797,10 @@ bool MapBlockMesh::animate(bool faraway, float time, int crack,
 
 	// Texture animation
 	for (auto &it : m_animation_info) {
-		const TileLayer &tile = it.second.tile;
-		// Figure out current frame
-		int frameno = (int)(time * 1000 / tile.animation_frame_length_ms) %
-			tile.animation_frame_count;
-		// If frame doesn't change, skip
-		if (frameno == it.second.frame)
-			continue;
-
-		it.second.frame = frameno;
-
 		scene::IMeshBuffer *buf = m_mesh[it.first.first]->getMeshBuffer(it.first.second);
-
-		const FrameSpec &frame = (*tile.frames)[frameno];
-		buf->getMaterial().setTexture(0, frame.texture);
+		assert(buf);
+		video::SMaterial &material = buf->getMaterial();
+		it.second.updateTexture(material, time);
 	}
 
 	return true;
@@ -983,7 +955,7 @@ u8 get_solid_sides(MeshMakeData *data)
 
 		for (u8 k = 0; k < 6; k++) {
 			const MapNode &top = data->m_vmanip.getNodeRefUnsafe(blockpos_nodes + positions[k]);
-			if (ndef->get(top).solidness != 2)
+			if (ndef->get(top).visuals->solidness != 2)
 				result &= ~(1 << k);
 		}
 	}

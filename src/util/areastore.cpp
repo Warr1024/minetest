@@ -92,7 +92,7 @@ void AreaStore::deserialize(std::istream &is)
 		areas.emplace_back(std::move(a));
 	}
 
-	bool read_ids = is.good(); // EOF for old formats
+	const bool read_ids = canRead(is); // since 5.1.0-dev
 
 	for (auto &area : areas) {
 		if (read_ids)
@@ -178,8 +178,7 @@ bool VectorAreaStore::insertArea(Area *a)
 {
 	if (a->id == U32_MAX)
 		a->id = getNextId();
-	std::pair<AreaMap::iterator, bool> res =
-			areas_map.insert(std::make_pair(a->id, *a));
+	auto res = areas_map.emplace(a->id, *a);
 	if (!res.second)
 		// ID is not unique
 		return false;
@@ -194,7 +193,7 @@ bool VectorAreaStore::removeArea(u32 id)
 	if (it == areas_map.end())
 		return false;
 	Area *a = &it->second;
-	for (std::vector<Area *>::iterator v_it = m_areas.begin();
+	for (auto v_it = m_areas.begin();
 			v_it != m_areas.end(); ++v_it) {
 		if (*v_it == a) {
 			m_areas.erase(v_it);
@@ -249,7 +248,7 @@ bool SpatialAreaStore::insertArea(Area *a)
 {
 	if (a->id == U32_MAX)
 		a->id = getNextId();
-	if (!areas_map.insert(std::make_pair(a->id, *a)).second)
+	if (!areas_map.emplace(a->id, *a).second)
 		// ID is not unique
 		return false;
 	m_tree->insertData(0, nullptr, get_spatial_region(a->minedge, a->maxedge), a->id);
@@ -259,7 +258,7 @@ bool SpatialAreaStore::insertArea(Area *a)
 
 bool SpatialAreaStore::removeArea(u32 id)
 {
-	std::map<u32, Area>::iterator itr = areas_map.find(id);
+	auto itr = areas_map.find(id);
 	if (itr != areas_map.end()) {
 		Area *a = &itr->second;
 		bool result = m_tree->deleteData(get_spatial_region(a->minedge,

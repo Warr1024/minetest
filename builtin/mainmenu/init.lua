@@ -1,27 +1,6 @@
---Luanti
---Copyright (C) 2014 sapier
---
---This program is free software; you can redistribute it and/or modify
---it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
---(at your option) any later version.
---
---This program is distributed in the hope that it will be useful,
---but WITHOUT ANY WARRANTY; without even the implied warranty of
---MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
---GNU Lesser General Public License for more details.
---
---You should have received a copy of the GNU Lesser General Public License along
---with this program; if not, write to the Free Software Foundation, Inc.,
---51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-mt_color_grey  = "#AAAAAA"
-mt_color_blue  = "#6389FF"
-mt_color_lightblue  = "#99CCFF"
-mt_color_green = "#72FF63"
-mt_color_dark_green = "#25C191"
-mt_color_orange  = "#FF8800"
-mt_color_red = "#FF3300"
+-- Luanti
+-- Copyright (C) 2014 sapier
+-- SPDX-License-Identifier: LGPL-2.1-or-later
 
 MAIN_TAB_W = 15.5
 MAIN_TAB_H = 7.1
@@ -35,6 +14,7 @@ local basepath = core.get_builtin_path()
 defaulttexturedir = core.get_texturepath_share() .. DIR_DELIM .. "base" ..
 					DIR_DELIM .. "pack" .. DIR_DELIM
 
+dofile(basepath .. "common" .. DIR_DELIM .. "menu.lua")
 dofile(basepath .. "common" .. DIR_DELIM .. "filterlist.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "buttonbar.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "dialog.lua")
@@ -48,6 +28,7 @@ dofile(menupath .. DIR_DELIM .. "content" .. DIR_DELIM .. "init.lua")
 
 dofile(menupath .. DIR_DELIM .. "dlg_config_world.lua")
 dofile(basepath .. "common" .. DIR_DELIM .. "settings" .. DIR_DELIM .. "init.lua")
+dofile(menupath .. DIR_DELIM .. "dlg_confirm_exit.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_create_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_content.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
@@ -55,6 +36,7 @@ dofile(menupath .. DIR_DELIM .. "dlg_register.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_version_info.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_reinstall_mtg.lua")
+dofile(menupath .. DIR_DELIM .. "dlg_rebind_keys.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_clients_list.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_server_list_mods.lua")
 
@@ -65,16 +47,33 @@ local tabs = {
 	play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua")
 }
 
---------------------------------------------------------------------------------
 local function main_event_handler(tabview, event)
 	if event == "MenuQuit" then
-		core.close()
+		local show_dialog = core.settings:get_bool("enable_esc_dialog")
+		if not ui.childlist["mainmenu_quit_confirm"] and show_dialog then
+			tabview:hide()
+			local dlg = create_exit_dialog()
+			dlg:set_parent(tabview)
+			dlg:show()
+		else
+			core.close()
+		end
+		return true
 	end
 	return true
 end
 
---------------------------------------------------------------------------------
 local function init_globals()
+	-- Permanent warning if on an unoptimized debug build
+	if core.is_debug_build() then
+		local set_topleft_text = core.set_topleft_text
+		core.set_topleft_text = function(s)
+			s = (s or "") .. "\n"
+			s = s .. core.colorize("#f22", core.gettext("Debug build, expect worse performance"))
+			set_topleft_text(s)
+		end
+	end
+
 	-- Init gamedata
 	gamedata.worldindex = 0
 
@@ -87,7 +86,17 @@ local function init_globals()
 		end,
 		-- Filter function
 		function(element, gameid)
-			return element.gameid == gameid
+			-- Keep in sync with the logic in pkgmgr.find_by_gameid
+			local el_gameid = pkgmgr.normalize_game_id(element.gameid)
+			if el_gameid == gameid then
+				return true
+			end
+			local game = pkgmgr.find_by_gameid(el_gameid)
+			if (not game or game.id ~= el_gameid)
+					and pkgmgr.find_by_gameid(gameid).aliases[el_gameid] then
+				return true
+			end
+			return false
 		end
 	)
 
@@ -131,7 +140,12 @@ local function init_globals()
 	tv_main:show()
 	ui.update()
 
-	check_reinstall_mtg()
+	-- synchronous, chain parents to only show one at a time
+	local parent = tv_main
+	parent = migrate_keybindings(parent)
+	check_reinstall_mtg(parent)
+
+	-- asynchronous, will only be shown if we're still on "maintab"
 	check_new_version()
 end
 

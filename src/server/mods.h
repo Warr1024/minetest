@@ -5,7 +5,6 @@
 #pragma once
 
 #include "content/mod_configuration.h"
-#include <memory>
 
 class ServerScripting;
 
@@ -21,10 +20,11 @@ class ServerModManager
 public:
 
 	/**
-	 * Creates a ServerModManager which targets worldpath
-	 * @param worldpath
+	 * Creates a ServerModManager
+	 * @param worldpath path to world
+	 * @param gamespec game used by the world
 	 */
-	ServerModManager(const std::string &worldpath);
+	ServerModManager(const std::string &worldpath, SubgameSpec gamespec);
 
 	/**
 	 * Creates an empty ServerModManager. For testing purposes.

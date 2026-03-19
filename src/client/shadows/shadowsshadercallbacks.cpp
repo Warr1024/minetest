@@ -5,7 +5,7 @@
 #include "client/shadows/shadowsshadercallbacks.h"
 #include "client/renderingengine.h"
 
-void ShadowConstantSetter::onSetConstants(video::IMaterialRendererServices *services)
+void ShadowUniformSetter::onSetUniforms(video::IMaterialRendererServices *services)
 {
 	auto *shadow = RenderingEngine::get_shadow_renderer();
 	if (!shadow)
@@ -52,10 +52,9 @@ void ShadowConstantSetter::onSetConstants(video::IMaterialRendererServices *serv
 	m_perspective_zbias_pixel.set(&zbias, services);
 }
 
-void ShadowDepthShaderCB::OnSetConstants(
-		video::IMaterialRendererServices *services, s32 userData)
+void ShadowDepthUniformSetter::onSetUniforms(video::IMaterialRendererServices *services)
 {
-	video::IVideoDriver *driver = services->getVideoDriver();
+	auto *driver = services->getVideoDriver();
 
 	core::matrix4 lightMVP = driver->getTransform(video::ETS_PROJECTION);
 	lightMVP *= driver->getTransform(video::ETS_VIEW);

@@ -14,9 +14,6 @@
 #include "SB3DStructs.h"
 #include "IReadFile.h"
 
-namespace irr
-{
-
 namespace scene
 {
 
@@ -63,7 +60,7 @@ private:
 
 	core::array<video::S3DVertex2TCoords> BaseVertices;
 
-	SkinnedMeshBuilder *AnimatedMesh;
+	SkinnedMeshBuilder AnimatedMesh;
 	io::IReadFile *B3DFile;
 
 	// B3Ds have Vertex ID's local within the mesh I don't want this
@@ -76,4 +73,3 @@ private:
 };
 
 } // end namespace scene
-} // end namespace irr

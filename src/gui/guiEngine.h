@@ -9,10 +9,14 @@
 /******************************************************************************/
 #include "irrlichttypes.h"
 #include "guiFormSpecMenu.h"
+#include "statusTextHelper.h"
 #include "client/clouds.h"
 #include "client/sound.h"
 #include "util/enriched_string.h"
 #include "translation.h"
+
+#include <csignal>
+#include <memory>
 
 /******************************************************************************/
 /* Structs and macros                                                         */
@@ -38,7 +42,6 @@ struct image_definition {
 class GUIEngine;
 class RenderingEngine;
 class MainMenuScripting;
-class IWritableShaderSource;
 struct MainMenuData;
 
 /******************************************************************************/
@@ -62,10 +65,9 @@ public:
 	void gotText(const StringMap &fields);
 
 	/**
-	 * receive text/events transmitted by guiFormSpecMenu
-	 * @param text textual representation of event
+	 * Request a screenshot from the main menu
 	 */
-	void gotText(const std::wstring &text);
+	void requestScreenshot();
 
 private:
 	/** target to transmit data to */
@@ -130,7 +132,7 @@ public:
 			RenderingEngine *rendering_engine,
 			IMenuManager *menumgr,
 			MainMenuData *data,
-			bool &kill);
+			volatile std::sig_atomic_t &kill);
 
 	/** default destructor */
 	virtual ~GUIEngine();
@@ -149,6 +151,14 @@ public:
 	std::string getScriptDir()
 	{
 		return m_scriptdir;
+	}
+
+	/**
+	 * Request taking a screenshot on the next frame
+	 */
+	void requestScreenshot()
+	{
+		m_take_screenshot = true;
 	}
 
 	/**
@@ -199,10 +209,13 @@ private:
 	irr_ptr<GUIFormSpecMenu>              m_menu;
 
 	/** reference to kill variable managed by SIGINT handler */
-	bool                                 &m_kill;
+	volatile std::sig_atomic_t           &m_kill;
 
 	/** variable used to abort menu and return back to main game handling */
 	bool                                  m_startgame = false;
+
+	/** flag to take a screenshot on next frame */
+	bool                                  m_take_screenshot = false;
 
 	/** scripting interface */
 	std::unique_ptr<MainMenuScripting>    m_script;
@@ -258,15 +271,21 @@ private:
 	void setTopleftText(const std::string &text);
 
 	/** pointer to gui element shown at topleft corner */
-	irr::gui::IGUIStaticText *m_irr_toplefttext = nullptr;
+	gui::IGUIStaticText *m_irr_toplefttext = nullptr;
 	/** and text that is in it */
 	EnrichedString m_toplefttext;
+
+	/** status message element for menu notifications */
+	std::unique_ptr<StatusTextHelper> m_status_text;
 
 	/** do preprocessing for cloud subsystem */
 	void drawClouds(float dtime);
 
 	/** is drawing of clouds enabled atm */
 	bool m_clouds_enabled = true;
+
+	void setMenuCloudsColor(video::SColor color);
+	void setMenuSkyColor(video::SColor color);
 
 	static void fullscreenChangedCallback(const std::string &name, void *data);
 };

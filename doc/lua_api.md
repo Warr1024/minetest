@@ -5,9 +5,12 @@ Luanti Lua Modding API Reference
 it's now called `core` due to the renaming of Luanti (formerly Minetest).
 `minetest` will keep existing as an alias, so that old code won't break.
 
+Note that `core` has already existed since version 0.4.10, so you can use it
+safely without breaking backwards compatibility.
+
 * More information at <http://www.luanti.org/>
-* Developer Wiki: <https://dev.luanti.org/>
-* (Unofficial) Minetest Modding Book by rubenwardy: <https://rubenwardy.com/minetest_modding_book/>
+* Additional documentation: <https://docs.luanti.org/>
+* (Unofficial) Luanti Modding Book by rubenwardy: <https://rubenwardy.com/minetest_modding_book/>
 * Modding tools: <https://github.com/luanti-org/modtools>
 
 Introduction
@@ -81,6 +84,9 @@ The game directory can contain the following files:
       When both `allowed_mapgens` and `disallowed_mapgens` are
       specified, `allowed_mapgens` is applied before
       `disallowed_mapgens`.
+    * `default_mapgen`
+      e.g. `default_mapgen = valleys`
+      Set default mapgen for game, this will be the default selection when creating a new world.
     * `disallowed_mapgen_settings= <comma-separated mapgen settings>`
       e.g. `disallowed_mapgen_settings = mgv5_spflags`
       These mapgen settings are hidden for this game in the world creation
@@ -100,15 +106,27 @@ The game directory can contain the following files:
                  an internal ID used to track versions.
     * `textdomain`: Textdomain used to translate description. Defaults to game id.
       See [Translating content meta](#translating-content-meta).
+    * `aliases = <comma-separated gameid aliases>`
+      e.g. `aliases = foo, bar` (where "foo" and "bar" are the legacy names)
+      This allows automatic loading of worlds using a gameid from this list.
+      This is intended to allow a full rename of a game, including its id.
 * `minetest.conf`:
   Used to set default settings when running this game.
+* `screenshot.{png,jpg,jpeg}`:
+  Preview image, shown in the main menu.
 * `settingtypes.txt`:
   In the same format as the one in builtin.
   This settingtypes.txt will be parsed by the menu and the settings will be
   displayed in the "Games" category in the advanced settings tab.
-* If the game contains a folder called `textures` the server will load it as a
-  texturepack, overriding mod textures.
-  Any server texturepack will override mod textures and the game texturepack.
+
+And the following directories:
+
+* `menu`:
+  Files related to the main menu, see chapter [Menu images](#menu-images).
+* `mods`:
+  Mods provided by the game.
+* `textures`:
+  See also chapter [Textures](#loading-order).
 
 Menu images
 -----------
@@ -139,7 +157,7 @@ Mods
 Mod load path
 -------------
 
-Paths are relative to the directories listed in the [Paths] section above.
+Paths are relative to the directories listed in the [Paths](#paths) section above.
 
 * `games/<gameid>/mods/`
 * `mods/`
@@ -173,8 +191,6 @@ The file is a key-value store of modpack details.
              internal ID used to track versions.
 * `textdomain`: Textdomain used to translate title and description. Defaults to modpack name.
   See [Translating content meta](#translating-content-meta).
-
-Note: to support 0.4.x, please also create an empty modpack.txt file.
 
 Mod directory structure
 -----------------------
@@ -224,7 +240,7 @@ A `Settings` file that provides meta information about the mod.
 * `textdomain`: Textdomain used to translate title and description. Defaults to modname.
   See [Translating content meta](#translating-content-meta).
 
-### `screenshot.png`
+### `screenshot.{png,jpg,jpeg}`
 
 A screenshot shown in the mod manager within the main menu. It should
 have an aspect ratio of 3:2 and a minimum size of 300×200 pixels.
@@ -258,7 +274,7 @@ It is parsed by the main menu settings dialogue to list mod-specific
 settings in the "Mods" category.
 
 `core.settings` can be used to read custom or engine settings.
-See [`Settings`].
+See [Settings](#settings).
 
 ### `init.lua`
 
@@ -270,7 +286,7 @@ registered callbacks.
 
 Media files (textures, sounds, whatever) that will be transferred to the
 client and will be available for use by the mod and translation files for
-the clients (see [Translations]). Accepted characters for names are:
+the clients (see [Translations](#translations)). Accepted characters for names are:
 
     a-zA-Z0-9_.-
 
@@ -280,6 +296,9 @@ Accepted formats are:
     sounds: .ogg vorbis
     models: .x, .b3d, .obj, (since version 5.10:) .gltf, .glb
     fonts: .ttf, .woff (both since version 5.11, see notes below)
+
+Currently the engine is unable to handle files over ~16MB in size. For best
+performance you should keep your media files as small as reasonably possible.
 
 Other formats won't be sent to the client (e.g. you can store .blend files
 in a folder for convenience, without the risk that such files are transferred)
@@ -303,14 +322,13 @@ The .x, .b3d and .gltf formats additionally support (a single) animation.
 
 #### glTF
 
-The glTF model file format for now only serves as a
-more modern alternative to the other static model file formats;
-it unlocks no special rendering features.
-
 Binary glTF (`.glb`) files are supported and recommended over `.gltf` files
 due to their space savings.
 
 Bone weights should be normalized, e.g. using ["normalize all" in Blender](https://docs.blender.org/manual/en/4.2/grease_pencil/modes/weight_paint/weights_menu.html#normalize-all).
+
+Note that nodes using matrix transforms must not be animated.
+This also extends to bone overrides, which must not be applied to them.
 
 You can use the [Khronos glTF validator](https://github.com/KhronosGroup/glTF-Validator)
 to check whether a model is a valid glTF file.
@@ -352,6 +370,10 @@ The former is supported primarily for convenience. The latter is preferred due t
 In the future, having multiple custom fonts and the ability to switch between them is planned,
 but for now this feature is limited to the ability to override Luanti's default fonts via mods.
 It is recommended that this only be used by game mods to set a look and feel.
+
+Warning: Currently the Luanti client does not support reading kerning information
+from the OpenType `GPOS` table, but only the older `kern` table. This can cause
+modern fonts not to render correctly in Luanti.
 
 The stems (file names without extension) are self-explanatory:
 
@@ -505,6 +527,8 @@ By default the world is filled with air nodes. To set a different node use e.g.:
 Textures
 ========
 
+## Introduction
+
 Mods should generally prefix their textures with `modname_`, e.g. given
 the mod name `foomod`, a texture could be called:
 
@@ -517,6 +541,32 @@ stripping out the file extension:
 * e.g. `foomod_foothing`
 
 Supported texture formats are PNG (`.png`), JPEG (`.jpg`) and Targa (`.tga`).
+
+Luanti generally uses nearest-neighbor upscaling for textures to preserve the crisp
+look of pixel art (low-res textures).
+Users can optionally enable bilinear and/or trilinear filtering. However, to avoid
+everything becoming blurry, textures smaller than 192px will either not be filtered,
+or will be upscaled to that minimum resolution first without filtering.
+
+This is subject to change to move more control to the Lua API, but you can rely on
+low-res textures not suddenly becoming filtered.
+
+
+## Loading order
+
+Texture names are looked up in the following order. Top has the lowest priority.
+
+* Client: `$path_share/textures/base/pack`
+* Server: mod-provided textures, in their `textures` directory
+* Server: game textures, in `<game path>/textures`
+* Server: `$path_share/textures/server`
+* Server: `override.txt` in the path specified by the setting `texture_path`
+* Server: `override.txt` in `<game path>/textures`
+* Client: path specified by the setting `texture_path`
+* Client: `override.txt` in the path specified by the setting `texture_path`
+
+For details on texture packs, see [texture_packs.md](texture_packs.md).
+
 
 Texture modifiers
 -----------------
@@ -580,11 +630,11 @@ on top of `cobble.png`.
 
 Parameters:
 
-* `<t>`: tile count (in each direction)
-* `<n>`: animation frame count
-* `<p>`: current animation frame
+* `<t>`: draws a grid of `<t> * <t>` cracks onto each frame (default: `1`)
+* `<n>`: vertical count of frames of the base texture (often `1`)
+* `<p>`: crack animation frame (0-indexed)
 
-Draw a step of the crack animation on the texture.
+Draws a step of the crack animation on the texture.
 `crack` draws it normally, while `cracko` lays it over, keeping transparent
 pixels intact.
 
@@ -1278,8 +1328,8 @@ These sound-groups are played back by the engine if provided.
 Registered definitions
 ======================
 
-Anything added using certain [Registration functions] gets added to one or more
-of the global [Registered definition tables].
+Anything added using certain [Registration functions](#registration-functions) gets added to one or more
+of the global [Registered definition tables](#registered-definition-tables)
 
 Note that in some cases you will stumble upon things that are not contained
 in these tables (e.g. when a mod has been removed). Always check for
@@ -1312,7 +1362,7 @@ The definition of a node is stored and can be accessed by using
 core.registered_nodes[node.name]
 ```
 
-See [Registered definitions].
+See [Node definition](#node-definition)
 
 Nodes are passed by value between Lua and the engine.
 They are represented by a table:
@@ -1477,7 +1527,7 @@ The function of `param2` is determined by `paramtype2` in node definition.
     * `param2` will not be used by the engine and can be used to store
       an arbitrary value
 
-Nodes can also contain extra data. See [Node Metadata].
+Nodes can also contain extra data. See [Node Metadata](#node-metadata)
 
 Node drawtypes
 --------------
@@ -1522,7 +1572,7 @@ There are a bunch of different looking node types.
 * `allfaces`
     * Often used for partially-transparent nodes.
     * External sides of textures, and unlike other drawtypes, the external sides
-      of other blocks, are visible from the inside.
+      of other nodes, are visible from the inside.
 * `allfaces_optional`
     * Often used for leaves nodes.
     * This switches between `normal`, `glasslike` and `allfaces` according to
@@ -1569,7 +1619,7 @@ There are a bunch of different looking node types.
 * `nodebox`
     * Often used for stairs and slabs.
     * Allows defining nodes consisting of an arbitrary number of boxes.
-    * See [Node boxes] below for more information.
+    * See [Node boxes](#node-boxes) below for more information.
 * `mesh`
     * Uses models for nodes.
     * Tiles should hold model materials textures.
@@ -1596,7 +1646,8 @@ There are a bunch of different looking node types.
 Node boxes
 ----------
 
-Node selection boxes are defined using "node boxes".
+Node selection boxes and collision boxes, and the appearance of the `nodebox`
+drawtype, are defined using "node boxes".
 
 A nodebox is defined as any of:
 
@@ -1681,7 +1732,9 @@ roughly 1x1x1 meters in size.
 
 A 'mapblock' (often abbreviated to 'block') is 16x16x16 nodes and is the
 fundamental region of a world that is stored in the world database, sent to
-clients and handled by many parts of the engine.
+clients and handled by many parts of the engine. This size is available as the
+constant `core.MAP_BLOCKSIZE` (=16).
+
 'mapblock' is preferred terminology to 'block' to help avoid confusion with
 'node', however 'block' often appears in the API.
 
@@ -1689,6 +1742,38 @@ A 'mapchunk' (sometimes abbreviated to 'chunk') is usually 5x5x5 mapblocks
 (80x80x80 nodes) and is the volume of world generated in one operation by
 the map generator.
 The size in mapblocks has been chosen to optimize map generation.
+
+### Mapblock status
+
+A mapblock being "loaded" means that is in memory. These are the mapblocks that
+API functions like `core.get_node` or `core.set_node` can operate on. To reach
+this state, the mapblock must first go through the process of being "emerged".
+This means that it is loaded from disk, and/or, if it isn't yet generated,
+generated by the map generator.
+
+Mapblocks are loaded in a broad area around each player. They become "unloaded"
+again if no player is close enough. The engine commonly represents the contents
+of unloaded mapblocks as `"ignore"` nodes.
+
+A mapblock being "active" means that it is not only in memory, but also affected
+by world simulation:
+
+* Entities are active
+    * They are in memory as `ServerActiveObject`, exposed to Lua as `ObjectRef`
+    * They exist in Lua as luaentity tables
+* ABMs are executed
+* Node timers are executed
+
+Also, when a mapblock is "activated", LBMs are executed. Mapblocks are active
+in a smaller area around each player, and are "deactivated" again if no player
+is close enough.
+
+Related API functions:
+
+* `core.compare_block_status`
+* `core.forceload_block`
+* `core.load_area`
+* `core.emerge_area`
 
 Coordinates
 -----------
@@ -1713,7 +1798,7 @@ node position (0,0,0) to node position (15,15,15).
 To calculate the blockpos of the mapblock that contains the node at 'nodepos',
 for each axis:
 
-* blockpos = math.floor(nodepos / 16)
+* blockpos = math.floor(nodepos / core.MAP_BLOCKSIZE)
 
 #### Converting blockpos to min/max node positions
 
@@ -1721,9 +1806,9 @@ To calculate the min/max node positions contained in the mapblock at 'blockpos',
 for each axis:
 
 * Minimum:
-  nodepos = blockpos * 16
+  nodepos = blockpos * core.MAP_BLOCKSIZE
 * Maximum:
-  nodepos = blockpos * 16 + 15
+  nodepos = (blockpos + 1) * core.MAP_BLOCKSIZE - 1
 
 
 
@@ -1801,12 +1886,17 @@ Displays text on the HUD.
 * `text`: The text to be displayed in the HUD element.
   Supports `core.translate` (always)
   and `core.colorize` (since protocol version 44)
-* `number`: An integer containing the RGB value of the color used to draw the
-  text. Specify `0xFFFFFF` for white text, `0xFF0000` for red, and so on.
+* `number`: An integer containing the (A)RGB value of the color used to draw the
+  text. Specify `0xFFFFFF` for white text, `0x80FF0000` for semi-transparent red, and so on.
+    * Alpha only works on Luanti 5.15+ clients. Older clients will see the text as opaque.
+    * To completely hide a text, set `text` to `""`. Setting the alpha value to `00`
+      will not work due to compatibility reasons (it'll be treated as `FF`).
 * `alignment`: The alignment of the text.
 * `offset`: offset in pixels from position.
 * `size`: size of the text.
   The player-set font size is multiplied by size.x (y value isn't used).
+    * Float values are supported by clients >= 5.16.0. Older clients will receive
+      a rounded down integer value.
 * `style`: determines font style
   Bitfield with 1 = bold, 2 = italic, 4 = monospace
 
@@ -1916,7 +2006,7 @@ Vector (ie. a position)
 vector.new(x, y, z)
 ```
 
-See [Spatial Vectors] for details.
+See [Spatial Vectors](#spatial-vectors) for details.
 
 `pointed_thing`
 ---------------
@@ -2024,6 +2114,21 @@ that acts as tool in a gameplay sense as a craftitem, and vice-versa.
 Craftitems can be used for items that neither need to be a node
 nor a tool.
 
+Special Items
+-------------
+The following items are predefined and have special properties.
+
+* `"unknown"`: An item that represents every item which has not been registered
+* `"air"`: The node which appears everywhere where no other node is
+* `"ignore"`: Mapblocks that are not loaded are represented using this node.
+    * Also used for nodes that have not yet been set by the map generator.
+    * This is also what appears outside of the map boundary.
+* `""`: The player's hand, which is in use whenever the player wields no item.
+    * Its range and tool capabilities are also used as a fallback for the wielded item.
+    * It can be overridden to change those properties:
+        * globally using `core.override_item`
+        * per-player using the special `"hand"` inventory list
+
 Amount and wear
 ---------------
 
@@ -2109,10 +2214,10 @@ An apple:
 {name="default:apple", count=1, wear=0, metadata=""}
 ```
 
-### `ItemStack`
+### `ItemStack` format
 
 A native C++ format with many helper methods. Useful for converting
-between formats. See the [Class reference] section for details.
+between formats. See the [Class Reference](#class-reference) section for details.
 
 
 
@@ -2168,7 +2273,7 @@ Groups of entities
 
 For entities, groups are, as of now, used only for calculating damage.
 The rating is the percentage of damage caused by items with this damage group.
-See [Entity damage mechanism].
+See [Entity damage mechanism](#entity-damage-mechanism).
 
 ```lua
 object:get_armor_groups() --> a group-rating table (e.g. {fleshy=100})
@@ -2289,7 +2394,7 @@ to games.
        from destroyed nodes.
      * `0` is something that is directly accessible at the start of gameplay
      * There is no upper limit
-     * See also: `leveldiff` in [Tool Capabilities]
+     * See also: `leveldiff` in [Tool Capabilities](#tool-capabilities)
 * `slippery`: Players and items will slide on the node.
   Slipperiness rises steadily with `slippery` value, starting at 1.
 
@@ -2450,7 +2555,7 @@ so a digging time of 0.01 is actually faster than a digging time of 0.
 
 ### Damage groups
 
-List of damage for groups of entities. See [Entity damage mechanism].
+List of damage for groups of entities. See [Entity damage mechanism](#entity-damage-mechanism).
 
 ### Punch attack uses (tools only)
 
@@ -2521,9 +2626,7 @@ Damage calculation:
 
 Client predicts damage based on damage groups. Because of this, it is able to
 give an immediate response when an entity is damaged or dies; the response is
-pre-defined somehow (e.g. by defining a sprite animation) (not implemented;
-TODO).
-Currently a smoke puff will appear when an entity dies.
+pre-defined and a smoke puff will appear when an entity dies.
 
 The group `immortal` completely disables normal damage.
 
@@ -2538,18 +2641,10 @@ entity:on_punch(puncher, time_from_last_punch, tool_capabilities, direction,
                 damage)
 ```
 
-This should never be called directly, because damage is usually not handled by
-the entity itself.
+This should **never** be called directly, because damage is usually not handled
+by the entity itself.
 
-* `puncher` is the object performing the punch. Can be `nil`. Should never be
-  accessed unless absolutely required, to encourage interoperability.
-* `time_from_last_punch` is time from last punch (by `puncher`) or `nil`.
-* `tool_capabilities` can be `nil`.
-* `direction` is a unit vector, pointing from the source of the punch to
-   the punched object.
-* `damage` damage that will be done to entity
-Return value of this function will determine if damage is done by this function
-(retval true) or shall be done by engine (retval false)
+(see "Registered entities" section for detailed description)
 
 To punch an entity/object in Lua, call:
 
@@ -2557,12 +2652,7 @@ To punch an entity/object in Lua, call:
 object:punch(puncher, time_from_last_punch, tool_capabilities, direction)
 ```
 
-* Return value is tool wear.
-* Parameters are equal to the above callback.
-* If `direction` equals `nil` and `puncher` does not equal `nil`, `direction`
-  will be automatically filled in based on the location of `puncher`.
-
-
+(see "`ObjectRef`" section for detailed description)
 
 
 Metadata
@@ -2572,7 +2662,7 @@ Node Metadata
 -------------
 
 The instance of a node in the world normally only contains the three values
-mentioned in [Nodes]. However, it is possible to insert extra data into a node.
+mentioned in [Nodes](#nodes). However, it is possible to insert extra data into a node.
 It is called "node metadata"; See `NodeMetaRef`.
 
 Node metadata contains two things:
@@ -2584,7 +2674,7 @@ Some of the values in the key-value store are handled specially:
 
 * `formspec`: Defines an inventory menu that is opened with the
               'place/use' key. Only works if no `on_rightclick` was
-              defined for the node. See also [Formspec].
+              defined for the node. See also [Formspec](#formspec).
 * `infotext`: Text shown on the screen when the node is pointed at.
               Line-breaks will be applied automatically.
               If the infotext is very long, it will be truncated.
@@ -2632,20 +2722,21 @@ meta:from_table({
 Item Metadata
 -------------
 
-Item stacks can store metadata too. See [`ItemStackMetaRef`].
+Item stacks can store metadata too. See [`ItemStackMetaRef`](#itemstackmetaref)
+Note: They are not able to store the character `"\1"`, be very careful when storing binary data in them
 
 Item metadata only contains a key-value store.
 
 Some of the values in the key-value store are handled specially:
 
 * `description`: Set the item stack's description.
-  See also: `get_description` in [`ItemStack`]
+  See also: `get_description` in [`ItemStack`](#itemstack)
 * `short_description`: Set the item stack's short description.
-  See also: `get_short_description` in [`ItemStack`]
-* `inventory_image`: Override inventory_image
-* `inventory_overlay`: Override inventory_overlay
-* `wield_image`: Override wield_image
-* `wield_overlay`: Override wield_overlay
+  See also: `get_short_description` in [`ItemStack`](#itemstack)
+* `inventory_image`: Override inventory_image.name
+* `inventory_overlay`: Override inventory_overlay.name
+* `wield_image`: Override wield_image.name
+* `wield_overlay`: Override wield_overlay.name
 * `wield_scale`: Override wield_scale, use vector.to_string
 * `color`: A `ColorString`, which sets the stack's color.
 * `palette_index`: If the item has a palette, this is used to get the
@@ -2732,7 +2823,7 @@ control characters. For values, escape sequences used by the engine are an excep
 **WARNING**: Luanti allows you to add elements to every single formspec instance
 using `player:set_formspec_prepend()`, which may be the reason backgrounds are
 appearing when you don't expect them to, or why things are styled differently
-to normal. See [`no_prepend[]`] and [Styling Formspecs].
+to normal. See [`no_prepend[]`] and [Styling Formspecs](#styling-formspecs).
 
 Examples
 --------
@@ -2783,6 +2874,11 @@ Version History
   * Add field_enter_after_edit[] (experimental)
 * Formspec version 8 (5.10.0)
   * scroll_container[]: content padding parameter
+* Formspec version 9 (5.12.0)
+  * Add allow_close[]
+  * label[]: Add "area label" variant
+* Formspec version 10 (5.13.0)
+  * model[]: Support floating-point frames
 
 Elements
 --------
@@ -2795,7 +2891,7 @@ Elements
 * Clients older than this version can neither show newer elements nor display
   elements with new arguments correctly.
 * Available since feature `formspec_version_element`.
-* See also: [Version History]
+* See also: [Version History](#version-history).
 
 ### `size[<W>,<H>,<fixed_size>]`
 
@@ -2853,6 +2949,13 @@ Elements
 * For information on converting forms to the new coordinate system, see `Migrating
   to Real Coordinates`.
 
+### `allow_close[<bool>]`
+
+* When set to false, the formspec will not close when the user tries to close
+  it with the Escape key or similar. Default true.
+* The formspec can still be closed with `*_exit[]` elements and
+  `core.close_formspec()`, regardless of this setting.
+
 ### `container[<X>,<Y>]`
 
 * Start of a container block, moves all physical elements in the container by
@@ -2907,7 +3010,7 @@ Elements
   `starting item index`.
 * **Note**: With the new coordinate system, the spacing between inventory
   slots is one-fourth the size of an inventory slot by default. Also see
-  [Styling Formspecs] for changing the size of slots and spacing.
+  [Styling Formspecs](#styling-formspecs) for changing the size of slots and spacing.
 
 ### `listring[<inventory location>;<list name>]`
 
@@ -2963,7 +3066,7 @@ Elements
 ### `animated_image[<X>,<Y>;<W>,<H>;<name>;<texture name>;<frame count>;<frame duration>;<frame start>;<middle>]`
 
 * Show an animated image. The image is drawn like a "vertical_frames" tile
-  animation (See [Tile animation definition]), but uses a frame count/duration for simplicity
+  animation (See [Tile animation definition](#tile-animation-definition)), but uses a frame count/duration for simplicity
 * `name`: Element name to send when an event occurs. The event value is the index of the current frame.
 * `texture name`: The image to use.
 * `frame count`: The number of frames animating the image.
@@ -3021,7 +3124,7 @@ Elements
 
 ### `background9[<X>,<Y>;<W>,<H>;<texture name>;<auto_clip>;<middle>]`
 
-* 9-sliced background. See https://en.wikipedia.org/wiki/9-slice_scaling
+* 9-sliced background. See [Wikipedia](https://en.wikipedia.org/wiki/9-slice_scaling)
 * Middle is a rect which defines the middle of the 9-slice.
     * `x` - The middle will be x pixels from all sides.
     * `x,y` - The middle will be x pixels from the horizontal and y from the vertical.
@@ -3088,9 +3191,11 @@ Elements
 ### `textarea[<X>,<Y>;<W>,<H>;<name>;<label>;<default>]`
 
 * Same as fields above, but with multi-line input
+* Text is wrapped to fit within the given bounds.
 * If the text overflows, a vertical scrollbar is added.
 * If the name is empty, the textarea is read-only and
   the background is not shown, which corresponds to a multi-line label.
+  See also `label[<X>,<Y>;<W>,<H>;<label>]` for an alternative.
 
 ### `label[<X>,<Y>;<label>]`
 
@@ -3104,6 +3209,16 @@ Elements
 * **Note**: With the new coordinate system, newlines are spaced with
   half a coordinate.  With the old system, newlines are spaced 2/5 of
   an inventory slot.
+
+### `label[<X>,<Y>;<W>,<H>;<label>]`
+
+* The "area label" formspec element displays the text set in `label`
+  at the specified position and size.
+* Text is wrapped to fit within the given bounds.
+* If the text overflows, it is currently simply truncated, but this behavior is
+  subject to change. There is no scrollbar.
+* See also `textarea` for an alternative.
+* Only available with the new coordinate system.
 
 ### `hypertext[<X>,<Y>;<W>,<H>;<name>;<text>]`
 * Displays a static formatted text with hyperlinks.
@@ -3383,7 +3498,7 @@ Elements
     * If a state is provided, the style will only take effect when the element is in that state.
     * All provided states must be active for the style to apply.
 * Note: this **must** be before the element is defined.
-* See [Styling Formspecs].
+* See [Styling Formspecs](#styling-formspecs).
 
 
 ### `style_type[<selector 1>,<selector 2>,...;<prop1>;<prop2>;...]`
@@ -3395,7 +3510,7 @@ Elements
 * `state` is a list of states separated by the `+` character.
     * If a state is provided, the style will only take effect when the element is in that state.
     * All provided states must be active for the style to apply.
-* See [Styling Formspecs].
+* See [Styling Formspecs](#styling-formspecs).
 
 ### `set_focus[<name>;<force>]`
 
@@ -3525,6 +3640,8 @@ Some types may inherit styles from parent types.
 * animated_image
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
 * box
+    * **Note**: In order for any of the styling options to take effect,
+                the `color` field in the box element must be left unspecified.
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
         * Defaults to false in formspec_version version 3 or higher
     * **Note**: `colors`, `bordercolors`, and `borderwidths` accept multiple input types:
@@ -3766,7 +3883,8 @@ Player Inventory lists
 * `craftresult`: list containing the crafted output
 * `hand`: list containing an override for the empty hand
     * Is not created automatically, use `InvRef:set_size`
-    * Is only used to enhance the empty hand's tool capabilities
+    * Players use the first item in this list as their hand
+    * It behaves as if the default hand `""` has been overridden for this specific player
 
 Custom lists can be added and deleted with `InvRef:set_size(name, size)` like
 any other inventory.
@@ -3823,17 +3941,16 @@ Escape sequences
 ================
 
 Most text can contain escape sequences, that can for example color the text.
-There are a few exceptions: tab headers, dropdowns and vertical labels can't.
+There are a few exceptions: tab headers and dropdowns can't be colorized
+(but they *can* be translated).
 The following functions provide escape sequences:
 
 * `core.get_color_escape_sequence(color)`:
     * `color` is a ColorString
     * The escape sequence sets the text color to `color`
 * `core.colorize(color, message)`:
-    * Equivalent to:
-      `core.get_color_escape_sequence(color) ..
-      message ..
-      core.get_color_escape_sequence("#ffffff")`
+    * Equivalent to including the right color escape sequence in the front,
+      and resetting to `#fff` after the text (plus newline handling).
 * `core.get_background_escape_sequence(color)`
     * `color` is a ColorString
     * The escape sequence sets the background of the whole text element to
@@ -3844,8 +3961,184 @@ The following functions provide escape sequences:
     * Removes background colors added by `get_background_escape_sequence`.
 * `core.strip_colors(str)`
     * Removes all color escape sequences.
+* `core.strip_escapes(str)`
+    * Removes all escape sequences, including client-side translations and
+      any unknown or future escape sequences that Luanti might define.
+    * You can use this to clean text before logging or handing to an external system.
 
 
+Coordinate System
+=================
+
+Luanti uses a **left-handed** coordinate system: Y is "up", X is "right", Z is "forward".
+This is the convention used by Unity, DirectX and Irrlicht.
+It means that when you're pointing in +Z direction in-game ("forward"), +X is to your right; +Y is up.
+
+Consistently, rotation is [**left-handed**](https://en.wikipedia.org/w/index.php?title=Right-hand_rule) as well.
+Luanti uses [Tait-Bryan angles](https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles) for rotations,
+often referred to simply as "euler angles" (even though they are not "proper" euler angles).
+The rotation order is extrinsic X-Y-Z:
+First rotation around the (unrotated) X-axis is applied,
+then rotation around the (unrotated) Y-axis follows,
+and finally rotation around the (unrotated) Z-axis is applied.
+(Note: As a product of rotation matrices, this will be written in reverse, so `Z*Y*X`.)
+
+Attachment and bone override rotations both use these conventions.
+
+There is an exception, however: Object rotation (`ObjectRef:set_rotation`, `ObjectRef:get_rotation`, `automatic_rotate`)
+**does not** use left-handed (extrinsic) X-Y-Z rotations.
+Instead, it uses **right-handed (extrinsic) Z-X-Y** rotations:
+First roll (Z) is applied, then pitch (X); yaw (Y) is applied last.
+
+See [Scratchapixel](https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/coordinate-systems.html)
+or [Wikipedia](https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Orientation_and_handedness)
+for a more detailed and pictorial explanation of these terms.
+
+
+Vectors
+=======
+
+Luanti provides two vector classes for working with coordinates and mathematical operations:
+
+* **Spatial Vectors** (`vector.*`) - 3-dimensional vectors for 3D positions, directions, and spatial operations
+* **2D Vectors** (`vector2.*`) - 2-dimensional vectors for 2D positions, screen coordinates, and 2D operations
+
+Both vector types share many common properties and operations, which are described in the following sections.
+
+Common to all vector types
+---------------------------
+
+### Special properties
+
+Vectors can be indexed with numbers and allow method and operator syntax.
+
+All these forms of addressing a vector `v` are valid:
+
+* For 3D vectors: `v[1]`, `v[3]`, `v.x`, `v[1] = 42`, `v.y = 13`
+* For 2D vectors: `v[1]`, `v[2]`, `v.x`, `v[1] = 42`, `v.y = 13`
+
+Note: Prefer letter over number indexing for performance and compatibility reasons.
+
+Where `v` is a vector and `foo` stands for any function name, `v:foo(...)` does
+the same as `vector.foo(v, ...)` (or `vector2.foo(v, ...)` for 2D vectors).
+
+`tostring` is defined for vectors, see `vector.to_string` and `vector2.to_string`.
+
+The metatable that is used for vectors can be accessed via `vector.metatable` or `vector2.metatable`.
+Do not modify it!
+
+All `vector.*` and `vector2.*` functions allow vectors (e.g., `{x = X, y = Y, z = Z}`) without metatables.
+Returned vectors always have a metatable set.
+
+Note: Vectors are *not* used for simple numeric arrays of the form `{num, num, num}` or `{num, num}`.
+Use proper vector tables with named fields (`x`, `y`, `z`) instead.
+
+### Operators
+
+Operators can be used if all of the involved vectors have metatables:
+
+* `v1 == v2`:
+    * Returns whether `v1` and `v2` are identical.
+* `-v`:
+    * Returns the additive inverse of v.
+* `v1 + v2`:
+    * Returns the sum of both vectors.
+    * Note: `+` cannot be used together with scalars.
+* `v1 - v2`:
+    * Returns the difference of `v1` subtracted by `v2`.
+    * Note: `-` cannot be used together with scalars.
+* `v * s` or `s * v`:
+    * Returns `v` scaled by `s`.
+* `v / s`:
+    * Returns `v` scaled by `1 / s`.
+
+### Common functions
+
+The following functions are available for both `vector` and `vector2` types with the same signature and behavior.
+Replace `vector` with `vector2` for 2D vectors (e.g., `vector2.add(v, x)`).
+
+For the following functions,
+`v`, `v1`, `v2` are vectors (either 3D or 2D depending on context),
+`p1`, `p2` are position vectors,
+`s` is a scalar (a number).
+
+* `vector.copy(v)`:
+    * Returns a copy of the vector `v`.
+* `vector.zero()`:
+    * Returns a new zero vector.
+    * For 3D: `(0, 0, 0)`. For 2D: `(0, 0)`.
+* `vector.random_direction()`:
+    * Returns a new vector of length 1, pointing in a direction chosen uniformly at random.
+* `vector.from_string(s[, init])`:
+    * Returns `v, np`, where `v` is a vector read from the given string `s` and
+      `np` is the next position in the string after the vector.
+    * Returns `nil` on failure.
+    * `s`: Has to begin with a substring of the form `"(x, y, z)"` (for 3D) or `"(x, y)"` (for 2D).
+      Additional spaces, omitting commas and adding an additional comma to the end is allowed.
+    * `init`: If given starts looking for the vector at this string index.
+* `vector.to_string(v)`:
+    * Returns a human-readable string of the form `"(x, y, z)"` (for 3D) or `"(x, y)"` (for 2D).
+    * `tostring(v)` does the same.
+    * Note: This function loses precision. For exact precision, use `core.serialize()` instead.
+    * Note: Precision may increase in future versions.
+* `vector.direction(p1, p2)`:
+    * Returns a vector of length 1 with direction `p1` to `p2`.
+    * If `p1` and `p2` are identical, returns a zero vector.
+* `vector.distance(p1, p2)`:
+    * Returns zero or a positive number, the distance between `p1` and `p2`.
+* `vector.length(v)`:
+    * Returns zero or a positive number, the length of vector `v`.
+* `vector.normalize(v)`:
+    * Returns a vector of length 1 with direction of vector `v`.
+    * If `v` has zero length, returns a zero vector.
+* `vector.floor(v)`:
+    * Returns a vector, each dimension rounded down.
+* `vector.ceil(v)`:
+    * Returns a vector, each dimension rounded up.
+* `vector.round(v)`:
+    * Returns a vector, each dimension rounded to nearest integer.
+    * At a multiple of 0.5, rounds away from zero.
+* `vector.sign(v, tolerance)`:
+    * Returns a vector where `math.sign` was called for each component.
+    * See [Helper functions](#helper-functions) for details on `math.sign`.
+* `vector.abs(v)`:
+    * Returns a vector with absolute values for each component.
+* `vector.apply(v, func, ...)`:
+    * Returns a vector where the function `func` has been applied to each component.
+    * `...` are optional arguments passed to `func`.
+* `vector.combine(v, w, func)`:
+    * Returns a vector where the function `func` has combined both components of `v` and `w`
+      for each component.
+* `vector.equals(v1, v2)`:
+    * Returns a boolean, `true` if the vectors are identical.
+* `vector.dot(v1, v2)`:
+    * Returns the dot product of `v1` and `v2`.
+* `vector.check(v)`:
+    * Returns a boolean value indicating whether `v` is a real vector, e.g. created
+      by a `vector.*` or `vector2.*` function.
+    * Returns `false` for anything else, including tables like `{x=3, y=1, z=4}` or `{x=3, y=1}`.
+* `vector.in_area(pos, min, max)`:
+    * Returns a boolean value indicating if `pos` is inside area formed by `min` and `max`.
+    * `min` and `max` are inclusive.
+    * If `min` is bigger than `max` on some axis, function always returns false.
+    * You can use `vector.sort` (or `vector2.sort` for 2D) if you have two vectors and don't know which are the minimum and the maximum.
+
+For the following functions `x` can be either a vector or a number:
+
+* `vector.add(v, x)`:
+    * Returns a vector.
+    * If `x` is a vector: Returns the sum of `v` and `x`.
+    * If `x` is a number: Adds `x` to each component of `v`.
+* `vector.subtract(v, x)`:
+    * Returns a vector.
+    * If `x` is a vector: Returns the difference of `v` subtracted by `x`.
+    * If `x` is a number: Subtracts `x` from each component of `v`.
+* `vector.multiply(v, s)`:
+    * Returns a scaled vector.
+    * For `vector` only, deprecated behavior: If `s` is a vector, returns the Schur product.
+* `vector.divide(v, s)`:
+    * Returns a scaled vector.
+    * For `vector` only, deprecated behavior: If `s` is a vector, returns the Schur quotient.
 
 
 Spatial Vectors
@@ -3853,19 +4146,13 @@ Spatial Vectors
 
 Luanti stores 3-dimensional spatial vectors in Lua as tables of 3 coordinates,
 and has a class to represent them (`vector.*`), which this chapter is about.
-For details on what a spatial vectors is, please refer to Wikipedia:
-https://en.wikipedia.org/wiki/Euclidean_vector.
+For details on what a spatial vector is, please refer to [Wikipedia](https://en.wikipedia.org/wiki/Euclidean_vector).
 
 Spatial vectors are used for various things, including, but not limited to:
 
 * any 3D spatial vector (x/y/z-directions)
 * Euler angles (pitch/yaw/roll in radians) (Spatial vectors have no real semantic
   meaning here. Therefore, most vector operations make no sense in this use case.)
-
-Note that they are *not* used for:
-
-* n-dimensional vectors where n is not 3 (ie. n=2)
-* arrays of the form `{num, num, num}`
 
 The API documentation may refer to spatial vectors, as produced by `vector.new`,
 by any of the following notations:
@@ -3897,27 +4184,18 @@ stated otherwise. Mods should adapt this for convenience reasons.
 Special properties of the class
 -------------------------------
 
-Vectors can be indexed with numbers and allow method and operator syntax.
+For special properties common to all vector types (indexing, method syntax, operators, etc.),
+see [Common to all vector types](#common-to-all-vector-types).
 
-All these forms of addressing a vector `v` are valid:
-`v[1]`, `v[3]`, `v.x`, `v[1] = 42`, `v.y = 13`
-Note: Prefer letter over number indexing for performance and compatibility reasons.
+Functions
+---------
 
-Where `v` is a vector and `foo` stands for any function name, `v:foo(...)` does
-the same as `vector.foo(v, ...)`, apart from deprecated functionality.
+For common functions available to both `vector` and `vector2`,
+see [Common functions](#common-functions).
 
-`tostring` is defined for vectors, see `vector.to_string`.
+The following functions are specific to `vector` (3D vectors).
 
-The metatable that is used for vectors can be accessed via `vector.metatable`.
-Do not modify it!
-
-All `vector.*` functions allow vectors `{x = X, y = Y, z = Z}` without metatables.
-Returned vectors always have a metatable set.
-
-Common functions and methods
-----------------------------
-
-For the following functions (and subchapters),
+For the following functions,
 `v`, `v1`, `v2` are vectors,
 `p1`, `p2` are position vectors,
 `s` is a scalar (a number),
@@ -3927,114 +4205,23 @@ vectors are written like this: `(x, y, z)`:
     * Returns a new vector `(a, b, c)`.
     * Deprecated: `vector.new()` does the same as `vector.zero()` and
       `vector.new(v)` does the same as `vector.copy(v)`
-* `vector.zero()`:
-    * Returns a new vector `(0, 0, 0)`.
-* `vector.random_direction()`:
-    * Returns a new vector of length 1, pointing into a direction chosen uniformly at random.
-* `vector.copy(v)`:
-    * Returns a copy of the vector `v`.
-* `vector.from_string(s[, init])`:
-    * Returns `v, np`, where `v` is a vector read from the given string `s` and
-      `np` is the next position in the string after the vector.
-    * Returns `nil` on failure.
-    * `s`: Has to begin with a substring of the form `"(x, y, z)"`. Additional
-           spaces, leaving away commas and adding an additional comma to the end
-           is allowed.
-    * `init`: If given starts looking for the vector at this string index.
-* `vector.to_string(v)`:
-    * Returns a string of the form `"(x, y, z)"`.
-    *  `tostring(v)` does the same.
-* `vector.direction(p1, p2)`:
-    * Returns a vector of length 1 with direction `p1` to `p2`.
-    * If `p1` and `p2` are identical, returns `(0, 0, 0)`.
-* `vector.distance(p1, p2)`:
-    * Returns zero or a positive number, the distance between `p1` and `p2`.
-* `vector.length(v)`:
-    * Returns zero or a positive number, the length of vector `v`.
-* `vector.normalize(v)`:
-    * Returns a vector of length 1 with direction of vector `v`.
-    * If `v` has zero length, returns `(0, 0, 0)`.
-* `vector.floor(v)`:
-    * Returns a vector, each dimension rounded down.
-* `vector.ceil(v)`:
-    * Returns a vector, each dimension rounded up.
-* `vector.round(v)`:
-    * Returns a vector, each dimension rounded to nearest integer.
-    * At a multiple of 0.5, rounds away from zero.
-* `vector.sign(v, tolerance)`:
-    * Returns a vector where `math.sign` was called for each component.
-    * See [Helper functions] for details.
-* `vector.abs(v)`:
-    * Returns a vector with absolute values for each component.
-* `vector.apply(v, func, ...)`:
-    * Returns a vector where the function `func` has been applied to each
-      component.
-    * `...` are optional arguments passed to `func`.
-* `vector.combine(v, w, func)`:
-    * Returns a vector where the function `func` has combined both components of `v` and `w`
-      for each component
-* `vector.equals(v1, v2)`:
-    * Returns a boolean, `true` if the vectors are identical.
 * `vector.sort(v1, v2)`:
     * Returns in order minp, maxp vectors of the cuboid defined by `v1`, `v2`.
 * `vector.angle(v1, v2)`:
     * Returns the angle between `v1` and `v2` in radians.
-* `vector.dot(v1, v2)`:
-    * Returns the dot product of `v1` and `v2`.
 * `vector.cross(v1, v2)`:
     * Returns the cross product of `v1` and `v2`.
 * `vector.offset(v, x, y, z)`:
     * Returns the sum of the vectors `v` and `(x, y, z)`.
-* `vector.check(v)`:
-    * Returns a boolean value indicating whether `v` is a real vector, eg. created
-      by a `vector.*` function.
-    * Returns `false` for anything else, including tables like `{x=3,y=1,z=4}`.
-* `vector.in_area(pos, min, max)`:
-    * Returns a boolean value indicating if `pos` is inside area formed by `min` and `max`.
-    * `min` and `max` are inclusive.
-    * If `min` is bigger than `max` on some axis, function always returns false.
-    * You can use `vector.sort` if you have two vectors and don't know which are the minimum and the maximum.
 * `vector.random_in_area(min, max)`:
     * Returns a random integer position in area formed by `min` and `max`
     * `min` and `max` are inclusive.
     * You can use `vector.sort` if you have two vectors and don't know which are the minimum and the maximum.
 
-For the following functions `x` can be either a vector or a number:
-
-* `vector.add(v, x)`:
-    * Returns a vector.
-    * If `x` is a vector: Returns the sum of `v` and `x`.
-    * If `x` is a number: Adds `x` to each component of `v`.
-* `vector.subtract(v, x)`:
-    * Returns a vector.
-    * If `x` is a vector: Returns the difference of `v` subtracted by `x`.
-    * If `x` is a number: Subtracts `x` from each component of `v`.
-* `vector.multiply(v, s)`:
-    * Returns a scaled vector.
-    * Deprecated: If `s` is a vector: Returns the Schur product.
-* `vector.divide(v, s)`:
-    * Returns a scaled vector.
-    * Deprecated: If `s` is a vector: Returns the Schur quotient.
-
 Operators
 ---------
 
-Operators can be used if all of the involved vectors have metatables:
-
-* `v1 == v2`:
-    * Returns whether `v1` and `v2` are identical.
-* `-v`:
-    * Returns the additive inverse of v.
-* `v1 + v2`:
-    * Returns the sum of both vectors.
-    * Note: `+` cannot be used together with scalars.
-* `v1 - v2`:
-    * Returns the difference of `v1` subtracted by `v2`.
-    * Note: `-` cannot be used together with scalars.
-* `v * s` or `s * v`:
-    * Returns `v` scaled by `s`.
-* `v / s`:
-    * Returns `v` scaled by `1 / s`.
+For vector operators (`+`, `-`, `*`, `/`, `==`, unary `-`), see [Common to all vector types](#common-to-all-vector-types).
 
 Rotation-related functions
 --------------------------
@@ -4045,6 +4232,7 @@ angles in radians.
 
 * `vector.rotate(v, r)`:
     * Applies the rotation `r` to `v` and returns the result.
+    * Uses (extrinsic) Z-X-Y rotation order and is right-handed, consistent with `ObjectRef:set_rotation`.
     * `vector.rotate(vector.new(0, 0, 1), r)` and
       `vector.rotate(vector.new(0, 1, 0), r)` return vectors pointing
       forward and up relative to an entity's rotation `r`.
@@ -4072,6 +4260,77 @@ For example:
 
 
 
+2D Vectors
+==========
+
+Luanti stores 2-dimensional vectors in Lua as tables of 2 coordinates,
+and has a class to represent them (`vector2.*`).
+
+The API provides `vector2.new` to create vectors:
+
+* `vector2.new(x, y)`
+* `{x=num, y=num}` (Even here you are still supposed to use `vector2.new`.)
+
+Compatibility notes
+-------------------
+
+Vectors should be created using `vector2.new(x, y)` to ensure they have the
+proper metatable. This enables:
+
+* Method call syntax (e.g., `v:length()` instead of `vector2.length(v)`)
+* Operator overloading (e.g., `v1 + v2` instead of `vector2.add(v1, v2)`)
+* Type checking with `vector2.check()`
+
+Special properties of the class
+-------------------------------
+
+For special properties common to all vector types (indexing, method syntax, operators, etc.),
+see [Common to all vector types](#common-to-all-vector-types).
+
+Functions
+---------
+
+For common functions available to both `vector` and `vector2`,
+see [Common functions](#common-functions).
+
+The following functions are specific to `vector2` (2D vectors).
+
+For the following functions,
+`v`, `v1`, `v2` are vectors,
+`p1`, `p2` are position vectors,
+`s` is a scalar (a number),
+vectors are written like this: `(x, y)`:
+
+* `vector2.new(x, y)`:
+    * Returns a new vector `(x, y)`.
+* `vector2.from_angle(angle)`:
+    * Returns a new unit vector from an angle.
+    * `angle` is the angle in radians from the positive x-axis (counterclockwise).
+    * Example: `vector2.from_angle(math.pi / 2)` returns a vector pointing up `(0, 1)`.
+* `vector2.to_angle(v)`:
+    * Returns the angle of the vector in radians.
+    * `angle` is the angle from the positive x-axis (counterclockwise), in the range `(-pi, pi]`.
+    * The edge case of `(0, 0)` returns `0`.
+    * Example: `vector2.to_angle(vector2.new(0, 1))` returns `math.pi / 2`.
+* `vector2.sort(v1, v2)`:
+    * Returns in order minp, maxp vectors of the rectangle defined by `v1`, `v2`.
+* `vector2.angle(v1, v2)`:
+    * Returns the angle between `v1` and `v2` in radians.
+    * This is always a positive value (unsigned angle).
+* `vector2.rotate(v, angle)`:
+    * Returns a new vector rotated counterclockwise by `angle` radians around the origin.
+    * The length of the vector is preserved.
+    * Example: `vector2.rotate(vector2.new(1, 0), math.pi / 2)` returns `(0, 1)`.
+* `vector2.offset(v, x, y)`:
+    * Returns the sum of the vectors `v` and `(x, y)`.
+
+Operators
+---------
+
+For vector operators (`+`, `-`, `*`, `/`, `==`, unary `-`), see [Common to all vector types](#common-to-all-vector-types).
+
+
+
 Helper functions
 ================
 
@@ -4080,9 +4339,11 @@ Helper functions
     * `obj`: arbitrary variable
     * `name`: string, default: `"_"`
     * `dumped`: table, default: `{}`
-* `dump(obj, dumped)`: returns a string which makes `obj` human-readable
-    * `obj`: arbitrary variable
-    * `dumped`: table, default: `{}`
+* `dump(value, indent)`: returns a string which makes `value` human-readable
+    * `value`: arbitrary value
+      * Circular references are supported. Every table is dumped only once.
+    * `indent`: string to use for indentation, default: `"\t"`
+      * `""` disables indentation & line breaks (compact output)
 * `math.hypot(x, y)`
     * Get the hypotenuse of a triangle with legs x and y.
       Useful for distance calculation.
@@ -4094,6 +4355,8 @@ Helper functions
 * `math.factorial(x)`: returns the factorial of `x`
 * `math.round(x)`: Returns `x` rounded to the nearest integer.
     * At a multiple of 0.5, rounds away from zero.
+* `math.isfinite(x)`: Returns `true` if `x` is neither an infinity nor a NaN,
+  and `false` otherwise.
 * `string.split(str, separator, include_empty, max_splits, sep_is_pattern)`
     * `separator`: string, cannot be empty, default: `","`
     * `include_empty`: boolean, default: `false`
@@ -4104,6 +4367,11 @@ Helper functions
     * e.g. `"a,b":split","` returns `{"a","b"}`
 * `string:trim()`: returns the string without whitespace pre- and suffixes
     * e.g. `"\n \t\tfoo bar\t ":trim()` returns `"foo bar"`
+* Utilities for working with binary data:
+    * `string.pack(fmt, ...)`
+    * `string.unpack(fmt, s, [pos])`
+    * `string.packsize(fmt)`
+    * Backported from Lua 5.4, see [Lua manual section 6.4.2](https://www.lua.org/manual/5.4/manual.html#6.4.2)
 * `core.wrap_text(str, limit, as_table)`: returns a string or table
     * Adds newlines to the string to keep it within the specified character
       limit
@@ -4142,6 +4410,11 @@ Helper functions
     * returns time with microsecond precision. May not return wall time.
 * `table.copy(table)`: returns a table
     * returns a deep copy of `table`
+    * strips metatables, but this may change in the future
+* `table.copy_with_metatables(table)`
+    * since 5.12
+    * `table` can also be non-table value, which will be returned as-is
+    * preserves metatables as they are
 * `table.indexof(list, val)`: returns the smallest numerical index containing
       the value `val` in the table `list`. Non-numerical indices are ignored.
       If `val` could not be found, `-1` is returned. `list` must not have
@@ -4166,13 +4439,13 @@ Helper functions
 * `core.pointed_thing_to_face_pos(placer, pointed_thing)`: returns a
   position.
     * returns the exact position on the surface of a pointed node
-* `core.get_tool_wear_after_use(uses [, initial_wear])`
+* `core.get_tool_wear_after_use(uses, initial_wear)`
     * Simulates a tool being used once and returns the added wear,
       such that, if only this function is used to calculate wear,
       the tool will break exactly after `uses` times of uses
     * `uses`: Number of times the tool can be used
     * `initial_wear`: The initial wear the tool starts with (default: 0)
-* `core.get_dig_params(groups, tool_capabilities [, wear])`:
+* `core.get_dig_params(groups, tool_capabilities, wear)`:
     Simulates an item that digs a node.
     Returns a table with the following fields:
     * `diggable`: `true` if node can be dug, `false` otherwise.
@@ -4183,7 +4456,7 @@ Helper functions
     * `groups`: Table of the node groups of the node that would be dug
     * `tool_capabilities`: Tool capabilities table of the item
     * `wear`: Amount of wear the tool starts with (default: 0)
-* `core.get_hit_params(groups, tool_capabilities [, time_from_last_punch [, wear]])`:
+* `core.get_hit_params(groups, tool_capabilities, time_from_last_punch, wear)`:
     Simulates an item that punches an object.
     Returns a table with the following fields:
     * `hp`: How much damage the punch would cause (between -65535 and 65535).
@@ -4191,10 +4464,8 @@ Helper functions
     Parameters:
     * `groups`: Damage groups of the object
     * `tool_capabilities`: Tool capabilities table of the item
-    * `time_from_last_punch`: time in seconds since last punch action
+    * `time_from_last_punch`: time in seconds since last punch action (can be `nil`)
     * `wear`: Amount of wear the item starts with (default: 0)
-
-
 
 
 Translations
@@ -4242,7 +4513,7 @@ Two functions are provided to translate strings: `core.translate` and
   the client, the choice between singular and plural might be more complicated,
   but the choice will be done automatically using the value of `n`.
 
-  You can read https://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html
+  You can read [the Gettext documentation](https://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html)
   for more details on the differences of plurals between languages.
 
   Also note that plurals are only handled in .po or .mo files, and not in .tr files.
@@ -4356,7 +4627,7 @@ The file should be a text file, with the following format:
 * All other empty lines or lines beginning with `#` are ignored.
 * Other lines should be in the format `original=translated`. Both `original`
   and `translated` can contain escape sequences beginning with `@` to insert
-  arguments, literal `@`, `=` or newline (See [Escapes] below).
+  arguments, literal `@`, `=` or newline (See [Escapes](#escapes) below).
   There must be no extraneous whitespace around the `=` or at the beginning or
   the end of the line.
 
@@ -4464,22 +4735,25 @@ textdomain match the mod name, but this isn't required.
 
 
 
-Perlin noise
-============
+Fractal value noise
+===================
 
-Perlin noise creates a continuously-varying value depending on the input values.
+Value noise creates a continuously-varying value depending on the input values.
+It is similar to Perlin noise, but may exhibit more geometric artifacts,
+as it interpolates between values and not between gradients as in Perlin noise.
+
 Usually in Luanti the input values are either 2D or 3D coordinates in nodes.
 The result is used during map generation to create the terrain shape, vary heat
 and humidity to distribute biomes, vary the density of decorations or vary the
 structure of ores.
 
-Structure of perlin noise
--------------------------
+Structure of fractal value noise
+--------------------------------
 
 An 'octave' is a simple noise generator that outputs a value between -1 and 1.
 The smooth wavy noise it generates has a single characteristic scale, almost
 like a 'wavelength', so on its own does not create fine detail.
-Due to this perlin noise combines several octaves to create variation on
+Due to this fractal value noise combines several octaves to create variation on
 multiple scales. Each additional octave has a smaller 'wavelength' than the
 previous.
 
@@ -4487,13 +4761,15 @@ This combination results in noise varying very roughly between -2.0 and 2.0 and
 with an average value of 0.0, so `scale` and `offset` are then used to multiply
 and offset the noise variation.
 
-The final perlin noise variation is created as follows:
+The final fractal value noise variation is created as follows:
 
+```
 noise = offset + scale * (octave1 +
                           octave2 * persistence +
                           octave3 * persistence ^ 2 +
                           octave4 * persistence ^ 3 +
                           ...)
+```
 
 Noise Parameters
 ----------------
@@ -4605,17 +4881,19 @@ with restraint.
 #### `absvalue`
 
 The absolute value of each octave's noise variation is used when combining the
-octaves. The final perlin noise variation is created as follows:
+octaves. The final value noise variation is created as follows:
 
+```
 noise = offset + scale * (abs(octave1) +
                           abs(octave2) * persistence +
                           abs(octave3) * persistence ^ 2 +
                           abs(octave4) * persistence ^ 3 +
                           ...)
+```
 
 ### Format example
 
-For 2D or 3D perlin noise or perlin noise maps:
+For 2D or 3D value noise or value noise maps:
 
 ```lua
 np_terrain = {
@@ -4650,13 +4928,13 @@ All default ores are of the uniformly-distributed scatter type.
 
 Randomly chooses a location and generates a cluster of ore.
 
-If `noise_params` is specified, the ore will be placed if the 3D perlin noise
+If `noise_params` is specified, the ore will be placed if the 3D value noise
 at that point is greater than the `noise_threshold`, giving the ability to
 create a non-equal distribution of ore.
 
 ### `sheet`
 
-Creates a sheet of ore in a blob shape according to the 2D perlin noise
+Creates a sheet of ore in a blob shape according to the 2D value noise
 described by `noise_params` and `noise_threshold`. This is essentially an
 improved version of the so-called "stratus" ore seen in some unofficial mods.
 
@@ -4689,14 +4967,14 @@ noise parameters `np_puff_top` and `np_puff_bottom`, respectively.
 
 ### `blob`
 
-Creates a deformed sphere of ore according to 3d perlin noise described by
+Creates a deformed sphere of ore according to 3d value noise described by
 `noise_params`. The maximum size of the blob is `clust_size`, and
 `clust_scarcity` has the same meaning as with the `scatter` type.
 
 ### `vein`
 
 Creates veins of ore varying in density by according to the intersection of two
-instances of 3d perlin noise with different seeds, both described by
+instances of 3d value noise with different seeds, both described by
 `noise_params`.
 
 `random_factor` varies the influence random chance has on placement of an ore
@@ -4731,8 +5009,8 @@ computationally expensive than any other ore.
 Creates a single undulating ore stratum that is continuous across mapchunk
 borders and horizontally spans the world.
 
-The 2D perlin noise described by `noise_params` defines the Y coordinate of
-the stratum midpoint. The 2D perlin noise described by `np_stratum_thickness`
+The 2D value noise described by `noise_params` defines the Y coordinate of
+the stratum midpoint. The 2D value noise described by `np_stratum_thickness`
 defines the stratum's vertical thickness (in units of nodes). Due to being
 continuous across mapchunk borders the stratum's vertical thickness is
 unlimited.
@@ -4759,7 +5037,7 @@ The parameters `clust_num_ores`, `clust_size`, `noise_threshold` and
 Ore attributes
 --------------
 
-See section [Flag Specifier Format].
+See section [Flag Specifier Format](#flag-specifier-format).
 
 Currently supported flags:
 `puff_cliffs`, `puff_additive_composition`.
@@ -4854,7 +5132,7 @@ About probability values:
 Schematic attributes
 --------------------
 
-See section [Flag Specifier Format].
+See section [Flag Specifier Format](#flag-specifier-format).
 
 Currently supported flags: `place_center_x`, `place_center_y`, `place_center_z`,
                            `force_placement`.
@@ -4906,7 +5184,8 @@ A VoxelManip object can be created any time using either:
 If the optional position parameters are present for either of these routines,
 the specified region will be pre-loaded into the VoxelManip object on creation.
 Otherwise, the area of map you wish to manipulate must first be loaded into the
-VoxelManip object using `VoxelManip:read_from_map()`.
+VoxelManip object using `VoxelManip:read_from_map()`, or an empty one created
+with `VoxelManip:initialize()`.
 
 Note that `VoxelManip:read_from_map()` returns two position vectors. The region
 formed by these positions indicate the minimum and maximum (respectively)
@@ -4917,17 +5196,17 @@ be queried any time after loading map data with `VoxelManip:get_emerged_area()`.
 Now that the VoxelManip object is populated with map data, your mod can fetch a
 copy of this data using either of two methods. `VoxelManip:get_node_at()`,
 which retrieves an individual node in a MapNode formatted table at the position
-requested is the simplest method to use, but also the slowest.
+requested. This is the simplest method to use, but also the slowest.
 
 Nodes in a VoxelManip object may also be read in bulk to a flat array table
 using:
 
 * `VoxelManip:get_data()` for node content (in Content ID form, see section
-  [Content IDs]),
-* `VoxelManip:get_light_data()` for node light levels, and
+  [Content IDs](#content-ids),
+* `VoxelManip:get_light_data()` for node param (usually light levels), and
 * `VoxelManip:get_param2_data()` for the node type-dependent "param2" values.
 
-See section [Flat array format] for more details.
+See section [Flat array format](#flat-array-format) for more details.
 
 It is very important to understand that the tables returned by any of the above
 three functions represent a snapshot of the VoxelManip's internal state at the
@@ -4939,17 +5218,16 @@ internal state unless otherwise explicitly stated.
 Once the bulk data has been edited to your liking, the internal VoxelManip
 state can be set using:
 
-* `VoxelManip:set_data()` for node content (in Content ID form, see section
-  [Content IDs]),
-* `VoxelManip:set_light_data()` for node light levels, and
-* `VoxelManip:set_param2_data()` for the node type-dependent `param2` values.
+* `VoxelManip:set_data()` or
+* `VoxelManip:set_light_data()` or
+* `VoxelManip:set_param2_data()`
 
 The parameter to each of the above three functions can use any table at all in
 the same flat array format as produced by `get_data()` etc. and is not required
 to be a table retrieved from `get_data()`.
 
 Once the internal VoxelManip state has been modified to your liking, the
-changes can be committed back to the map by calling `VoxelManip:write_to_map()`
+changes can be committed back to the map by calling `VoxelManip:write_to_map()`.
 
 ### Flat array format
 
@@ -4980,8 +5258,8 @@ and the array index for a position p contained completely in p1..p2 is:
 `(p.Z - p1.Z) * Ny * Nx + (p.Y - p1.Y) * Nx + (p.X - p1.X) + 1`
 
 Note that this is the same "flat 3D array" format as
-`PerlinNoiseMap:get3dMap_flat()`.
-VoxelArea objects (see section [`VoxelArea`]) can be used to simplify calculation
+`ValueNoiseMap:get3dMap_flat()`.
+VoxelArea objects (see section [`VoxelArea`](#voxelarea)) can be used to simplify calculation
 of the index for a single point in a flat VoxelManip array.
 
 ### Content IDs
@@ -5081,15 +5359,22 @@ inside the VoxelManip.
 Methods
 -------
 
-* `read_from_map(p1, p2)`: Loads a chunk of map into the VoxelManip object
+* `read_from_map(p1, p2)`: Loads a part of the map into the VoxelManip object
   containing the region formed by `p1` and `p2`.
-    * returns actual emerged `pmin`, actual emerged `pmax`
+    * returns actual emerged `pmin`, actual emerged `pmax` (MapBlock-aligned)
     * Note that calling this multiple times will *add* to the area loaded in the
       VoxelManip, and not reset it.
+* `initialize(p1, p2, [node])`: Clears and resizes the VoxelManip object to
+  comprise the region formed by `p1` and `p2`.
+   * **No data** is read from the map, so you can use this to treat `VoxelManip`
+     objects as general containers of node data.
+   * `node`: if present the data will be filled with this node; if not it will
+     be uninitialized
+   * returns actual emerged `pmin`, actual emerged `pmax` (MapBlock-aligned)
+   * (introduced in 5.13.0)
 * `write_to_map([light])`: Writes the data loaded from the `VoxelManip` back to
   the map.
-    * **important**: data must be set using `VoxelManip:set_data()` before
-      calling this.
+    * **important**: you should call `set_data()` before this, or nothing will change.
     * if `light` is true, then lighting is automatically recalculated.
       The default value is true.
       If `light` is false, no light calculations happen, and you should correct
@@ -5150,6 +5435,15 @@ Methods
    where the engine will keep the map and the VM in sync automatically.
    * Note: this doesn't do what you think it does and is subject to removal. Don't use it!
 * `get_emerged_area()`: Returns actual emerged minimum and maximum positions.
+   * "Emerged" does not imply that this region was actually loaded from the map,
+      if `initialize()` has been used.
+* `close()`: Frees the data buffers associated with the VoxelManip object.
+   It will become empty.
+   * Since Lua's garbage collector is not aware of the potentially significant
+     memory behind a VoxelManip, frequent VoxelManip usage can cause the server to
+     run out of RAM. Therefore it's recommend to call this method once you're done
+     with the VoxelManip.
+   * (introduced in 5.13.0)
 
 `VoxelArea`
 -----------
@@ -5171,7 +5465,7 @@ The coordinates are *inclusive*, like most other things in Luanti.
     * The position (x, y, z) is not checked for being inside the area volume,
       being outside can cause an incorrect index result.
     * Useful for things like `VoxelManip`, raw Schematic specifiers,
-      `PerlinNoiseMap:get2d`/`3dMap`, and so on.
+      `ValueNoiseMap:get2d`/`3dMap`, and so on.
 * `indexp(p)`: same functionality as `index(x, y, z)` but takes a vector.
     * As with `index(x, y, z)`, the components of `p` must be integers, and `p`
       is not checked for being inside the area volume.
@@ -5266,7 +5560,7 @@ Available generation notification types:
 * `cave_end`
 * `large_cave_begin`
 * `large_cave_end`
-* `custom`: data originating from [Mapgen environment] (Lua API)
+* `custom`: data originating from [Mapgen environment](#mapgen-environment) (Lua API)
    * This is a table.
    * key = user-defined ID (string)
    * value = arbitrary Lua value
@@ -5316,7 +5610,7 @@ Callbacks:
     * `puncher`: an `ObjectRef` (can be `nil`)
     * `time_from_last_punch`: Meant for disallowing spamming of clicks
       (can be `nil`).
-    * `tool_capabilities`: capability table of used item (can be `nil`)
+    * `tool_capabilities`: capability table of used item
     * `dir`: unit vector of direction of punch. Always defined. Points from the
       puncher to the punched.
     * `damage`: damage that will be done to entity.
@@ -5505,7 +5799,6 @@ provided by the Luanti engine and can be used by mods:
       * `fly`: can use "fly mode" to move freely above the ground without falling.
       * `noclip`: can use "noclip mode" to fly through solid nodes (e.g. walls).
       * `teleport`: can use `/teleport` command to move to any point in the world.
-      * `creative`: can access creative inventory.
       * `bring`: can teleport other players to oneself.
       * `give`: can use `/give` and `/giveme` commands to give any item
         in the game to oneself or others.
@@ -5553,8 +5846,13 @@ Utilities
     * Works regardless of whether the mod has been loaded yet.
     * Useful for loading additional `.lua` modules or static data from a mod,
   or checking if a mod is enabled.
-* `core.get_modnames()`: returns a list of enabled mods, sorted alphabetically.
-    * Does not include disabled mods, even if they are installed.
+* `core.get_modnames([load_order])`:
+    * Returns a list of the mods' names that are loaded or are yet to be loaded
+      during startup.
+    * `load_order` defines the order of the names (optional, default `false`)
+        * Available since 5.16.0
+        * `true`: Sorted according to the load order.
+        * `false`: Sorted alphabetically.
 * `core.get_game_info()`: returns a table containing information about the
   current game. Note that other meta information (e.g. version/release number)
   can be manually read from `game.conf` in the game's root directory.
@@ -5629,7 +5927,7 @@ Utilities
       dynamic_add_media_table = true,
       -- particlespawners support texpools and animation of properties,
       -- particle textures support smooth fade and scale animations, and
-      -- sprite-sheet particle animations can by synced to the lifetime
+      -- sprite-sheet particle animations can be synced to the lifetime
       -- of individual particles (5.6.0)
       particlespawner_tweenable = true,
       -- allows get_sky to return a table instead of separate values (5.6.0)
@@ -5689,6 +5987,25 @@ Utilities
       biome_weights = true,
       -- Particles can specify a "clip" blend mode (5.11.0)
       particle_blend_clip = true,
+      -- The `match_meta` optional parameter is available for `InvRef:remove_item()` (5.12.0)
+      remove_item_match_meta = true,
+      -- The HTTP API supports the HEAD and PATCH methods (5.12.0)
+      httpfetch_additional_methods = true,
+      -- objects have get_guid method (5.13.0)
+      object_guids = true,
+      -- The NodeTimer `on_timer` callback is passed additional `node` and `timeout` args (5.14.0)
+      on_timer_four_args = true,
+      -- `ParticleSpawner` definition supports `exclude_player` field (5.14.0)
+      particlespawner_exclude_player = true,
+      -- core.generate_decorations() supports `use_mapgen_biomes` parameter (5.14.0)
+      generate_decorations_biomes = true,
+      -- 'chunksize' mapgen setting can be a vector, instead of a single number (5.15.0)
+      chunksize_vector = true,
+      -- Item definition fields `inventory_image`, `inventory_overlay`, `wield_image`
+      -- and `wield_overlay` accept a table containing animation definitions. (5.15.0)
+      item_image_animation = true,
+      -- `core.get_modnames`' parameter `load_order` (5.16.0)
+      get_modnames_load_order = true,
   }
   ```
 
@@ -5696,6 +6013,7 @@ Utilities
     * checks for *server-side* feature availability
     * `arg`: string or table in format `{foo=true, bar=true}`
     * `missing_features`: `{foo=true, bar=true}`
+
 * `core.get_player_information(player_name)`: Table containing information
   about a player. Example return value:
 
@@ -5735,19 +6053,19 @@ Utilities
   ```
 
 * `core.protocol_versions`:
-  * Table mapping Luanti versions to corresponding protocol versions for modder convenience.
-  * For example, to check whether a client has at least the feature set
-    of Luanti 5.8.0 or newer, you could do:
-    `core.get_player_information(player_name).protocol_version >= core.protocol_versions["5.8.0"]`
-  * (available since 5.11)
+    * Table mapping Luanti versions to corresponding protocol versions for modder convenience.
+    * For example, to check whether a client has at least the feature set
+      of Luanti 5.8.0 or newer, you could do:
+      `core.get_player_information(player_name).protocol_version >= core.protocol_versions["5.8.0"]`
+    * (available since 5.11)
 
-  ```lua
-  {
-      [version string] = protocol version at time of release
-      -- every major and minor version has an entry
-      -- patch versions only for the first release whose protocol version is not already present in the table
-  }
-  ```
+    ```lua
+    {
+        [version string] = protocol version at time of release
+        -- every major and minor version has an entry
+        -- patch versions only for the first release whose protocol version is not already present in the table
+    }
+    ```
 
 * `core.get_player_window_information(player_name)`:
 
@@ -5771,8 +6089,8 @@ Utilities
       },
 
       -- Estimated maximum formspec size before Luanti will start shrinking the
-      -- formspec to fit. For a fullscreen formspec, use this formspec size and
-      -- `padding[0,0]`. `bgcolor[;true]` is also recommended.
+      -- formspec to fit. For a fullscreen formspec, use the size returned by
+      -- this table  and `padding[0,0]`. `bgcolor[;true]` is also recommended.
       max_formspec_size = {
           x = 20,
           y = 11.25
@@ -5794,6 +6112,8 @@ Utilities
   }
   ```
 
+* `core.path_exists(path)`: returns true if the given path exists else false
+    * `path` is the path that will be tested can be either a directory or a file
 * `core.mkdir(path)`: returns success.
     * Creates a directory specified by `path`, creating parent directories
       if they don't exist.
@@ -5874,7 +6194,8 @@ Logging
 -------
 
 * `core.debug(...)`
-    * Equivalent to `core.log(table.concat({...}, "\t"))`
+    * Calls `core.log` with all arguments converted to string and separated by tabs
+      (similar to `print`).
 * `core.log([level,] text)`
     * `level` is one of `"none"`, `"error"`, `"warning"`, `"action"`,
       `"info"`, or `"verbose"`.  Default is `"none"`.
@@ -5886,16 +6207,23 @@ Call these functions only at load time!
 
 ### Environment
 
-* `core.register_node(name, node definition)`
-* `core.register_craftitem(name, item definition)`
-* `core.register_tool(name, item definition)`
+* `core.register_node(name, nodedef)`
+    * register a node with its definition
+    * Note: you must pass a clean table that hasn't already been used for
+      another registration to this function, as it will be modified.
+* `core.register_craftitem(name, itemdef)`
+    * register an item with its definition
+    * Note: (as above)
+* `core.register_tool(name, tooldef)`
+    * register a tool item with its definition
+    * Note: (as above)
 * `core.override_item(name, redefinition, del_fields)`
     * `redefinition` is a table of fields `[name] = new_value`,
       overwriting fields of or adding fields to the existing definition.
     * `del_fields` is a list of field names to be set
       to `nil` ("deleted from") the original definition.
     * Overrides fields of an item registered with register_node/tool/craftitem.
-    * Note: Item must already be defined, (opt)depend on the mod defining it.
+    * Note: Item must already be defined.
     * Example: `core.override_item("default:mese",
       {light_source=core.LIGHT_MAX}, {"sounds"})`:
       Overwrites the `light_source` field,
@@ -5903,13 +6231,13 @@ Call these functions only at load time!
 * `core.unregister_item(name)`
     * Unregisters the item from the engine, and deletes the entry with key
       `name` from `core.registered_items` and from the associated item table
-      according to its nature: `core.registered_nodes`, etc.
+      according to its nature (e.g. `core.registered_nodes`)
 * `core.register_entity(name, entity definition)`
 * `core.register_abm(abm definition)`
 * `core.register_lbm(lbm definition)`
 * `core.register_alias(alias, original_name)`
     * Also use this to set the 'mapgen aliases' needed in a game for the core
-      mapgens. See [Mapgen aliases] section above.
+      mapgens. See [Mapgen aliases](#mapgen-aliases) section above.
 * `core.register_alias_force(alias, original_name)`
 * `core.register_ore(ore definition)`
     * Returns an integer object handle uniquely identifying the registered
@@ -5971,7 +6299,7 @@ Call these functions only at load time!
     * Unregisters a chatcommands registered with `register_chatcommand`.
 * `core.register_privilege(name, definition)`
     * `definition` can be a description or a definition table (see [Privilege
-      definition]).
+      definition](#privilege-definition)).
     * If it is a description, the priv will be granted to singleplayer and admin
       by default.
     * To allow players with `basic_privs` to grant, see the `basic_privs`
@@ -5989,34 +6317,34 @@ Call these functions only at load time!
     * Called every server step, usually interval of 0.1s.
     * `dtime` is the time since last execution in seconds.
 * `core.register_on_mods_loaded(function())`
-    * Called after mods have finished loading and before the media is cached or the
-      aliases handled.
+    * Called after all mods have finished loading and before the media is cached
+      or aliases are handled.
 * `core.register_on_shutdown(function())`
-    * Called before server shutdown
-    * Players that were kicked by the shutdown procedure are still fully accessible
-     in `core.get_connected_players()`.
+    * Called during server shutdown before players are kicked.
     * **Warning**: If the server terminates abnormally (i.e. crashes), the
-      registered callbacks **will likely not be run**. Data should be saved at
+      registered callbacks will likely **not run**. Data should be saved at
       semi-frequent intervals as well as on server shutdown.
 * `core.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing))`
-    * Called when a node has been placed
-    * If return `true` no item is taken from `itemstack`
+    * Called after a node has been placed.
+    * If `true` is returned no item is taken from `itemstack`
     * `placer` may be any valid ObjectRef or nil.
     * **Not recommended**; use `on_construct` or `after_place_node` in node
       definition whenever possible.
 * `core.register_on_dignode(function(pos, oldnode, digger))`
-    * Called when a node has been dug.
+    * Called after a node has been dug.
     * **Not recommended**; Use `on_destruct` or `after_dig_node` in node
       definition whenever possible.
 * `core.register_on_punchnode(function(pos, node, puncher, pointed_thing))`
     * Called when a node is punched
 * `core.register_on_generated(function(minp, maxp, blockseed))`
-    * Called after generating a piece of world between `minp` and `maxp`.
+    * Called after a piece of world between `minp` and `maxp` has been
+      generated and written into the map.
     * **Avoid using this** whenever possible. As with other callbacks this blocks
-      the main thread and introduces noticeable latency.
-      Consider [Mapgen environment] for an alternative.
-* `core.register_on_newplayer(function(ObjectRef))`
+      the main thread and is prone to introduce noticeable latency/lag.
+      Consider [Mapgen environment](#mapgen-environment) as an alternative.
+* `core.register_on_newplayer(function(player))`
     * Called when a new player enters the world for the first time
+    * `player`: ObjectRef
 * `core.register_on_punchplayer(function(player, hitter, time_from_last_punch, tool_capabilities, dir, damage))`
     * Called when a player is punched
     * Note: This callback is invoked even if the punched player is dead.
@@ -6043,26 +6371,14 @@ Call these functions only at load time!
       * Historically, the new HP value was clamped to [0, 65535] before
         calculating the HP change. This clamping has been removed as of
         version 5.10.0
-    * `reason`: a PlayerHPChangeReason table.
-        * The `type` field will have one of the following values:
-            * `set_hp`: A mod or the engine called `set_hp` without
-                        giving a type - use this for custom damage types.
-            * `punch`: Was punched. `reason.object` will hold the puncher, or nil if none.
-            * `fall`
-            * `node_damage`: `damage_per_second` from a neighboring node.
-                             `reason.node` will hold the node name or nil.
-                             `reason.node_pos` will hold the position of the node
-            * `drown`
-            * `respawn`
-        * Any of the above types may have additional fields from mods.
-        * `reason.from` will be `mod` or `engine`.
+    * `reason`: a `PlayerHPChangeReason` table.
     * `modifier`: when true, the function should return the actual `hp_change`.
        Note: modifiers only get a temporary `hp_change` that can be modified by later modifiers.
        Modifiers can return true as a second argument to stop the execution of further functions.
        Non-modifiers receive the final HP change calculated by the modifiers.
 * `core.register_on_dieplayer(function(ObjectRef, reason))`
     * Called when a player dies
-    * `reason`: a PlayerHPChangeReason table, see register_on_player_hpchange
+    * `reason`: a `PlayerHPChangeReason` table
     * For customizing the death screen, see `core.show_death_screen`.
 * `core.register_on_respawnplayer(function(ObjectRef))`
     * Called when player is to be respawned
@@ -6108,17 +6424,18 @@ Call these functions only at load time!
       handlers will be prevented.
 * `core.register_on_player_receive_fields(function(player, formname, fields))`
     * Called when the server received input from `player`.
-      Specifically, this is called on any of the
-      following events:
-          * a button was pressed,
-          * Enter was pressed while the focus was on a text field
-          * a checkbox was toggled,
-          * something was selected in a dropdown list,
-          * a different tab was selected,
-          * selection was changed in a textlist or table,
-          * an entry was double-clicked in a textlist or table,
-          * a scrollbar was moved, or
-          * the form was actively closed by the player.
+      Specifically, this is called on any of the following events:
+        * a button was pressed,
+        * Enter was pressed while the focus was on a text field
+        * a checkbox was toggled,
+        * something was selected in a dropdown list,
+        * a different tab was selected,
+        * selection was changed in a textlist or table,
+        * an entry was double-clicked in a textlist or table,
+        * a scrollbar was moved, or
+        * the form was actively closed by the player.
+    * This is not called for node metadata formspecs. These use the callback
+      `on_receive_fields` specified in the node definition.
     * `formname` is the name passed to `core.show_formspec`.
       Special case: The empty string refers to the player inventory
       (the formspec set by the `set_inventory_formspec` player method).
@@ -6138,8 +6455,10 @@ Call these functions only at load time!
         * `table`: See `core.explode_table_event`
         * `scrollbar`: See `core.explode_scrollbar_event`
         * Special case: `["quit"]="true"` is sent when the user actively
-          closed the form by mouse click, keypress or through a button_exit[]
+          closed the form by mouse click, keypress or through a `button_exit[]`
           element.
+        * Special case: `["try_quit"]="true"` is sent when the user tries to
+          close the formspec, but the formspec used `allow_close[false]`.
         * Special case: `["key_enter"]="true"` is sent when the user pressed
           the Enter key and the focus was either nowhere (causing the formspec
           to be closed) or on a button. If the focus was on a text field,
@@ -6150,7 +6469,7 @@ Call these functions only at load time!
 * `core.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv))`
     * Called when `player` crafts something
     * `itemstack` is the output
-    * `old_craft_grid` contains the recipe (Note: the one in the inventory is
+    * `old_craft_grid` contains the recipe, is a list of `ItemStack`s (Note: the one in the inventory is
       cleared).
     * `craft_inv` is the inventory with the crafting grid
     * Return either an `ItemStack`, to replace the output, or `nil`, to not
@@ -6162,8 +6481,8 @@ Call these functions only at load time!
     * Determines how much of a stack may be taken, put or moved to a
       player inventory.
     * Function arguments: see `core.register_on_player_inventory_action`
-    * Return a numeric value to limit the amount of items to be taken, put or
-      moved. A value of `-1` for `take` will make the source stack infinite.
+    * The return value behaves like the respective `allow_metadata_inventory_*`
+      item callback.
 * `core.register_on_player_inventory_action(function(player, action, inventory, inventory_info))`
     * Called after an item take, put or move event from/to/in a player inventory
     * These inventory actions are recognized:
@@ -6232,7 +6551,7 @@ Setting-related
 ---------------
 
 * `core.settings`: Settings object containing all of the settings from the
-  main config file (`minetest.conf`). See [`Settings`].
+  main config file (`minetest.conf`). See [`Settings`](#settings).
 * `core.setting_get_pos(name)`: Loads a setting from the main settings and
   parses it as a position (in the format `(1,2,3)`). Returns a position or nil. **Deprecated: use `core.settings:get_pos()` instead**
 
@@ -6275,7 +6594,7 @@ Authentication
 * `core.get_auth_handler()`: Return the currently active auth handler
     * Must be called *after* load time, to ensure that any custom auth handler was
       already registered.
-    * See the [Authentication handler definition]
+    * See the [Authentication handler definition](#authentication-handler-definition)
     * Use this to e.g. get the authentication data for a player:
       `local auth_data = core.get_auth_handler().get_auth(playername)`
 * `core.notify_authentication_modified(name)`
@@ -6351,6 +6670,11 @@ Environment access
 * `core.get_node_or_nil(pos)`
     * Same as `get_node` but returns `nil` for unloaded areas.
     * Note that even loaded areas can contain "ignore" nodes.
+* `core.get_node_raw(x, y, z)`
+    * Same as `get_node` but a faster low-level API
+    * Returns `content_id`, `param1`, `param2`, and `pos_ok`
+    * The `content_id` can be mapped to a name using `core.get_name_from_content_id()`
+    * If `pos_ok` is false, the area is unloaded and `content_id == core.CONTENT_IGNORE`
 * `core.get_node_light(pos[, timeofday])`
     * Gets the light value at the given position. Note that the light value
       "inside" the node at the given position is returned, so you usually want
@@ -6447,24 +6771,28 @@ Environment access
       first value: Table with all node positions
       second value: Table with the count of each node with the node name
       as index
-    * Area volume is limited to 4,096,000 nodes
+    * Area volume is limited to 150,000,000 nodes
 * `core.find_nodes_in_area_under_air(pos1, pos2, nodenames)`: returns a
   list of positions.
     * `nodenames`: e.g. `{"ignore", "group:tree"}` or `"default:dirt"`
     * Return value: Table with all node positions with a node air above
-    * Area volume is limited to 4,096,000 nodes
-* `core.get_perlin(noiseparams)`
-    * Return world-specific perlin noise.
+    * Area volume is limited to 150,000,000 nodes
+* `core.get_value_noise(noiseparams)`
+    * Return world-specific value noise.
     * The actual seed used is the noiseparams seed plus the world seed.
+    * **Important**: Requires the mapgen environment to be initalized, do not use at load time.
+* `core.get_value_noise(seeddiff, octaves, persistence, spread)`
+    * Deprecated: use `core.get_value_noise(noiseparams)` instead.
+* `core.get_perlin(noiseparams)`
+    * Deprecated: renamed to `core.get_value_noise` in version 5.12.0.
 * `core.get_perlin(seeddiff, octaves, persistence, spread)`
-    * Deprecated: use `core.get_perlin(noiseparams)` instead.
-    * Return world-specific perlin noise.
+    * Deprecated: renamed to `core.get_value_noise` in version 5.12.0.
 * `core.get_voxel_manip([pos1, pos2])`
     * Return voxel manipulator object.
     * Loads the manipulator from the map if positions are passed.
 * `core.set_gen_notify(flags, [deco_ids], [custom_ids])`
     * Set the types of on-generate notifications that should be collected.
-    * `flags`: flag field, see [`gennotify`] for available generation notification types.
+    * `flags`: flag field, see [`gennotify`](#gennotify) for available generation notification types.
     * The following parameters are optional:
     * `deco_ids` is a list of IDs of decorations which notification
       is requested for.
@@ -6478,7 +6806,7 @@ Environment access
     * Returns the decoration ID number for the provided decoration name string,
       or `nil` on failure.
 * `core.get_mapgen_object(objectname)`
-    * Return requested mapgen object if available (see [Mapgen objects])
+    * Return requested mapgen object if available (see [Mapgen objects](#mapgen-objects))
 * `core.get_heat(pos)`
     * Returns the heat at the position, or `nil` on failure.
 * `core.get_humidity(pos)`
@@ -6525,8 +6853,11 @@ Environment access
       in that order.
     * `mapgen_limit` is an optional number. If it is absent, its value is that
       of the *active* mapgen setting `"mapgen_limit"`.
-    * `chunksize` is an optional number. If it is absent, its value is that
+    * `chunksize` is an optional number or vector. If it is absent, its value is that
       of the *active* mapgen setting `"chunksize"`.
+* `core.get_mapgen_chunksize()`
+    * Returns the currently active chunksize of the mapgen, as a vector.
+      The size is specified in blocks.
 * `core.get_mapgen_setting(name)`
     * Gets the *active* mapgen setting (or nil if none exists) in string
       format with the following order of precedence:
@@ -6555,14 +6886,18 @@ Environment access
       active config.
 * `core.get_noiseparams(name)`
     * Returns a table of the noiseparams for name.
-* `core.generate_ores(vm, pos1, pos2)`
+* `core.generate_ores(vm[, pos1, pos2])`
     * Generate all registered ores within the VoxelManip `vm` and in the area
       from `pos1` to `pos2`.
     * `pos1` and `pos2` are optional and default to mapchunk minp and maxp.
-* `core.generate_decorations(vm, pos1, pos2)`
+* `core.generate_decorations(vm[, pos1, pos2, [use_mapgen_biomes]])`
     * Generate all registered decorations within the VoxelManip `vm` and in the
       area from `pos1` to `pos2`.
     * `pos1` and `pos2` are optional and default to mapchunk minp and maxp.
+    * `use_mapgen_biomes` (optional boolean). For use in on_generated callbacks only.
+       If set to true, decorations are placed in respect to the biome map of the current chunk.
+       `pos1` and `pos2` must match the positions of the current chunk, or an error will be raised.
+       default: `false`
 * `core.clear_objects([options])`
     * Clear all objects in the environment
     * Takes an optional table as an argument with the field `mode`.
@@ -6583,14 +6918,18 @@ Environment access
       emerged.
     * The function signature of callback is:
       `function EmergeAreaCallback(blockpos, action, calls_remaining, param)`
-        * `blockpos` is the *block* coordinates of the block that had been
-          emerged.
-        * `action` could be one of the following constant values:
-            * `core.EMERGE_CANCELLED`
-            * `core.EMERGE_ERRORED`
-            * `core.EMERGE_FROM_MEMORY`
-            * `core.EMERGE_FROM_DISK`
-            * `core.EMERGE_GENERATED`
+        * `blockpos` are the *block* coordinates of the block in question.
+        * `action` can be one of the following constant values:
+            * `core.EMERGE_GENERATED`: The block has been freshly generated.
+            * `core.EMERGE_FROM_MEMORY`: The block did not need to be loaded
+              because it was already in memory.
+            * `core.EMERGE_FROM_DISK`: The block was generated before and has been
+              loaded from the map database.
+            * `core.EMERGE_CANCELLED`: The block was not loaded for some reason.
+              Possible reasons include: Server shutdown, it was already being
+              emerged, outside of mapgen limits.
+              This event is not an error, but does *not* mean that the block is now present.
+            * `core.EMERGE_ERRORED`: Emerging the block has failed due to an error.
         * `calls_remaining` is the number of callbacks to be expected after
           this one.
         * `param` is the user-defined parameter passed to emerge_area (or
@@ -6706,6 +7045,7 @@ You can find mod channels communication scheme in `doc/mod_channels.png`.
     * Server joins channel `channel_name`, and creates it if necessary. You
       should listen for incoming messages with
       `core.register_on_modchannel_message`
+    * This returns a [ModChannel](#modchannel) object.
 
 Inventory
 ---------
@@ -6718,7 +7058,7 @@ Inventory
     * `{type="detached", name="creative"}`
 * `core.create_detached_inventory(name, callbacks, [player_name])`: returns
   an `InvRef`.
-    * `callbacks`: See [Detached inventory callbacks]
+    * `callbacks`: See [Detached inventory callbacks](#detached-inventory-callbacks)
     * `player_name`: Make detached inventory available to one player
       exclusively, by default they will be sent to every player (even if not
       used).
@@ -6731,16 +7071,21 @@ Inventory
   returns leftover ItemStack or nil to indicate no inventory change
     * See `core.item_eat` and `core.register_on_item_eat`
 
-Formspec
+Formspec functions
 --------
 
 * `core.show_formspec(playername, formname, formspec)`
     * `playername`: name of player to show formspec
     * `formname`: name passed to `on_player_receive_fields` callbacks.
-      It should follow the `"modname:<whatever>"` naming convention.
-    * `formname` must not be empty, unless you want to reshow
-      the inventory formspec without updating it for future opens.
+        * It should follow the `"modname:<whatever>"` naming convention.
+        * If empty: Shows a custom, temporary inventory formspec.
+            * An inventory formspec shown this way will also be updated if
+              `ObjectRef:set_inventory_formspec` is called.
+            * Use `ObjectRef:set_inventory_formspec` to change the player's
+              inventory formspec for future opens.
+            * Supported if server AND client are both of version >= 5.13.0.
     * `formspec`: formspec to display
+    * See also: `core.register_on_player_receive_fields`
 * `core.close_formspec(playername, formname)`
     * `playername`: name of player to close formspec
     * `formname`: has to exactly match the one given in `show_formspec`, or the
@@ -6779,7 +7124,7 @@ Formspec
         * `"VAL"`: not changed
 * `core.show_death_screen(player, reason)`
     * Called when the death screen should be shown.
-    * `player` is an ObjectRef, `reason` is a PlayerHPChangeReason table or nil.
+    * `player` is an ObjectRef, `reason` is a `PlayerHPChangeReason` table or nil.
     * By default, this shows a simple formspec with the option to respawn.
       Respawning is done via `ObjectRef:respawn`.
     * You can override this to show a custom death screen.
@@ -6795,7 +7140,7 @@ Item handling
       does not refer to a node or entity.
     * If the optional `above` parameter is true and the `pointed_thing` refers
       to a node, then it will return the `above` position of the `pointed_thing`.
-* `core.dir_to_facedir(dir, is6d)`
+* `core.dir_to_facedir(dir[, is6d])`
     * Convert a vector to a facedir value, used in `param2` for
       `paramtype2="facedir"`.
     * passing something non-`nil`/`false` for the optional second parameter
@@ -6827,11 +7172,16 @@ Item handling
       given `param2` value.
     * Returns `nil` if the given `paramtype2` does not contain color
       information.
-* `core.get_node_drops(node, toolname)`
-    * Returns list of itemstrings that are dropped by `node` when dug
-      with the item `toolname` (not limited to tools).
+* `core.get_node_drops(node[, toolname, tool, digger, pos])`
+    * Returns list of itemstrings that are dropped by `node` when dug with the
+      item `toolname` (not limited to tools). The default implementation doesn't
+      use `tool`, `digger`, and `pos`, but these are provided by `core.node_dig`
+      since 5.12.0 for games/mods implementing customized drops.
     * `node`: node as table or node name
     * `toolname`: name of the item used to dig (can be `nil`)
+    * `tool`: `ItemStack` used to dig (can be `nil`)
+    * `digger`: the ObjectRef that digs the node (can be `nil`)
+    * `pos`: the pos of the dug node (can be `nil`)
 * `core.get_craft_result(input)`: returns `output, decremented_input`
     * `input.method` = `"normal"` or `"cooking"` or `"fuel"`
     * `input.width` = for example `3`
@@ -6932,11 +7282,20 @@ Defaults for the `on_place` and `on_drop` item definition functions
 * `core.item_pickup(itemstack, picker, pointed_thing, time_from_last_punch, ...)`
     * Runs callbacks registered by `core.register_on_item_pickup` and adds
       the item to the picker's `"main"` inventory list.
-    * Parameters are the same as in `on_pickup`.
-    * Returns the leftover itemstack.
+    * Parameters and return value are the same as `on_pickup`.
+    * **Note**: is not called when wielded item overrides `on_pickup`
+* `core.item_secondary_use(itemstack, user)`
+    * Global secondary use callback. Does nothing.
+    * Parameters and return value are the same as `on_secondary_use`.
+    * **Note**: is not called when wielded item overrides `on_secondary_use`
 * `core.item_drop(itemstack, dropper, pos)`
-    * Drop the item
-    * returns the leftover itemstack
+    * Converts `itemstack` to an in-world Lua entity.
+    * `itemstack` (`ItemStack`) is modified (cleared) on success.
+      * In versions < 5.12.0, `itemstack` was cleared in all cases.
+    * `dropper` (`ObjectRef`) is optional.
+    * Returned values on success:
+      1. leftover itemstack
+      2. `ObjectRef` of the spawned object (provided since 5.12.0)
 * `core.item_eat(hp_change[, replace_with_item])`
     * Returns `function(itemstack, user, pointed_thing)` as a
       function wrapper for `core.do_item_eat`.
@@ -6951,7 +7310,7 @@ Defaults for the `on_punch` and `on_dig` node definition callbacks
     * Calls functions registered by `core.register_on_punchnode()`
 * `core.node_dig(pos, node, digger)`
     * Checks if node can be dug, puts item into inventory, removes node
-    * Calls functions registered by `core.registered_on_dignodes()`
+    * Calls functions registered by `core.register_on_dignode()`
 
 Sounds
 ------
@@ -7016,11 +7375,11 @@ This allows you easy interoperability for delegating work to jobs.
     * When `func` returns the callback is called (in the normal environment)
       with all of the return values as arguments.
     * Optional: Variable number of arguments that are passed to `func`
+    * Returns an `AsyncJob` async job.
 * `core.register_async_dofile(path)`:
     * Register a path to a Lua file to be imported when an async environment
       is initialized. You can use this to preload code which you can then call
       later using `core.handle_async()`.
-
 
 ### List of APIs available in an async environment
 
@@ -7028,8 +7387,8 @@ Classes:
 
 * `AreaStore`
 * `ItemStack`
-* `PerlinNoise`
-* `PerlinNoiseMap`
+* `ValueNoise`
+* `ValueNoiseMap`
 * `PseudoRandom`
 * `PcgRandom`
 * `SecureRandom`
@@ -7041,8 +7400,8 @@ Classes:
 Class instances that can be transferred between environments:
 
 * `ItemStack`
-* `PerlinNoise`
-* `PerlinNoiseMap`
+* `ValueNoise`
+* `ValueNoiseMap`
 * `VoxelManip`
 
 Functions:
@@ -7068,7 +7427,7 @@ a Lua environment. Its primary purpose is to allow mods to operate on newly
 generated parts of the map to e.g. generate custom structures.
 Internally it is referred to as "emerge environment".
 
-Refer to [Async environment] for the usual disclaimer on what environment isolation entails.
+Refer to [Async environment](#async-environment) for the usual disclaimer on what environment isolation entails.
 
 The map generator threads, which also contain the above mentioned Lua environment,
 are initialized after all mods have been loaded by the server. After that the
@@ -7092,7 +7451,7 @@ does not have a global step or timer.
       is not necessary and is disallowed.
     * `blockseed`: 64-bit seed number used for this chunk
 * `core.save_gen_notify(id, data)`
-    * Saves data for retrieval using the gennotify mechanism (see [Mapgen objects]).
+    * Saves data for retrieval using the gennotify mechanism (see [Mapgen objects](#mapgen-objects)).
     * Data is bound to the chunk that is currently being processed, so this function
       only makes sense inside the `on_generated` callback.
     * `id`: user-defined ID (a string)
@@ -7108,8 +7467,8 @@ Classes:
 
 * `AreaStore`
 * `ItemStack`
-* `PerlinNoise`
-* `PerlinNoiseMap`
+* `ValueNoise`
+* `ValueNoiseMap`
 * `PseudoRandom`
 * `PcgRandom`
 * `SecureRandom`
@@ -7179,11 +7538,13 @@ Server
         * `filedata`: the data of the file to be sent [*]
         * `to_player`: name of the player the media should be sent to instead of
                        all players (optional)
-        * `ephemeral`: boolean that marks the media as ephemeral,
-                       it will not be cached on the client (optional, default false)
+        * `ephemeral`: if true the server will create a copy of the file and
+                       forget about it once delivered (optional boolean, default false)
+        * `client_cache`: hint whether the client should save the media in its cache
+                          (optional boolean, default `!ephemeral`, added in 5.14.0)
         * Exactly one of the parameters marked [*] must be specified.
     * `callback`: function with arguments `name`, which is a player name
-    * Pushes the specified media file to client(s). (details below)
+    * Pushes the specified media file to client(s) as detailed below.
       The file must be a supported image, sound or model format.
       Dynamically added media is not persisted between server restarts.
     * Returns false on error, true if the request was accepted
@@ -7192,19 +7553,17 @@ Server
     * Details/Notes:
       * If `ephemeral`=false and `to_player` is unset the file is added to the media
         sent to clients on startup, this means the media will appear even on
-        old clients if they rejoin the server.
+        old clients (<5.3.0) if they rejoin the server.
       * If `ephemeral`=false the file must not be modified, deleted, moved or
-        renamed after calling this function.
-      * Regardless of any use of `ephemeral`, adding media files with the same
-        name twice is not possible/guaranteed to work. An exception to this is the
-        use of `to_player` to send the same, already existent file to multiple
-        chosen players.
+        renamed after calling this function. This is allowed otherwise.
+      * Adding media files with the same name twice is not possible.
+        An exception to this is the use of `to_player` to send the same,
+        already existent file to multiple chosen players (`ephemeral`=false only).
       * You can also call this at startup time. In that case `callback` MUST
         be `nil` and you cannot use `ephemeral` or `to_player`, as these logically
         do not make sense.
     * Clients will attempt to fetch files added this way via remote media,
-      this can make transfer of bigger files painless (if set up). Nevertheless
-      it is advised not to use dynamic media for big media files.
+      this can make transfer of bigger files painless (if set up).
 
 IPC
 ---
@@ -7275,6 +7634,7 @@ Particles
 ---------
 
 * `core.add_particle(particle definition)`
+    * Spawn a single particle
     * Deprecated: `core.add_particle(pos, velocity, acceleration,
       expirationtime, size, collisiondetection, texture, playername)`
 
@@ -7329,7 +7689,7 @@ Schematics
     * Saves schematic in the Luanti Schematic format to filename.
 
 * `core.place_schematic(pos, schematic, rotation, replacements, force_placement, flags)`
-    * Place the schematic specified by schematic (see [Schematic specifier]) at
+    * Place the schematic specified by schematic (see [Schematic specifier](#schematic-specifier)) at
       `pos`.
     * `rotation` can equal `"0"`, `"90"`, `"180"`, `"270"`, or `"random"`.
     * If the `rotation` parameter is omitted, the schematic is not rotated.
@@ -7364,7 +7724,7 @@ Schematics
 
 * `core.serialize_schematic(schematic, format, options)`
     * Return the serialized schematic specified by schematic
-      (see [Schematic specifier])
+      (see [Schematic specifier](#schematic-specifier))
     * in the `format` of either "mts" or "lua".
     * "mts" - a string containing the binary MTS data used in the MTS file
       format.
@@ -7379,8 +7739,8 @@ Schematics
           instead of a tab character.
 
 * `core.read_schematic(schematic, options)`
-    * Returns a Lua table representing the schematic (see: [Schematic specifier])
-    * `schematic` is the schematic to read (see: [Schematic specifier])
+    * Returns a Lua table representing the schematic (see: [Schematic specifier](#schematic-specifier))
+    * `schematic` is the schematic to read (see: [Schematic specifier](#schematic-specifier))
     * `options` is a table containing the following optional parameters:
         * `write_yslice_prob`: string value:
             * `none`: no `write_yslice_prob` table is inserted,
@@ -7454,7 +7814,8 @@ Misc.
     * This function can be overridden by mods to change the leave message.
 * `core.hash_node_position(pos)`: returns a 48-bit integer
     * `pos`: table {x=number, y=number, z=number},
-    * Gives a unique hash number for a node position (16+16+16=48bit)
+    * Gives a unique numeric encoding for a node position (16+16+16=48bit)
+    * Despite the name, this is not a hash function (so it doesn't mix or produce collisions).
 * `core.get_position_from_hash(hash)`: returns a position
     * Inverse transform of `core.hash_node_position`
 * `core.get_item_group(name, group)`: returns a rating
@@ -7492,16 +7853,22 @@ Misc.
     * Example: `write_json({10, {a = false}})`,
       returns `'[10, {"a": false}]'`
 * `core.serialize(table)`: returns a string
-    * Convert a table containing tables, strings, numbers, booleans and `nil`s
-      into string form readable by `core.deserialize`
+    * Convert a value into string form readable by `core.deserialize`.
+    * Supports tables, strings, numbers, booleans and `nil`.
+    * Support for dumping function bytecode is **deprecated**.
+    * Note: To obtain a human-readable representation of a value, use `dump` instead.
     * Example: `serialize({foo="bar"})`, returns `'return { ["foo"] = "bar" }'`
 * `core.deserialize(string[, safe])`: returns a table
     * Convert a string returned by `core.serialize` into a table
     * `string` is loaded in an empty sandbox environment.
-    * Will load functions if safe is false or omitted. Although these functions
-      cannot directly access the global environment, they could bypass this
-      restriction with maliciously crafted Lua bytecode if mod security is
-      disabled.
+    * Will load functions if `safe` is `false` or omitted.
+      Although these functions cannot directly access the global environment,
+      they could bypass this restriction with maliciously crafted Lua bytecode
+      if mod security is disabled.
+    * Will silently strip functions embedded via calls to `loadstring`
+      (typically bytecode dumped by `core.serialize`) if `safe` is `true`.
+      You should not rely on this if possible.
+      * Example: `core.deserialize("return loadstring('')", true)` will be `nil`.
     * This function should not be used on untrusted data, regardless of the
      value of `safe`. It is fine to serialize then deserialize user-provided
      data, but directly providing user input to deserialize is always unsafe.
@@ -7614,6 +7981,8 @@ Misc.
 
 * `core.forceload_block(pos[, transient[, limit]])`
     * forceloads the position `pos`.
+    * this means that the mapblock containing `pos` will always be kept in the
+      `"active"` state, regardless of nearby players or server settings.
     * returns `true` if area could be forceloaded
     * If `transient` is `false` or absent, the forceload will be persistent
       (saved between server runs). If `true`, the forceload will be transient
@@ -7693,8 +8062,12 @@ Global tables
     * Values in this table may be modified directly.
       Note: changes to initial properties will only affect entities spawned afterwards,
       as they are only read when spawning.
+* `core.objects_by_guid`
+    * Map of active object references, indexed by object GUID
 * `core.object_refs`
-    * Map of object references, indexed by active object id
+    * **Obsolete:** Use `core.objects_by_guid` instead.
+      GUIDs are strictly more useful than active object IDs.
+    * Map of active object references, indexed by active object id
 * `core.luaentities`
     * Map of Lua entities, indexed by active object id
 * `core.registered_abms`
@@ -7723,7 +8096,7 @@ Global tables
 
 ### Registered callback tables
 
-All callbacks registered with [Global callback registration functions] are added
+All callbacks registered with [Global callback registration functions](#global-callback-registration-functions) are added
 to corresponding `core.registered_*` tables.
 
 For historical reasons, the use of an -s suffix in these names is inconsistent.
@@ -7843,6 +8216,15 @@ use the provided load and write functions for this.
 * `from_file(filename)`: Experimental. Like `from_string()`, but reads the data
   from a file.
 
+`AsyncJob`
+----------
+An `AsyncJob` is a reference to a job to be run in an async environment.
+
+### Methods
+* `cancel()`: try to cancel the job
+    * Returns whether the job was cancelled.
+    * A job can only be cancelled if it has not started.
+
 `InvRef`
 --------
 
@@ -7872,13 +8254,15 @@ An `InvRef` is a reference to an inventory.
   can be fully added to the list
 * `contains_item(listname, stack, [match_meta])`: returns `true` if
   the stack of items can be fully taken from the list.
-  If `match_meta` is false, only the items' names are compared
-  (default: `false`).
-* `remove_item(listname, stack)`: take as many items as specified from the
-  list, returns the items that were actually removed (as an `ItemStack`)
-  -- note that any item metadata is ignored, so attempting to remove a specific
-  unique item this way will likely remove the wrong one -- to do that use
-  `set_stack` with an empty `ItemStack`.
+    * If `match_meta` is `true`, item metadata is also considered when comparing
+      items. Otherwise, only the items names are compared. Default: `false`
+    * The method ignores wear.
+* `remove_item(listname, stack, [match_meta])`: take as many items as specified from the
+  list, returns the items that were actually removed (as an `ItemStack`).
+    * If `match_meta` is `true` (available since feature `remove_item_match_meta`),
+      item metadata is also considered when comparing items. Otherwise, only the
+      items names are compared. Default: `false`
+    * The method ignores wear.
 * `get_location()`: returns a location compatible to
   `core.get_inventory(location)`.
     * returns `{type="undefined"}` in case location is not known
@@ -7938,13 +8322,13 @@ an itemstring, a table or `nil`.
 * `get_description()`: returns the description shown in inventory list tooltips.
     * The engine uses this when showing item descriptions in tooltips.
     * Fields for finding the description, in order:
-        * `description` in item metadata (See [Item Metadata].)
+        * `description` in item metadata (See [Item Metadata](#item-metadata).)
         * `description` in item definition
         * item name
 * `get_short_description()`: returns the short description or nil.
     * Unlike the description, this does not include new lines.
     * Fields for finding the short description, in order:
-        * `short_description` in item metadata (See [Item Metadata].)
+        * `short_description` in item metadata (See [Item Metadata](#item-metadata).)
         * `short_description` in item definition
         * first line of the description (From item meta or def, see `get_description()`.)
         * Returns nil if none of the above are set
@@ -8020,8 +8404,8 @@ Can be obtained via `item:get_meta()`.
 `MetaDataRef`
 -------------
 
-Base class used by [`StorageRef`], [`NodeMetaRef`], [`ItemStackMetaRef`],
-and [`PlayerMetaRef`].
+Base class used by [`StorageRef`](#storageref), [`NodeMetaRef`](#nodemetaref), [`ItemStackMetaRef`](#itemstackmetaref),
+and [`PlayerMetaRef`](#playermetaref).
 
 Note: If a metadata value is in the format `${k}`, an attempt to get the value
 will return the value associated with key `k`. There is a low recursion limit.
@@ -8040,8 +8424,8 @@ of the `${k}` syntax in formspecs is not deprecated.
       The value will be converted into a string when stored.
 * `get_int(key)`: Returns `0` if key not present.
 * `set_float(key, value)`
-    * The range for the value is system-dependent (usually 32 bits).
-      The value will be converted into a string when stored.
+    * Store a number (a 64-bit float) exactly.
+    * The value will be converted into a string when stored.
 * `get_float(key)`: Returns `0` if key not present.
 * `get_keys()`: returns a list of all keys in the metadata.
 * `to_table()`:
@@ -8086,14 +8470,14 @@ metadata_table = {
         -- inventory list "main" with 4 slots
         main = {
             -- list of all item slots
-            [1] = "example:dirt",
-            [2] = "example:stone 25",
-            [3] = "", -- empty slot
-            [4] = "example:pickaxe",
+            [1] = ItemStack("example:dirt"),
+            [2] = ItemStack("example:stone 25"),
+            [3] = ItemStack(""), -- empty slot
+            [4] = ItemStack("example:pickaxe"),
         },
         -- inventory list "hidden" with 1 slot
         hidden = {
-            [1] = "example:diamond",
+            [1] = ItemStack("example:diamond"),
         },
     },
 }
@@ -8237,11 +8621,11 @@ child will follow movement and rotation of that bone.
     * no-op if object is attached
 * `punch(puncher, time_from_last_punch, tool_capabilities, dir)`
     * punches the object, triggering all consequences a normal punch would have
-    * `puncher`: another `ObjectRef` which punched the object or `nil`
-    * `dir`: direction vector of punch
-    * Other arguments: See `on_punch` for entities
-    * Arguments `time_from_last_punch`, `tool_capabilities`, and `dir`
-      will be replaced with a default value when the caller sets them to `nil`.
+    * `puncher`: another `ObjectRef` which punched the object (can be `nil`)
+    * `time_from_last_punch`: Meant for disallowing spamming of clicks
+      (can be `nil`)
+    * `tool_capabilities`: capability table of used item
+    * `dir`: direction vector. Points from the puncher to the punched (can be `nil`)
 * `right_click(clicker)`:
     * simulates using the 'place/use' key on the object
     * triggers all consequences as if a real player had done this
@@ -8249,7 +8633,7 @@ child will follow movement and rotation of that bone.
     * note: this is called `right_click` for historical reasons only
 * `get_hp()`: returns number of health points
 * `set_hp(hp, reason)`: set number of health points
-    * See reason in register_on_player_hpchange
+    * reason: A `PlayerHPChangeReason` table (optional)
     * Is limited to the range of 0 ... 65535 (2^16 - 1)
     * For players: HP are also limited by `hp_max` specified in object properties
 * `get_inventory()`: returns an `InvRef` for players, otherwise returns `nil`
@@ -8292,7 +8676,7 @@ child will follow movement and rotation of that bone.
     * Attaches object to `parent`
     * See 'Attachments' section for details
     * `parent`: `ObjectRef` to attach to
-    * `bone`: Bone to attach to. Default is `""` (the root bone)
+    * `bone`: Bone to attach to. Default is `""` which attaches to the parent object's origin.
     * `position`: relative position, default `{x=0, y=0, z=0}`
     * `rotation`: relative rotation in degrees, default `{x=0, y=0, z=0}`
     * `forced_visible`: Boolean to control whether the attached entity
@@ -8330,9 +8714,9 @@ child will follow movement and rotation of that bone.
         * `interpolation`: The old and new overrides are interpolated over this timeframe (in seconds).
         * `absolute`: If set to `false` (which is the default),
           the override will be relative to the animated property:
-            * Translation in the case of `position`;
-            * Composition in the case of `rotation`;
-            * Per-axis multiplication in the case of `scale`
+          * Translation in the case of `position`;
+          * Composition in the case of `rotation`;
+          * Per-axis multiplication in the case of `scale`
     * `property = nil` is equivalent to no override on that property
     * **Note:** Unlike `set_bone_position`, the rotation is in radians, not degrees.
     * Compatibility note: Clients prior to 5.9.0 only support absolute position and rotation.
@@ -8390,6 +8774,14 @@ child will follow movement and rotation of that bone.
           -- Default: false
       }
       ```
+* `get_guid()`: returns a global unique identifier (a string)
+    * For players, this is a player name.
+    * For Lua entities, this is a uniquely generated string, guaranteed not to collide with player names.
+      * example: `@bGh3p2AbRE29Mb4biqX6OA`
+    * GUIDs only use printable ASCII characters.
+    * GUIDs persist between object reloads, and their format is guaranteed not to change.
+      Thus you can use the GUID to identify an object in a particular world online and offline.
+
 
 #### Lua entity only (no-op for other objects)
 
@@ -8405,18 +8797,21 @@ child will follow movement and rotation of that bone.
     * `acc` is a vector
 * `get_acceleration()`: returns the acceleration, a vector
 * `set_rotation(rot)`
-    * Sets the rotation
     * `rot` is a vector (radians). X is pitch (elevation), Y is yaw (heading)
       and Z is roll (bank).
+    * Sets the **right-handed Z-X-Y** rotation:
+      First roll (Z) is applied, then pitch (X); yaw (Y) is applied last.
     * Does not reset rotation incurred through `automatic_rotate`.
       Remove & re-add your objects to force a certain rotation.
 * `get_rotation()`: returns the rotation, a vector (radians)
-* `set_yaw(yaw)`: sets the yaw in radians (heading).
+* `set_yaw(yaw)`
+    * Sets the yaw in radians (heading).
+    * Also resets pitch and roll to 0.
 * `get_yaw()`: returns number in radians
 * `set_texture_mod(mod)`
     * Set a texture modifier to the base texture, for sprites and meshes.
     * When calling `set_texture_mod` again, the previous one is discarded.
-    * `mod` the texture modifier. See [Texture modifiers].
+    * `mod` the texture modifier. See [Texture modifiers](#texture-modifiers).
 * `get_texture_mod()` returns current texture modifier
 * `set_sprite(start_frame, num_frames, framelength, select_x_by_camera)`
     * Specifies and starts a sprite animation
@@ -8473,7 +8868,7 @@ child will follow movement and rotation of that bone.
     * values:
         * `0`: player is drowning
         * max: bubbles bar is not shown
-        * See [Object properties] for more information
+        * See [Object properties](#object-properties) for more information
     * Is limited to range 0 ... 65535 (2^16 - 1)
 * `set_fov(fov, is_multiplier, transition_time)`: Sets player's FOV
     * `fov`: Field of View (FOV) value.
@@ -8497,9 +8892,12 @@ child will follow movement and rotation of that bone.
     * Returns `nil` if no attribute found.
 * `get_meta()`: Returns metadata associated with the player (a PlayerMetaRef).
 * `set_inventory_formspec(formspec)`
-    * Redefine player's inventory form
-    * Should usually be called in `on_joinplayer`
+    * Redefines the player's inventory formspec.
+    * Should usually be called at least once in the `on_joinplayer` callback.
     * If `formspec` is `""`, the player's inventory is disabled.
+    * If the inventory formspec is currently open on the client, it is
+      updated immediately.
+    * See also: `core.register_on_player_receive_fields`
 * `get_inventory_formspec()`: returns a formspec string
 * `set_formspec_prepend(formspec)`:
     * the formspec string will be added to every formspec shown to the user,
@@ -8714,6 +9112,11 @@ child will follow movement and rotation of that bone.
             * `fog_color`: ColorSpec, override the color of the fog.
                Unlike `base_color` above this will apply regardless of the skybox type.
                (default: `"#00000000"`, which means no override)
+        * `auto_dim_skybox`: boolean, whether to dim skybox brightness if
+          the sky is assumed not to be visible (e.g. in caves),
+          based on a hardcoded and sometimes buggy heuristic.
+          Requires a Luanti 5.16.0+ client and server.
+          (default: `true`)
 * `set_sky(base_color, type, {texture names}, clouds)`
     * Deprecated. Use `set_sky(sky_parameters)`
     * `base_color`: ColorSpec, defaults to white
@@ -8785,6 +9188,7 @@ child will follow movement and rotation of that bone.
             alpha channel is used to set overall star brightness.
             (default: `#ebebff69`)
         * `scale`: Float controlling the overall size of the stars (default: `1`)
+        * `star_seed`: Integer number which decides how to generate the sky stars. If set to zero, client picks a random number. (default: `0`)
 * `get_stars()`: returns a table with the current stars parameters as in
     `set_stars`.
 * `set_clouds(cloud_parameters)`: set cloud parameters
@@ -8827,6 +9231,14 @@ child will follow movement and rotation of that bone.
       Same limits as for `thirdperson_back` apply.
       Defaults to `thirdperson_back` if unspecified.
 * `get_eye_offset()`: Returns camera offset vectors as set via `set_eye_offset`.
+* `set_camera(params)`: Sets camera parameters.
+    * `mode`: Defines the camera mode used
+      - `any`: free choice between all modes (default)
+      - `first`: first-person camera
+      - `third`: third-person camera
+      - `third_front`: third-person camera, looking opposite of movement direction
+    * Supported by client since 5.12.0.
+* `get_camera()`: Returns the camera parameters as a table as above.
 * `send_mapblock(blockpos)`:
     * Sends an already loaded mapblock to the player.
     * Returns `false` if nothing was sent (note that this can also mean that
@@ -8853,6 +9265,11 @@ child will follow movement and rotation of that bone.
         * `intensity` sets the intensity of the shadows from 0 (no shadows, default) to 1 (blackness)
         * `tint` tints the shadows with the provided color, with RGB values ranging from 0 to 255.
           (default `{r=0, g=0, b=0}`)
+        * `direction` is a direction vector that can override the direction of the light,
+          disregarding the sun/moon position. This is useful for custom skyboxes.
+          The default is a zero vector and disables the override.
+          Note: the vector points "outwards" so that `(0, 1, 0)` is equivalent to
+          the sun at midday shining straight down.
       * `exposure` is a table that controls automatic exposure.
         The basic exposure factor equation is `e = 2^exposure_correction / clamp(luminance, 2^luminance_min, 2^luminance_max)`
         * This has no effect on clients who have the "Automatic Exposure" effect disabled.
@@ -8922,70 +9339,6 @@ offering very strong randomness.
 * `get_state()`: return generator state encoded in string
 * `set_state(state_string)`: restore generator state from encoded string
 
-`PerlinNoise`
--------------
-
-A perlin noise generator.
-It can be created via `PerlinNoise()` or `core.get_perlin()`.
-For `core.get_perlin()`, the actual seed used is the noiseparams seed
-plus the world seed, to create world-specific noise.
-
-`PerlinNoise(noiseparams)`
-`PerlinNoise(seed, octaves, persistence, spread)` (Deprecated).
-
-`core.get_perlin(noiseparams)`
-`core.get_perlin(seeddiff, octaves, persistence, spread)` (Deprecated).
-
-### Methods
-
-* `get_2d(pos)`: returns 2D noise value at `pos={x=,y=}`
-* `get_3d(pos)`: returns 3D noise value at `pos={x=,y=,z=}`
-
-`PerlinNoiseMap`
-----------------
-
-A fast, bulk perlin noise generator.
-
-It can be created via `PerlinNoiseMap(noiseparams, size)` or
-`core.get_perlin_map(noiseparams, size)`.
-For `core.get_perlin_map()`, the actual seed used is the noiseparams seed
-plus the world seed, to create world-specific noise.
-
-Format of `size` is `{x=dimx, y=dimy, z=dimz}`. The `z` component is omitted
-for 2D noise, and it must be larger than 1 for 3D noise (otherwise
-`nil` is returned).
-
-For each of the functions with an optional `buffer` parameter: If `buffer` is
-not nil, this table will be used to store the result instead of creating a new
-table.
-
-### Methods
-
-* `get_2d_map(pos)`: returns a `<size.x>` times `<size.y>` 2D array of 2D noise
-  with values starting at `pos={x=,y=}`
-* `get_3d_map(pos)`: returns a `<size.x>` times `<size.y>` times `<size.z>`
-  3D array of 3D noise with values starting at `pos={x=,y=,z=}`.
-* `get_2d_map_flat(pos, buffer)`: returns a flat `<size.x * size.y>` element
-  array of 2D noise with values starting at `pos={x=,y=}`
-* `get_3d_map_flat(pos, buffer)`: Same as `get2dMap_flat`, but 3D noise
-* `calc_2d_map(pos)`: Calculates the 2d noise map starting at `pos`. The result
-  is stored internally.
-* `calc_3d_map(pos)`: Calculates the 3d noise map starting at `pos`. The result
-  is stored internally.
-* `get_map_slice(slice_offset, slice_size, buffer)`: In the form of an array,
-  returns a slice of the most recently computed noise results. The result slice
-  begins at coordinates `slice_offset` and takes a chunk of `slice_size`.
-  E.g. to grab a 2-slice high horizontal 2d plane of noise starting at buffer
-  offset y = 20:
-  `noisevals = noise:get_map_slice({y=20}, {y=2})`
-  It is important to note that `slice_offset` offset coordinates begin at 1,
-  and are relative to the starting position of the most recently calculated
-  noise.
-  To grab a single vertical column of noise starting at map coordinates
-  x = 1023, y=1000, z = 1000:
-  `noise:calc_3d_map({x=1000, y=1000, z=1000})`
-  `noisevals = noise:get_map_slice({x=24, z=1}, {x=1, z=1})`
-
 `PlayerMetaRef`
 ---------------
 
@@ -9037,14 +9390,17 @@ end
 The map is loaded as the ray advances. If the map is modified after the
 `Raycast` is created, the changes may or may not have an effect on the object.
 
-It can be created via `Raycast(pos1, pos2, objects, liquids)` or
-`core.raycast(pos1, pos2, objects, liquids)` where:
+It can be created via `Raycast(pos1, pos2, objects, liquids, pointabilities)`
+or `core.raycast(pos1, pos2, objects, liquids, pointabilities)` where:
 
 * `pos1`: start of the ray
 * `pos2`: end of the ray
-* `objects`: if false, only nodes will be returned. Default is true.
+* `objects`: if false, only nodes will be returned. Default is `true`.
 * `liquids`: if false, liquid nodes (`liquidtype ~= "none"`) won't be
-             returned. Default is false.
+             returned. Default is `false`.
+* `pointabilities`: Allows overriding the `pointable` property of
+  nodes and objects. Uses the same format as the `pointabilities` property
+  of item definitions. Default is `nil`.
 
 ### Limitations
 
@@ -9150,7 +9506,7 @@ The settings have the format `key = value`. Example:
 `StorageRef`
 ------------
 
-Mod metadata: per mod metadata, saved automatically.
+Mod metadata: per mod and world metadata, saved automatically.
 Can be obtained via `core.get_mod_storage()` during load time.
 
 WARNING: This storage backend is incapable of saving raw binary data due
@@ -9159,6 +9515,85 @@ to restrictions of JSON.
 ### Methods
 
 * All methods in MetaDataRef
+
+`ValueNoise`
+-------------
+
+A value noise generator.
+It can be created via `ValueNoise()` or `core.get_value_noise()`.
+For `core.get_value_noise()`, the actual seed used is the noiseparams seed
+plus the world seed, to create world-specific noise.
+
+**Important**: These require the mapgen environment to be initalized, do not use at load time.
+
+* `ValueNoise(noiseparams)`
+* `ValueNoise(seed, octaves, persistence, spread)` (deprecated)
+* `core.get_value_noise(noiseparams)`
+* `core.get_value_noise(seeddiff, octaves, persistence, spread)` (deprecated)
+
+These were previously called `PerlinNoise()` and `core.get_perlin()`, but the
+implemented noise was not Perlin noise. They were renamed in 5.12.0. The old
+names still exist as aliases.
+
+### Methods
+
+* `get_2d(pos)`: returns 2D noise value at `pos={x=,y=}`
+* `get_3d(pos)`: returns 3D noise value at `pos={x=,y=,z=}`
+
+`ValueNoiseMap`
+----------------
+
+A fast, bulk noise generator.
+
+It can be created via `ValueNoiseMap(noiseparams, size)` or
+`core.get_value_noise_map(noiseparams, size)`.
+For `core.get_value_noise_map()`, the actual seed used is the noiseparams seed
+plus the world seed, to create world-specific noise.
+
+These were previously called `PerlinNoiseMap()` and `core.get_perlin_map()`,
+but the implemented noise was not Perlin noise. They were renamed in 5.12.0.
+The old names still exist as aliases.
+
+Format of `size` is `{x=dimx, y=dimy, z=dimz}`. The `z` component is omitted
+for 2D noise, and it must be larger than 1 for 3D noise (otherwise
+`nil` is returned).
+
+For each of the functions with an optional `buffer` parameter: If `buffer` is
+not nil, this table will be used to store the result instead of creating a new
+table.
+
+**Important**: These require the mapgen environment to be initalized, do not use at load time.
+
+### Methods
+
+* `get_2d_map(pos)`: returns a `<size.x>` times `<size.y>` 2D array of 2D noise
+  with values starting at `pos={x=,y=}`
+* `get_3d_map(pos)`: returns a `<size.x>` times `<size.y>` times `<size.z>`
+  3D array of 3D noise with values starting at `pos={x=,y=,z=}`.
+* `get_2d_map_flat(pos, buffer)`: returns a flat `<size.x * size.y>` element
+  array of 2D noise with values starting at `pos={x=,y=}`
+* `get_3d_map_flat(pos, buffer)`: Same as `get2dMap_flat`, but 3D noise
+* `calc_2d_map(pos)`: Calculates the 2d noise map starting at `pos`. The result
+  is stored internally.
+* `calc_3d_map(pos)`: Calculates the 3d noise map starting at `pos`. The result
+  is stored internally.
+* `get_map_slice(slice_offset, slice_size, buffer)`: In the form of an array,
+  returns a slice of the most recently computed noise results. The result slice
+  begins at coordinates `slice_offset` and takes a chunk of `slice_size`.
+  E.g., to grab a 2-slice high horizontal 2d plane of noise starting at buffer
+  offset `y = 20`:
+  ```lua
+  noisevals = noise:get_map_slice({y=20}, {y=2})
+  ```
+  It is important to note that `slice_offset` offset coordinates begin at 1,
+  and are relative to the starting position of the most recently calculated
+  noise.
+  To grab a single vertical column of noise starting at map coordinates
+  `x = 1023, y=1000, z = 1000`:
+  ```lua
+  noise:calc_3d_map({x=1000, y=1000, z=1000})
+  noisevals = noise:get_map_slice({x=24, z=1}, {x=1, z=1})
+  ```
 
 
 
@@ -9221,7 +9656,7 @@ Player properties need to be saved manually.
     -- Clients older than 5.9.0 interpret `pointable = "blocking"` as `pointable = true`.
     -- Can be overridden by the `pointabilities` of the held item.
 
-    visual = "cube" / "sprite" / "upright_sprite" / "mesh" / "wielditem" / "item",
+    visual = "",
     -- "cube" is a node-sized cube.
     -- "sprite" is a flat texture always facing the player.
     -- "upright_sprite" is a vertical flat texture.
@@ -9242,17 +9677,22 @@ Player properties need to be saved manually.
     --   `core.itemstring_with_palette()`), the entity will inherit the color.
     --   Wielditems are scaled a bit. If you want a wielditem to appear
     --   to be as large as a node, use `0.667` in `visual_size`
+    --   Currently, item image animations are not played. This may change in the future.
     -- "item" is similar to "wielditem" but ignores the 'wield_image' parameter.
+    -- "node" looks exactly like a node in-world (supported since 5.12.0)
+    --   Note that visual effects like waving or liquid reflections will not work.
 
-    visual_size = {x = 1, y = 1, z = 1},
+    visual_size = {x = number, y = number, z = number},
+    -- Defaults to `{x = 1, y = 1, z = 1}` for entities, but `{x = 1, y = 2, z = 1}` for players!
     -- Multipliers for the visual size. If `z` is not specified, `x` will be used
     -- to scale the entity along both horizontal axes.
 
     mesh = "model.obj",
-    -- File name of mesh when using "mesh" visual
+    -- File name of mesh when using "mesh" visual.
+    -- For legacy reasons, this uses a 10x scale for meshes: 10 units = 1 node.
 
     textures = {},
-    -- Number of required textures depends on visual.
+    -- Number of required textures depends on visual:
     -- "cube" uses 6 textures just like a node, but all 6 must be defined.
     -- "sprite" uses 1 texture.
     -- "upright_sprite" uses 2 textures: {front, back}.
@@ -9262,11 +9702,14 @@ Player properties need to be saved manually.
     colors = {},
     -- Currently unused.
 
+    node = {name = "ignore", param1=0, param2=0},
+    -- Node to show when using the "node" visual
+
     use_texture_alpha = false,
-    -- Use texture's alpha channel.
-    -- Excludes "upright_sprite" and "wielditem".
+    -- Use texture's alpha channel for transparency blending.
     -- Note: currently causes visual issues when viewed through other
     -- semi-transparent materials such as water.
+    -- Note: ignored for "item", "wielditem" and "node" visual.
 
     spritediv = {x = 1, y = 1},
     -- Used with spritesheet textures for animation and/or frame selection
@@ -9283,18 +9726,19 @@ Player properties need to be saved manually.
     -- If false, object is invisible and can't be pointed.
 
     makes_footstep_sound = false,
-    -- If true, is able to make footstep sounds of nodes
+    -- If true, object is able to make footstep sounds of nodes
     -- (see node sound definition for details).
 
     automatic_rotate = 0,
-    -- Set constant rotation in radians per second, positive or negative.
+    -- Set constant right-handed rotation in radians per second, positive or negative.
     -- Object rotates along the local Y-axis, and works with set_rotation.
     -- Set to 0 to disable constant rotation.
 
     stepheight = 0,
     -- If positive number, object will climb upwards when it moves
     -- horizontally against a `walkable` node, if the height difference
-    -- is within `stepheight`.
+    -- is within `stepheight` and if the object current max Y in the world
+    -- is greater or equal than the node min Y.
 
     automatic_face_movement_dir = 0.0,
     -- Automatically set yaw to movement direction, offset in degrees.
@@ -9306,6 +9750,7 @@ Player properties need to be saved manually.
 
     backface_culling = true,
     -- Set to false to disable backface_culling for model
+    -- Note: only used by "mesh" and "cube" visual
 
     glow = 0,
     -- Add this much extra lighting when calculating texture color.
@@ -9327,6 +9772,16 @@ Player properties need to be saved manually.
     -- `false` will cause the background to be set automatically based on user settings.
     -- Default: false
 
+    nametag_fontsize = 1,
+    -- Sets the font size of the nametag in pixels.
+    -- `false` will cause the size to be set automatically based on user settings.
+    -- Default: false
+
+    nametag_scale_z = false,
+    -- If enabled, the nametag will be scaled by Z in screen space, meaning it becomes
+    -- smaller the further away the object is.
+    -- Default: false
+
     infotext = "",
     -- Same as infotext for nodes. Empty by default
 
@@ -9341,6 +9796,7 @@ Player properties need to be saved manually.
 
     shaded = true,
     -- Setting this to 'false' disables diffuse lighting of entity
+    -- Note: ignored for "item", "wielditem" and "node" visual
 
     show_on_minimap = false,
     -- Defaults to true for players, false for other entities.
@@ -9390,6 +9846,10 @@ ABM (ActiveBlockModifier) definition
 ------------------------------------
 
 Used by `core.register_abm`.
+
+An active block modifier (ABM) is used to define a function that is continously
+and randomly called for specific nodes (defined by `nodenames` and other conditions)
+in active mapblocks.
 
 ```lua
 {
@@ -9447,12 +9907,29 @@ Used by `core.register_lbm`.
 
 A loading block modifier (LBM) is used to define a function that is called for
 specific nodes (defined by `nodenames`) when a mapblock which contains such nodes
-gets activated (not loaded!).
+gets **activated** (**not loaded!**).
 
-Note: LBMs operate on a "snapshot" of node positions taken once before they are triggered.
+*Note*: LBMs operate on a "snapshot" of node positions taken once before they are triggered.
 That means if an LBM callback adds a node, it won't be taken into account.
-However the engine guarantees that when the callback is called that all given position(s)
-contain a matching node.
+However the engine guarantees that at the point in time when the callback is called
+that all given positions contain a matching node.
+
+For `run_at_every_load = false` to work, both mapblocks and LBMs have timestamps
+associated with them:
+
+* Each mapblock has a "last active" timestamp. It is also updated when the
+  mapblock is generated.
+* For each LBM, an introduction timestamp is stored in the world data, identified
+  by the LBM's `name` field. If an LBM disappears, the corresponding timestamp
+  is cleared.
+
+When a mapblock is activated, only LBMs whose introduction timestamp is newer
+than the mapblock's timestamp are run.
+
+*Note*: For maps generated in 5.11.0 or older, many newly generated mapblocks
+did not get a timestamp set. This means LBMs introduced between generation time
+and time of first activation will never run.
+Currently the only workaround is to use `run_at_every_load = true`.
 
 ```lua
 {
@@ -9469,14 +9946,17 @@ contain a matching node.
     -- will work as well.
 
     run_at_every_load = false,
-    -- Whether to run the LBM's action every time a block gets activated,
-    -- and not only the first time the block gets activated after the LBM
-    -- was introduced.
+    -- If `false`: The LBM only runs on mapblocks the first time they are
+    -- activated after the LBM was introduced.
+    -- It never runs on mapblocks generated after the LBM's introduction.
+    -- See above for details.
+    --
+    -- If `true`: The LBM runs every time a mapblock is activated.
 
     action = function(pos, node, dtime_s) end,
     -- Function triggered for each qualifying node.
-    -- `dtime_s` is the in-game time (in seconds) elapsed since the block
-    -- was last active.
+    -- `dtime_s` is the in-game time (in seconds) elapsed since the mapblock
+    -- was last active (available since 5.7.0).
 
     bulk_action = function(pos_list, dtime_s) end,
     -- Function triggered with a list of all applicable node positions at once.
@@ -9539,6 +10019,13 @@ Tile animation definition
 }
 ```
 
+Item image definition
+---------------------
+
+* `"image.png"`
+* `{name="image.png", animation={Tile Animation definition}}`
+    * Basically a tile definition but for items
+
 Item definition
 ---------------
 
@@ -9565,18 +10052,18 @@ Used by `core.register_node`, `core.register_craftitem`, and
     --      {bendy = 2, snappy = 1},
     --      {hard = 1, metal = 1, spikes = 1}
 
-    inventory_image = "",
-    -- Texture shown in the inventory GUI
+    inventory_image = <Item image definition>,
+    -- Image shown in the inventory GUI
     -- Defaults to a 3D rendering of the node if left empty.
 
-    inventory_overlay = "",
-    -- An overlay texture which is not affected by colorization
+    inventory_overlay = <Item image definition>,
+    -- An overlay image which is not affected by colorization
 
-    wield_image = "",
-    -- Texture shown when item is held in hand
+    wield_image = <Item image definition>,
+    -- Image shown when item is held in hand
     -- Defaults to a 3D rendering of the node if left empty.
 
-    wield_overlay = "",
+    wield_overlay = <Item image definition>,
     -- Like inventory_overlay but only used in the same situation as wield_image
 
     wield_scale = {x = 1, y = 1, z = 1},
@@ -9591,6 +10078,7 @@ Used by `core.register_node`, `core.register_craftitem`, and
 
     color = "#ffffffff",
     -- Color the item is colorized with. The palette overrides this.
+    -- It is a colorspec.
 
     stack_max = 99,
     -- Maximum amount of items that can be in a single stack.
@@ -9713,15 +10201,15 @@ Used by `core.register_node`, `core.register_craftitem`, and
         -- When item is eaten with `core.do_item_eat`
 
         punch_use = <SimpleSoundSpec>,
-        -- When item is used with the 'punch/mine' key pointing at a node or entity
+        -- When item is used with the 'punch/dig' key pointing at a node or entity
 
         punch_use_air = <SimpleSoundSpec>,
-        -- When item is used with the 'punch/mine' key pointing at nothing (air)
+        -- When item is used with the 'punch/dig' key pointing at nothing (air)
     },
 
     on_place = function(itemstack, placer, pointed_thing),
-    -- When the 'place' key was pressed with the item in hand
-    -- and a node was pointed at.
+    -- Called when the 'place' key was pressed with the item in hand
+    -- and pointing at a node.
     -- Shall place item and return the leftover itemstack
     -- or nil to not modify the inventory.
     -- The placer may be any ObjectRef or nil.
@@ -9732,11 +10220,19 @@ Used by `core.register_node`, `core.register_craftitem`, and
     -- Function must return either nil if inventory shall not be modified,
     -- or an itemstack to replace the original itemstack.
     -- The user may be any ObjectRef or nil.
-    -- default: nil
+    -- default: core.item_secondary_use
 
     on_drop = function(itemstack, dropper, pos),
-    -- Shall drop item and return the leftover itemstack.
-    -- The dropper may be any ObjectRef or nil.
+    -- Called when the player drops this item from an inventory.
+    -- Must return the left-over itemstack. Returning `nil` is equivalent to
+    -- the original itemstack (= inventory not modified).
+    -- WARNING: Only the count of the returned itemstack is significant. It is not
+    -- possible to modify the item, wear or metadata in a drop operation.
+    -- The returned itemstack must not have a higher count than the input stack.
+    -- Parameters:
+    -- * `itemstack`: the `ItemStack` to be dropped.
+    -- * `dropper`: any `ObjectRef` or `nil`.
+    -- * `pos`: position to drop the item at.
     -- default: core.item_drop
 
     on_pickup = function(itemstack, picker, pointed_thing, time_from_last_punch, ...),
@@ -9744,34 +10240,32 @@ Used by `core.register_node`, `core.register_craftitem`, and
     -- Shall pick-up the item and return the leftover itemstack or nil to not
     -- modify the dropped item.
     -- Parameters:
-    -- * `itemstack`: The `ItemStack` to be picked up.
-    -- * `picker`: Any `ObjectRef` or `nil`.
-    -- * `pointed_thing` (optional): The dropped item (a `"__builtin:item"`
-    --   luaentity) as `type="object"` `pointed_thing`.
-    -- * `time_from_last_punch, ...` (optional): Other parameters from
+    -- * `itemstack`: the `ItemStack` to be picked up.
+    -- * `picker`: any `ObjectRef` or `nil`.
+    -- * `pointed_thing` (optional): the dropped item (a `"__builtin:item"`
+    --   luaentity) as a `pointed_thing` with `type="object"`.
+    -- * `time_from_last_punch, ...` (optional): other parameters from
     --   `luaentity:on_punch`.
-    -- default: `core.item_pickup`
+    -- default: core.item_pickup
 
     on_use = function(itemstack, user, pointed_thing),
-    -- default: nil
-    -- When user pressed the 'punch/mine' key with the item in hand.
+    -- Called when user presses the 'punch/dig' key with the item in hand.
     -- Function must return either nil if inventory shall not be modified,
     -- or an itemstack to replace the original itemstack.
     -- e.g. itemstack:take_item(); return itemstack
-    -- Otherwise, the function is free to do what it wants.
     -- The user may be any ObjectRef or nil.
-    -- The default functions handle regular use cases.
+    -- Note that defining this callback will prevent normal punching/digging
+    -- behavior on the client, as the interaction is instead "forwarded" to the
+    -- server.
+    -- default: nil
 
     after_use = function(itemstack, user, node, digparams),
-    -- default: nil
-    -- If defined, should return an itemstack and will be called instead of
-    -- wearing out the item (if tool). If returns nil, does nothing.
-    -- If after_use doesn't exist, it is the same as:
-    --   function(itemstack, user, node, digparams)
-    --     itemstack:add_wear(digparams.wear)
-    --     return itemstack
-    --   end
+    -- Called after a tool is used to dig a node and will replace the default
+    -- tool wear-out handling.
+    -- Shall return the leftover itemstack or nil to not
+    -- modify the dropped item.
     -- The user may be any ObjectRef or nil.
+    -- default: nil
 
     _custom_field = whatever,
     -- Add your own custom fields. By convention, all custom field names
@@ -9992,6 +10486,13 @@ Used by `core.register_node`.
 
     mesh = "",
     -- File name of mesh when using "mesh" drawtype
+    -- The center of the node is the model origin.
+    -- For legacy reasons, this uses a different scale depending on the mesh:
+    -- 1. For glTF models: 10 units = 1 node (consistent with the scale for entities).
+    -- 2. For obj models: 1 unit = 1 node.
+    -- 3. For b3d and x models: 1 unit = 1 node if static, otherwise 10 units = 1 node.
+    -- Using static glTF or obj models is recommended.
+    -- You can use the `visual_scale` multiplier to achieve the expected scale.
 
     selection_box = {
         -- see [Node boxes] for possibilities
@@ -10188,8 +10689,6 @@ Used by `core.register_node`.
     -- itemstack will hold clicker's wielded item.
     -- Shall return the leftover itemstack.
     -- Note: pointed_thing can be nil, if a mod calls this function.
-    -- This function does not get triggered by clients <=0.4.16 if the
-    -- "formspec" node metadata field is set.
 
     on_dig = function(pos, node, digger),
     -- default: core.node_dig
@@ -10197,18 +10696,21 @@ Used by `core.register_node`.
     -- return true if the node was dug successfully, false otherwise.
     -- Deprecated: returning nil is the same as returning true.
 
-    on_timer = function(pos, elapsed),
+    on_timer = function(pos, elapsed, node, timeout),
     -- default: nil
     -- called by NodeTimers, see core.get_node_timer and NodeTimerRef.
-    -- elapsed is the total time passed since the timer was started.
+    -- `elapsed`: total time passed since the timer was started.
+    -- `node`: node table (since 5.14)
+    -- `timeout`: timeout value of the just ended timer (since 5.14)
     -- return true to run the timer for another cycle with the same timeout
     -- value.
 
     on_receive_fields = function(pos, formname, fields, sender),
     -- fields = {name1 = value1, name2 = value2, ...}
     -- formname should be the empty string; you **must not** use formname.
-    -- Called when an UI form (e.g. sign text input) returns data.
-    -- See core.register_on_player_receive_fields for more info.
+    -- Called when a node metadata formspec is present and data is returned.
+    -- See core.register_on_player_receive_fields for more info regarding
+    -- `formname` and `fields`.
     -- default: nil
 
     allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player),
@@ -10218,12 +10720,12 @@ Used by `core.register_node`.
     allow_metadata_inventory_put = function(pos, listname, index, stack, player),
     -- Called when a player wants to put something into the inventory.
     -- Return value: number of items allowed to put.
-    -- Return value -1: Allow and don't modify item count in inventory.
+    -- Return value -1: Allow and don't modify destination item.
 
     allow_metadata_inventory_take = function(pos, listname, index, stack, player),
     -- Called when a player wants to take something out of the inventory.
     -- Return value: number of items allowed to take.
-    -- Return value -1: Allow and don't modify item count in inventory.
+    -- Return value -1: Allow and don't modify source item.
 
     on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player),
     on_metadata_inventory_put = function(pos, listname, index, stack, player),
@@ -10298,6 +10800,16 @@ table format. The accepted parameters are listed below.
 
 Recipe input items can either be specified by item name (item count = 1)
 or by group (see "Groups in crafting recipes" for details).
+Only the item name (and groups) matter for matching a recipe, i.e. meta and count
+are ignored.
+
+If multiple recipes match the input of a craft grid, one of them is chosen by the
+following priority rules:
+
+* Shaped recipes are preferred over shapeless recipes, which in turn are preferred
+  over tool repair.
+* Otherwise, recipes without groups are preferred over recipes with groups.
+* Otherwise, earlier registered recipes are preferred.
 
 The following sections describe the types and syntaxes of recipes.
 
@@ -10316,6 +10828,10 @@ For example, for a 3x3 recipe, the `recipes` table must have
 
 In order to craft the recipe, the players' crafting grid must
 have equal or larger dimensions (both width and height).
+
+Empty slots outside of the recipe's extents are ignored, e.g. a 3x3
+recipe where only the bottom right 2x2 slots are filled is the same
+as the corresponding 2x2 recipe without the empty slots.
 
 Parameters:
 
@@ -10588,6 +11104,9 @@ See [Ores] section above for essential information.
 
 ```lua
 {
+    name = "",
+    -- If set, core.registered_ores[that_name] will return this definition.
+
     ore_type = "",
     -- Supported: "scatter", "sheet", "puff", "blob", "vein", "stratum"
 
@@ -10632,7 +11151,7 @@ See [Ores] section above for essential information.
         octaves = 3,
         persistence = 0.7
     },
-    -- NoiseParams structure describing one of the perlin noises used for
+    -- NoiseParams structure describing one of the noises used for
     -- ore distribution.
     -- Needed by "sheet", "puff", "blob" and "vein" ores.
     -- Omit from "scatter" ore for a uniform ore distribution.
@@ -10787,7 +11306,7 @@ performance and computing power the practical limit is much lower.
 Decoration definition
 ---------------------
 
-See [Decoration types]. Used by `core.register_decoration`.
+See [Decoration types](#decoration-types). Used by `core.register_decoration`.
 
 ```lua
 {
@@ -10819,7 +11338,7 @@ See [Decoration types]. Used by `core.register_decoration`.
         lacunarity = 2.0,
         flags = "absvalue"
     },
-    -- NoiseParams structure describing the perlin noise used for decoration
+    -- NoiseParams structure describing the noise used for decoration
     -- distribution.
     -- A noise value is calculated for each square division and determines
     -- 'decorations per surface node' within each division.
@@ -10953,6 +11472,40 @@ See [Decoration types]. Used by `core.register_decoration`.
 }
 ```
 
+`PlayerHPChangeReason` table definition
+---------------------------------------
+
+The `PlayerHPChangeReason` table specifies a reason for player health changes.
+
+* The `type` field is for providing one of the possible damage types
+  supported natively by the engine. It will have one of the following values:
+    * `set_hp`: A mod, builtin or the engine called `set_hp`, either
+       without giving a damage type, or by setting `set_hp`
+       as damage type explicitly
+    * `punch`: Was punched. `reason.object` will hold the puncher, or nil if none.
+    * `fall`: Fall damage.
+    * `node_damage`: `damage_per_second` from a neighboring node.
+                     `reason.node` will hold the node name or nil.
+                     `reason.node_pos` will hold the position of the node
+    * `drown`: Drowning damage from a node with the `drowning` field set.
+               `reason.node` and `reason.node_pos` are same as for `node_damage`
+    * `respawn`: HP restored by respawning.
+* The `custom_type` field may optionally be used to provide a reason that is not
+    supported by the engine, as a string. It will be ignored by the engine,
+    but it can be used to communicate to other mods about custom damage types.
+    If provided, it must be a string. It's recommended to follow the
+    `modname:reason` naming convention.
+    These custom types exist by default:
+    * `__builtin:item_eat`: HP change caused by `core.do_item_eat`
+    * `__builtin:kill_command`: `/kill` command
+* The `from` field denotes the origin of the HP change:
+    * `engine`: Engine
+    * `mod`: Mod or builtin
+* Mods may add additional fields
+
+Note: The `from` is ignored by `ObjectRef:set_hp`, the engine will always
+set it to `mod`.
+
 Chat command definition
 -----------------------
 
@@ -11057,12 +11610,12 @@ Used by `core.create_detached_inventory`.
     allow_put = function(inv, listname, index, stack, player),
     -- Called when a player wants to put something into the inventory.
     -- Return value: number of items allowed to put.
-    -- Return value -1: Allow and don't modify item count in inventory.
+    -- Return value -1: Allow and don't modify destination item.
 
     allow_take = function(inv, listname, index, stack, player),
     -- Called when a player wants to take something out of the inventory.
     -- Return value: number of items allowed to take.
-    -- Return value -1: Allow and don't modify item count in inventory.
+    -- Return value -1: Allow and don't modify source item.
 
     on_move = function(inv, from_list, from_index, to_list, to_index, count, player),
     on_put = function(inv, listname, index, stack, player),
@@ -11077,7 +11630,7 @@ HUD Definition
 --------------
 
 Since most values have multiple different functions, please see the
-documentation in [HUD] section.
+documentation in [HUD](#hud) section.
 
 Used by `ObjectRef:hud_add`. Returned by `ObjectRef:hud_get`.
 
@@ -11173,6 +11726,9 @@ Used by `core.add_particle`.
     playername = "singleplayer",
     -- Optional, if specified spawns particle only on the player's client
 
+    -- Note that `exclude_player` is not supported here. You can use a single-use
+    -- particlespawner if needed.
+
     animation = {Tile Animation definition},
     -- Optional, specifies how to animate the particle texture
 
@@ -11236,6 +11792,9 @@ will be ignored.
     -- If time is 0 spawner has infinite lifespan and spawns the `amount` on
     -- a per-second basis.
 
+    size = 1,
+    -- Size of the particle.
+
     collisiondetection = false,
     -- If true collide with `walkable` nodes and, depending on the
     -- `object_collision` field, objects too.
@@ -11262,7 +11821,12 @@ will be ignored.
     -- following section.
 
     playername = "singleplayer",
-    -- Optional, if specified spawns particles only on the player's client
+    -- Optional, if specified spawns particles only for this player
+    -- Can't be used together with `exclude_player`.
+
+    exclude_player = "singleplayer",
+    -- Optional, if specified spawns particles not for this player
+    -- Added in v5.14.0. Can't be used together with `playername`.
 
     animation = {Tile Animation definition},
     -- Optional, specifies how to animate the particles' texture
@@ -11419,7 +11983,7 @@ section, along with the datatypes they accept.
 All properties in this list of type "vec3 range", "float range" or "vec3" can
 be animated with `*_tween` tables. For example, `jitter` can be tweened by
 setting a `jitter_tween` table instead of (or in addition to) a `jitter`
-table/value.
+table/value. This also applies to the `attract` table.
 
 In this section, a float range is a table defined as so: { min = A, max = B }
 A and B are your supplemented values. For a vec3 range this means they are vectors.
@@ -11466,22 +12030,23 @@ Types used are defined in the previous section.
   * string `kind`: selects the kind of shape towards which the particles will
     be oriented. it must have one of the following values:
 
-    * `"none"`: no attractor is set and the `attractor` table is ignored
+    * `"none"`: no attractor is set and the `attract` table is ignored
     * `"point"`: the particles are attracted to a specific point in space.
       use this also if you want a sphere-like effect, in combination with
       the `radius` property.
     * `"line"`: the particles are attracted to an (infinite) line passing
-      through the points `origin` and `angle`. use this for e.g. beacon
+      through the point `origin`, with direction specified by `direction`. use this for e.g. beacon
       effects, energy beam effects, etc.
     * `"plane"`: the particles are attracted to an (infinite) plane on whose
       surface `origin` designates a point in world coordinate space. use this
       for e.g. particles entering or emerging from a portal.
 
-  * float range `strength`: the speed with which particles will move towards
-    `attractor`. If negative, the particles will instead move away from that
-    point.
+  * float range `strength`: a factor that determines the speed with which particles
+    will move towards the attractor shape. If negative, the particles will instead
+    move away from that point. The actual speed is the product of this parameter and
+    the particle's initial distance from the attractor's origin.
 
-  * vec3 `origin`: the origin point of the shape towards which particles will
+  * vec3 `origin`: the origin point of the attractor shape towards which particles will
     initially be oriented. functions as an offset if `origin_attached` is also
     set.
 
@@ -11637,22 +12202,22 @@ Used by `HTTPApiTable.fetch` and `HTTPApiTable.fetch_async`.
 
 ```lua
 {
-    url = "http://example.org",
+    url = "https://example.org",
 
     timeout = 10,
     -- Timeout for request to be completed in seconds. Default depends on engine settings.
 
-    method = "GET", "POST", "PUT" or "DELETE"
+    method = "GET", "HEAD", "POST", "PUT", "PATCH" or "DELETE"
     -- The http method to use. Defaults to "GET".
 
-    data = "Raw request data string" OR {field1 = "data1", field2 = "data2"},
-    -- Data for the POST, PUT or DELETE request.
+    data = "Raw request data string" or {field1 = "data1", field2 = "data2"},
+    -- Data for the POST, PUT, PATCH or DELETE request.
     -- Accepts both a string and a table. If a table is specified, encodes
     -- table as x-www-form-urlencoded key-value pairs.
 
     user_agent = "ExampleUserAgent",
     -- Optional, if specified replaces the default Luanti user agent with
-    -- given string
+    -- given string.
 
     extra_headers = { "Accept-Language: en-us", "Accept-Charset: utf-8" },
     -- Optional, if specified adds additional headers to the HTTP request.
@@ -11662,7 +12227,7 @@ Used by `HTTPApiTable.fetch` and `HTTPApiTable.fetch_async`.
     multipart = boolean
     -- Optional, if true performs a multipart HTTP request.
     -- Default is false.
-    -- Post only, data must be array
+    -- Not allowed for GET or HEAD method and `data` must be a table.
 
     post_data = "Raw POST request data string" OR {field1 = "data1", field2 = "data2"},
     -- Deprecated, use `data` instead. Forces `method = "POST"`.
@@ -11690,7 +12255,8 @@ Passed to `HTTPApiTable.fetch` callback. Returned by
     code = 200,
     -- HTTP status code
 
-    data = "response"
+    data = "",
+    -- Response body
 }
 ```
 

@@ -10,9 +10,8 @@
 ///////// Mapgen V5 flags
 #define MGV5_CAVERNS 0x01
 
-class BiomeManager;
 
-extern FlagDesc flagdesc_mapgen_v5[];
+extern const FlagDesc flagdesc_mapgen_v5[];
 
 struct MapgenV5Params : public MapgenParams
 {
@@ -59,7 +58,7 @@ public:
 	int generateBaseTerrain();
 
 private:
-	Noise *noise_factor;
-	Noise *noise_height;
-	Noise *noise_ground;
+	Noise *noise_factor = nullptr;
+	Noise *noise_height = nullptr;
+	Noise *noise_ground = nullptr;
 };

@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
+if(POLICY CMP0177)
+    cmake_policy(SET CMP0177 NEW)
+endif()
 
 # This can be read from ${PROJECT_NAME} after project() is called
 project(luanti)
@@ -11,7 +14,7 @@ set(CLANG_MINIMUM_VERSION "7.0.1")
 
 # You should not need to edit these manually, use util/bump_version.sh
 set(VERSION_MAJOR 5)
-set(VERSION_MINOR 11)
+set(VERSION_MINOR 16)
 set(VERSION_PATCH 0)
 set(VERSION_EXTRA "" CACHE STRING "Stuff to append to version string")
 
@@ -97,7 +100,6 @@ endif()
 
 
 if(TRUE)
-	message(STATUS "Using imported IrrlichtMt at subdirectory 'irr'")
 	if(BUILD_CLIENT)
 		add_subdirectory(irr EXCLUDE_FROM_ALL)
 
@@ -166,15 +168,15 @@ elseif(UNIX) # Linux, BSD etc
 		set(LOCALEDIR "locale")
 	else()
 		include(GNUInstallDirs)
-		set(SHAREDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}")
-		set(BINDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
-		set(DOCDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DOCDIR}")
-		set(MANDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_MANDIR}")
+		set(SHAREDIR "${CMAKE_INSTALL_FULL_DATADIR}/${PROJECT_NAME}")
+		set(BINDIR "${CMAKE_INSTALL_FULL_BINDIR}")
+		set(DOCDIR "${CMAKE_INSTALL_FULL_DOCDIR}")
+		set(MANDIR "${CMAKE_INSTALL_FULL_MANDIR}")
 		set(EXAMPLE_CONF_DIR ${DOCDIR})
-		set(XDG_APPS_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/applications")
-		set(METAINFODIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/metainfo")
-		set(ICONDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/icons")
-		set(LOCALEDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LOCALEDIR}")
+		set(XDG_APPS_DIR "${CMAKE_INSTALL_FULL_DATADIR}/applications")
+		set(METAINFODIR "${CMAKE_INSTALL_FULL_DATADIR}/metainfo")
+		set(ICONDIR "${CMAKE_INSTALL_FULL_DATADIR}/icons")
+		set(LOCALEDIR "${CMAKE_INSTALL_FULL_LOCALEDIR}")
 	endif()
 endif()
 
@@ -262,8 +264,8 @@ install(FILES "minetest.conf.example" DESTINATION "${EXAMPLE_CONF_DIR}")
 
 if(UNIX AND NOT APPLE)
 	install(FILES "doc/luanti.6" "doc/luantiserver.6" DESTINATION "${MANDIR}/man6")
-	install(FILES "misc/net.minetest.minetest.desktop" DESTINATION "${XDG_APPS_DIR}")
-	install(FILES "misc/net.minetest.minetest.metainfo.xml" DESTINATION "${METAINFODIR}")
+	install(FILES "misc/org.luanti.luanti.desktop" DESTINATION "${XDG_APPS_DIR}")
+	install(FILES "misc/org.luanti.luanti.metainfo.xml" DESTINATION "${METAINFODIR}")
 	install(FILES "misc/luanti.svg" DESTINATION "${ICONDIR}/hicolor/scalable/apps")
 	install(FILES "misc/luanti-xorg-icon-128.png"
 		DESTINATION "${ICONDIR}/hicolor/128x128/apps"
@@ -286,6 +288,7 @@ find_package(Lua REQUIRED)
 if(NOT USE_LUAJIT)
 	add_subdirectory(lib/bitop)
 endif()
+add_subdirectory(lib/lstrpack)
 add_subdirectory(lib/sha256)
 
 if(BUILD_UNITTESTS OR BUILD_BENCHMARKS)
@@ -298,7 +301,7 @@ add_subdirectory(lib/tiniergltf)
 # Be sure to add all relevant definitions above this
 add_subdirectory(src)
 
-# CPack
+# Package generation
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A free open-source voxel game engine with easy modding and game creation.")
 set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
@@ -318,41 +321,28 @@ if(WIN32)
 	# Include all dynamically linked runtime libraries such as MSVCRxxx.dll
 	include(InstallRequiredSystemLibraries)
 
-	if(RUN_IN_PLACE)
-		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-win64")
-		else()
-			set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-win32")
-		endif()
-
-		set(CPACK_GENERATOR ZIP)
-
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-win64")
 	else()
-		set(CPACK_GENERATOR WIX)
-		set(CPACK_PACKAGE_NAME "${PROJECT_NAME_CAPITALIZED}")
-		set(CPACK_PACKAGE_INSTALL_DIRECTORY ".")
-		set(CPACK_PACKAGE_EXECUTABLES ${PROJECT_NAME} "${PROJECT_NAME_CAPITALIZED}")
-		set(CPACK_CREATE_DESKTOP_LINKS ${PROJECT_NAME})
-		set(CPACK_PACKAGING_INSTALL_PREFIX "/${PROJECT_NAME_CAPITALIZED}")
-
-		set(CPACK_WIX_PRODUCT_ICON "${CMAKE_CURRENT_SOURCE_DIR}/misc/luanti-icon.ico")
-		# Supported languages can be found at
-		# http://wixtoolset.org/documentation/manual/v3/wixui/wixui_localization.html
-		#set(CPACK_WIX_CULTURES "ar-SA,bg-BG,ca-ES,hr-HR,cs-CZ,da-DK,nl-NL,en-US,et-EE,fi-FI,fr-FR,de-DE")
-		set(CPACK_WIX_UI_BANNER "${CMAKE_CURRENT_SOURCE_DIR}/misc/CPACK_WIX_UI_BANNER.BMP")
-		set(CPACK_WIX_UI_DIALOG "${CMAKE_CURRENT_SOURCE_DIR}/misc/CPACK_WIX_UI_DIALOG.BMP")
-
-		set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/doc/lgpl-2.1.txt")
-
-		# The correct way would be to include both x32 and x64 into one installer
-		# and install the appropriate one.
-		# CMake does not support that, so there are two separate GUID's
-		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(CPACK_WIX_UPGRADE_GUID "745A0FB3-5552-44CA-A587-A91C397CCC56")
-		else()
-			set(CPACK_WIX_UPGRADE_GUID "814A2E2D-2779-4BBD-9ACD-FC3BD51FBBA2")
-		endif()
+		set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-win32")
 	endif()
+
+	if(NOT RUN_IN_PLACE)
+		set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-nsis")
+		install(FILES "misc/luanti-icon.ico" DESTINATION ".")
+		install(FILES "misc/sfx-launcher.nsi" DESTINATION ".")
+		# normalize to 0/1
+		set(DEVELOPMENT_BUILD01 0)
+		if(DEVELOPMENT_BUILD)
+			set(DEVELOPMENT_BUILD01 1)
+		endif()
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/misc/meta.nsh.in"
+			"${CMAKE_CURRENT_BINARY_DIR}/misc/meta.nsh" @ONLY ESCAPE_QUOTES)
+		install(FILES "${CMAKE_CURRENT_BINARY_DIR}/misc/meta.nsh" DESTINATION ".")
+	endif()
+
+	# we just generate a ZIP file and someone has to run makensis manually
+	set(CPACK_GENERATOR ZIP)
 elseif(APPLE)
 	set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 	set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-osx")

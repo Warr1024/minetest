@@ -7,25 +7,24 @@
 #include "irrlichttypes.h"
 #include "irr_ptr.h"
 #include "rect.h"
-#include "SMeshBuffer.h"
+#include "CMeshBuffer.h"
 
-#include "../hud.h"
+#include "constants.h"
+#include "hud_element.h"
 #include "mapnode.h"
 #include "util/thread.h"
 #include <map>
 #include <string>
 #include <vector>
 
-namespace irr {
-	namespace video {
-		class IVideoDriver;
-		class IImage;
-		class ITexture;
-	}
+namespace video {
+	class IVideoDriver;
+	class IImage;
+	class ITexture;
+}
 
-	namespace scene {
-		class ISceneNode;
-	}
+namespace scene {
+	class ISceneNode;
 }
 
 class Client;
@@ -54,10 +53,11 @@ struct MinimapModeDef {
 struct MinimapMarker {
 	MinimapMarker(scene::ISceneNode *parent_node):
 		parent_node(parent_node)
-	{
-	}
+	{}
+
 	scene::ISceneNode *parent_node;
 };
+
 struct MinimapPixel {
 	//! The topmost node that the minimap displays.
 	MapNode n;
@@ -66,7 +66,7 @@ struct MinimapPixel {
 };
 
 struct MinimapMapblock {
-	void getMinimapNodes(VoxelManipulator *vmanip, const v3s16 &pos);
+	void getMinimapNodes(VoxelManipulator *vmanip, const NodeDefManager *nodedef, const v3s16 &pos);
 
 	MinimapPixel data[MAP_BLOCKSIZE * MAP_BLOCKSIZE];
 };
@@ -159,21 +159,22 @@ public:
 	void updateActiveMarkers();
 	void drawMinimap(core::rect<s32> rect);
 
-	video::IVideoDriver *driver;
-	Client* client;
+	video::IVideoDriver *driver = nullptr;
+	Client *client = nullptr;
 	std::unique_ptr<MinimapData> data;
 
 private:
-	ITextureSource *m_tsrc;
-	IShaderSource *m_shdrsrc;
-	const NodeDefManager *m_ndef;
+	ITextureSource *m_tsrc = nullptr;
+	IShaderSource *m_shdrsrc = nullptr;
+	const NodeDefManager *m_ndef = nullptr;
 	std::unique_ptr<MinimapUpdateThread> m_minimap_update_thread;
 	irr_ptr<scene::SMeshBuffer> m_meshbuffer;
 	std::vector<MinimapModeDef> m_modes;
 	size_t m_current_mode_index;
 	u16 m_surface_mode_scan_height;
 	f32 m_angle;
+
 	std::mutex m_mutex;
-	std::list<std::unique_ptr<MinimapMarker>> m_markers;
-	std::list<v2f> m_active_markers;
+	std::vector<std::unique_ptr<MinimapMarker>> m_markers;
+	std::vector<v2f> m_active_markers;
 };

@@ -10,9 +10,8 @@
 #define MGCARPATHIAN_CAVERNS 0x01
 #define MGCARPATHIAN_RIVERS  0x02
 
-class BiomeManager;
 
-extern FlagDesc flagdesc_mapgen_carpathian[];
+extern const FlagDesc flagdesc_mapgen_carpathian[];
 
 
 struct MapgenCarpathianParams : public MapgenParams
@@ -78,18 +77,18 @@ private:
 	float river_depth;
 	float valley_width;
 
-	Noise *noise_height1;
-	Noise *noise_height2;
-	Noise *noise_height3;
-	Noise *noise_height4;
-	Noise *noise_hills_terrain;
-	Noise *noise_ridge_terrain;
-	Noise *noise_step_terrain;
-	Noise *noise_hills;
-	Noise *noise_ridge_mnt;
-	Noise *noise_step_mnt;
+	Noise *noise_height1 = nullptr;
+	Noise *noise_height2 = nullptr;
+	Noise *noise_height3 = nullptr;
+	Noise *noise_height4 = nullptr;
+	Noise *noise_hills_terrain = nullptr;
+	Noise *noise_ridge_terrain = nullptr;
+	Noise *noise_step_terrain = nullptr;
+	Noise *noise_hills = nullptr;
+	Noise *noise_ridge_mnt = nullptr;
+	Noise *noise_step_mnt = nullptr;
 	Noise *noise_rivers = nullptr;
-	Noise *noise_mnt_var;
+	Noise *noise_mnt_var = nullptr;
 
 	s32 grad_wl;
 

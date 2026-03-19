@@ -18,6 +18,29 @@ struct PreMeshBuffer
 
 	PreMeshBuffer() = default;
 	explicit PreMeshBuffer(const TileLayer &layer) : layer(layer) {}
+
+	bool empty() const {
+		return indices.empty();
+	}
+
+	/// @brief Colorizes vertices as indicated by tile layer
+	void applyTileColor()
+	{
+		video::SColor tc = layer.color;
+		if (tc == video::SColor(0xFFFFFFFF))
+			return;
+		for (auto &vertex : vertices) {
+			video::SColor *c = &vertex.Color;
+			c->set(c->getAlpha(),
+				c->getRed() * tc.getRed() / 255U,
+				c->getGreen() * tc.getGreen() / 255U,
+				c->getBlue() * tc.getBlue() / 255U);
+		}
+	}
+
+	/// @brief Append another buffer to this one
+	/// @return false if index would overflow
+	bool append(const PreMeshBuffer &other);
 };
 
 struct MeshCollector
@@ -40,7 +63,7 @@ private:
 	void append(const TileLayer &material,
 			const video::S3DVertex *vertices, u32 numVertices,
 			const u16 *indices, u32 numIndices,
-			u8 layernum, bool use_scale = false);
+			u8 layernum);
 
 	PreMeshBuffer &findBuffer(const TileLayer &layer, u8 layernum, u32 numVertices);
 };

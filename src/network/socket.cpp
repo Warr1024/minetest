@@ -4,21 +4,19 @@
 
 #include "socket.h"
 
-#include <cstdio>
 #include <iostream>
-#include <cstdlib>
 #include <cstring>
-#include <iomanip>
-#include "util/string.h"
 #include "util/numeric.h"
+#include "address.h"
 #include "constants.h"
-#include "debug.h"
 #include "log.h"
+#include "networkexceptions.h"
 
 #ifdef _WIN32
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include "util/string.h"
 #define LAST_SOCKET_ERR() WSAGetLastError()
 #define SOCKET_ERR_STR(e) itos(e)
 typedef int socklen_t;
@@ -87,24 +85,15 @@ bool UDPSocket::init(bool ipv6, bool noExceptions)
 	m_handle = socket(m_addr_family, SOCK_DGRAM, IPPROTO_UDP);
 
 	if (m_handle < 0) {
-		if (noExceptions) {
+		auto msg = std::string("Failed to create socket: ") +
+			SOCKET_ERR_STR(LAST_SOCKET_ERR());
+		verbosestream << msg << std::endl;
+		if (noExceptions)
 			return false;
-		}
-
-		throw SocketException(std::string("Failed to create socket: error ") +
-				      SOCKET_ERR_STR(LAST_SOCKET_ERR()));
+		throw SocketException(msg);
 	}
 
 	setTimeoutMs(0);
-
-	if (m_addr_family == AF_INET6) {
-		// Allow our socket to accept both IPv4 and IPv6 connections
-		// required on Windows:
-		// https://msdn.microsoft.com/en-us/library/windows/desktop/bb513665(v=vs.85).aspx
-		int value = 0;
-		setsockopt(m_handle, IPPROTO_IPV6, IPV6_V6ONLY,
-				reinterpret_cast<char *>(&value), sizeof(value));
-	}
 
 	return true;
 }
@@ -127,6 +116,20 @@ void UDPSocket::Bind(Address addr)
 				"Socket and bind address families do not match";
 		errorstream << "Bind failed: " << errmsg << std::endl;
 		throw SocketException(errmsg);
+	}
+
+	if (m_addr_family == AF_INET6) {
+		// Allow our socket to accept both IPv4 and IPv6 connections
+		// required on Windows:
+		// <https://msdn.microsoft.com/en-us/library/windows/desktop/bb513665(v=vs.85).aspx>
+		int value = 0;
+		if (setsockopt(m_handle, IPPROTO_IPV6, IPV6_V6ONLY,
+				reinterpret_cast<char *>(&value), sizeof(value)) != 0) {
+			auto errmsg = SOCKET_ERR_STR(LAST_SOCKET_ERR());
+			errorstream << "Failed to disable V6ONLY: " << errmsg
+				<< "\nTry disabling ipv6_server to fix this." << std::endl;
+			throw SocketException(errmsg);
+		}
 	}
 
 	int ret = 0;
@@ -222,9 +225,9 @@ int UDPSocket::Receive(Address &sender, void *data, int size)
 			return -1;
 
 		u16 address_port = ntohs(address.sin6_port);
-		const auto *bytes = reinterpret_cast<IPv6AddressBytes*>
-			(address.sin6_addr.s6_addr);
-		sender = Address(bytes, address_port);
+		IPv6AddressBytes bytes;
+		memcpy(bytes.bytes, address.sin6_addr.s6_addr, sizeof(address.sin6_addr.s6_addr));
+		sender = Address(&bytes, address_port);
 	} else {
 		struct sockaddr_in address;
 		memset(&address, 0, sizeof(address));

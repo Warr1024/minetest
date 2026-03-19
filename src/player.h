@@ -6,12 +6,9 @@
 
 #include "irrlichttypes_bloated.h"
 #include "inventory.h"
-#include "constants.h"
 #include "util/basic_macros.h"
-#include "util/string.h"
-#include <mutex>
-#include <functional>
 #include <string>
+#include <string_view>
 
 #define PLAYERNAME_SIZE 20
 
@@ -126,9 +123,18 @@ struct PlayerPhysicsOverride
 	}
 };
 
-class Map;
+/// @note numeric values are part of network protocol
+enum CameraMode : int {
+	// not a mode. indicates that any may be used.
+	CAMERA_MODE_ANY = 0,
+	CAMERA_MODE_FIRST,
+	CAMERA_MODE_THIRD,
+	CAMERA_MODE_THIRD_FRONT
+};
+
+extern const struct EnumString es_CameraMode[];
+
 struct HudElement;
-class Environment;
 
 class Player
 {
@@ -159,6 +165,8 @@ public:
 		}
 		return size;
 	}
+
+	CameraMode allowed_camera_mode = CAMERA_MODE_ANY;
 
 	v3f eye_offset_first;
 	v3f eye_offset_third;
@@ -208,8 +216,8 @@ public:
 		return m_fov_override_spec;
 	}
 
+	const auto &getHudElements() const { return hud; }
 	HudElement* getHud(u32 id);
-	void        hudApply(std::function<void(const std::vector<HudElement*>&)> f);
 	u32         addHud(HudElement* hud);
 	HudElement* removeHud(u32 id);
 	void        clearHud();
@@ -226,12 +234,6 @@ protected:
 	u16 m_wield_index = 0;
 	PlayerFovSpec m_fov_override_spec = { 0.0f, false, 0.0f };
 
-	std::vector<HudElement *> hud;
-
 private:
-	// Protect some critical areas
-	// hud for example can be modified by EmergeThread
-	// and ServerThread
-	// FIXME: ^ this sounds like nonsense. should be checked.
-	std::mutex m_mutex;
+	std::vector<HudElement *> hud;
 };

@@ -3,6 +3,7 @@ project(luanti)
 INCLUDE(CheckTypeSize)
 INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckLibraryExists)
+INCLUDE(CheckCXXCompilerFlag)
 
 check_type_size(int SIZEOF_INT BUILTIN_TYPES_ONLY LANGUAGE CXX)
 if(SIZEOF_INT LESS 4)
@@ -67,7 +68,7 @@ if(PRECOMPILE_HEADERS)
 endif()
 
 
-option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
+option(ENABLE_CURL "Enable cURL support" TRUE)
 set(USE_CURL FALSE)
 
 if(ENABLE_CURL)
@@ -82,10 +83,10 @@ endif()
 
 if(NOT USE_CURL)
 	if(BUILD_CLIENT)
-		message(WARNING "cURL is required to load the server list")
+		message(WARNING "cURL is required to use the server list, content browser or update checker")
 	endif()
 	if(BUILD_SERVER)
-		message(WARNING "cURL is required to announce to the server list")
+		message(WARNING "cURL is required to announce to the server list or use the HTTP API")
 	endif()
 endif()
 
@@ -137,7 +138,7 @@ if(BUILD_CLIENT)
 	find_package(Freetype REQUIRED)
 endif()
 
-option(ENABLE_CURSES "Enable ncurses console" TRUE)
+option(ENABLE_CURSES "Enable ncurses console" ${BUILD_SERVER})
 set(USE_CURSES FALSE)
 
 if(ENABLE_CURSES)
@@ -375,6 +376,9 @@ endif()
 
 check_include_files(endian.h HAVE_ENDIAN_H)
 
+if((NOT PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR) AND EXISTS "${PROJECT_SOURCE_DIR}/cmake_config.h")
+	message(FATAL_ERROR "You are doing an out-of-tree build, but build artifacts are left in-tree. This will break the build!")
+endif()
 configure_file(
 	"${PROJECT_SOURCE_DIR}/cmake_config.h.in"
 	"${PROJECT_BINARY_DIR}/cmake_config.h"
@@ -414,7 +418,7 @@ set(independent_SRCS
 	face_position_cache.cpp
 	gettext_plural_form.cpp
 	httpfetch.cpp
-	hud.cpp
+	hud_element.cpp
 	inventory.cpp
 	itemstackmetadata.cpp
 	log.cpp
@@ -430,6 +434,7 @@ set(independent_SRCS
 	profiler.cpp
 	serialization.cpp
 	settings.cpp
+	sound_spec.cpp
 	staticobject.cpp
 	terminal_chat_console.cpp
 	texture_override.cpp
@@ -442,8 +447,11 @@ set(independent_SRCS
 	${util_SRCS}
 )
 
+file(GLOB common_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+
 # /!\ Consider carefully before adding files here /!\
 set(common_SRCS
+	${common_HDRS}
 	clientdynamicinfo.cpp
 	collision.cpp
 	content_mapnode.cpp
@@ -591,9 +599,12 @@ if(USE_CURL)
 endif()
 
 
-# When cross-compiling assume the user doesn't want to run the executable anyway,
-# otherwise place it in <source dir>/bin/ since Luanti can only run from there.
-if(NOT CMAKE_CROSSCOMPILING)
+# When cross-compiling place the executable in <build dir>/bin so that multiple
+# targets can be built from the same source folder. Otherwise, place it in
+# <source dir>/bin/ since Luanti can only run from there.
+if(CMAKE_CROSSCOMPILING)
+	set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+else()
 	set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
 endif()
 
@@ -689,6 +700,7 @@ if(BUILD_CLIENT)
 		${GMP_LIBRARY}
 		${JSON_LIBRARY}
 		${LUA_BIT_LIBRARY}
+		lstrpack
 		sha256
 		${FREETYPE_LIBRARY}
 		${PLATFORM_LIBS}
@@ -779,6 +791,7 @@ if(BUILD_SERVER)
 		${JSON_LIBRARY}
 		${LUA_LIBRARY}
 		${LUA_BIT_LIBRARY}
+		lstrpack
 		sha256
 		${GMP_LIBRARY}
 		${PLATFORM_LIBS}
@@ -928,6 +941,13 @@ if(MSVC)
 else()
 	# GCC or compatible compilers such as Clang
 	set(WARNING_FLAGS "-Wall -Wextra -Wno-unused-parameter -Werror=vla")
+
+	# if possible, error on struct/class keyword missmatch
+	check_cxx_compiler_flag("-Werror=mismatched-tags" SUPPORTS_W_MISMATCHED_TAGS)
+	if(SUPPORTS_W_MISMATCHED_TAGS)
+		set(WARNING_FLAGS "${WARNING_FLAGS} -Werror=mismatched-tags")
+	endif()
+
 	if(WARN_ALL)
 		set(RELEASE_WARNING_FLAGS "${WARNING_FLAGS}")
 	else()
@@ -947,7 +967,7 @@ else()
 	set(MATH_FLAGS "-fno-math-errno -fno-trapping-math -fno-signed-zeros")
 
 	# Enable SSE for floating point math on 32-bit x86 by default
-	# reasoning see minetest issue #11810 and https://gcc.gnu.org/wiki/FloatingPointMath
+	# reasoning see luanti issue #11810 and https://gcc.gnu.org/wiki/FloatingPointMath
 	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 		check_c_source_compiles("#ifndef __i686__\n#error\n#endif\nint main(){}" IS_I686)
 		if(IS_I686)
@@ -969,8 +989,8 @@ else()
 	set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 ${WARNING_FLAGS} ${OTHER_FLAGS}")
 
 	if(UNIX)
-		# enable assertions for libstdc++ or libc++
-		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wp,-D_GLIBCXX_ASSERTIONS -Wp,-D_LIBCPP_ENABLE_ASSERTIONS=1")
+		# enable assertions for libstdc++
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wp,-D_GLIBCXX_ASSERTIONS")
 	endif()
 	if(USE_GPROF)
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
@@ -1114,20 +1134,17 @@ elseif (USE_GETTEXT)
 		set_mo_paths(MO_BUILD_PATH MO_DEST_PATH ${LOCALE})
 		set(MO_FILE_PATH "${MO_BUILD_PATH}/${PROJECT_NAME}.mo")
 
-		add_custom_command(OUTPUT ${MO_BUILD_PATH}
-			COMMAND ${CMAKE_COMMAND} -E make_directory ${MO_BUILD_PATH}
-			COMMENT "mo-update [${LOCALE}]: Creating locale directory.")
-
 		add_custom_command(
 			OUTPUT ${MO_FILE_PATH}
+			COMMAND ${CMAKE_COMMAND} -E make_directory ${MO_BUILD_PATH}
 			COMMAND ${GETTEXT_MSGFMT} -o ${MO_FILE_PATH} ${PO_FILE_PATH}
-			DEPENDS ${MO_BUILD_PATH} ${PO_FILE_PATH}
+			DEPENDS ${PO_FILE_PATH}
 			WORKING_DIRECTORY "${GETTEXT_PO_PATH}/${LOCALE}"
-			COMMENT "mo-update [${LOCALE}]: Creating mo file."
+			COMMENT "mo-update [${LOCALE}]: Creating mo file"
 			)
 
 		list(APPEND MO_FILES ${MO_FILE_PATH})
 	endforeach()
 
-	add_custom_target(translations ALL COMMENT "mo update" DEPENDS ${MO_FILES})
+	add_custom_target(translations ALL COMMENT "mo-update" DEPENDS ${MO_FILES})
 endif()

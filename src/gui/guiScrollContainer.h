@@ -29,6 +29,12 @@ public:
 	}
 
 	void setScrollBar(GUIScrollBar *scrollbar);
+	void updateScrolling();
+
+	inline f32 getScrollFactor() const
+	{
+		return m_scrollfactor;
+	}
 
 private:
 	enum OrientationEnum
@@ -43,5 +49,4 @@ private:
 	f32 m_scrollfactor; //< scrollbar pos * scrollfactor = scroll offset in pixels
 	std::optional<s32> m_content_padding_px; //< in pixels
 
-	void updateScrolling();
 };

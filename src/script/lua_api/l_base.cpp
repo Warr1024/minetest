@@ -3,13 +3,12 @@
 // Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 
 #include "lua_api/l_base.h"
-#include "lua_api/l_internal.h"
 #include "cpp_api/s_base.h"
 #include "content/mods.h"
 #include "profiler.h"
+#include "porting.h"
 #include "server.h"
 #include <algorithm>
-#include <cmath>
 #include <sstream>
 
 ScriptApiBase *ModApiBase::getScriptApiBase(lua_State *L)
@@ -58,6 +57,11 @@ GUIEngine *ModApiBase::getGuiEngine(lua_State *L)
 {
 	return getScriptApiBase(L)->getGuiEngine();
 }
+
+SSCSMEnvironment *ModApiBase::getSSCSMEnv(lua_State *L)
+{
+	return getScriptApiBase(L)->getSSCSMEnv();
+}
 #endif
 
 EmergeThread *ModApiBase::getEmergeThread(lua_State *L)
@@ -90,29 +94,6 @@ bool ModApiBase::registerFunction(lua_State *L, const char *name,
 	return true;
 }
 
-void ModApiBase::registerClass(lua_State *L, const char *name,
-		const luaL_Reg *methods,
-		const luaL_Reg *metamethods)
-{
-	luaL_newmetatable(L, name);
-	luaL_register(L, NULL, metamethods);
-	int metatable = lua_gettop(L);
-
-	lua_newtable(L);
-	luaL_register(L, NULL, methods);
-	int methodtable = lua_gettop(L);
-
-	lua_pushvalue(L, methodtable);
-	lua_setfield(L, metatable, "__index");
-
-	// Protect the real metatable.
-	lua_pushvalue(L, methodtable);
-	lua_setfield(L, metatable, "__metatable");
-
-	// Pop methodtable and metatable.
-	lua_pop(L, 2);
-}
-
 int ModApiBase::l_deprecated_function(lua_State *L, const char *good, const char *bad, lua_CFunction func)
 {
 	thread_local std::vector<u64> deprecated_logged;
@@ -123,14 +104,18 @@ int ModApiBase::l_deprecated_function(lua_State *L, const char *good, const char
 
 	u64 start_time = porting::getTimeUs();
 	lua_Debug ar;
+	std::string backtrace;
 
 	// Get caller name with line and script backtrace
-	FATAL_ERROR_IF(!lua_getstack(L, 1, &ar), "lua_getstack() failed");
-	FATAL_ERROR_IF(!lua_getinfo(L, "Sl", &ar), "lua_getinfo() failed");
+	if (lua_getstack(L, 1, &ar) && lua_getinfo(L, "Sl", &ar)) {
+		// Get backtrace and hash it to reduce the warning flood
+		backtrace = ar.short_src;
+		backtrace.append(":").append(std::to_string(ar.currentline));
+	} else {
+		backtrace = "<tail call optimized coroutine> ";
+		backtrace.append(script_get_backtrace(L));
+	}
 
-	// Get backtrace and hash it to reduce the warning flood
-	std::string backtrace = ar.short_src;
-	backtrace.append(":").append(std::to_string(ar.currentline));
 	u64 hash = murmur_hash_64_ua(backtrace.data(), backtrace.length(), 0xBADBABE);
 
 	if (std::find(deprecated_logged.begin(), deprecated_logged.end(), hash)

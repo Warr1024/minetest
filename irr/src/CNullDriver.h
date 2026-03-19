@@ -4,22 +4,21 @@
 
 #pragma once
 
+#include "HWBuffer.h"
+#include "IIndexBuffer.h"
+#include "IVertexBuffer.h"
 #include "IVideoDriver.h"
 #include "IFileSystem.h"
 #include "IGPUProgrammingServices.h"
 #include "irrArray.h"
 #include "irrString.h"
-#include "IAttributes.h"
 #include "IMesh.h"
 #include "IMeshBuffer.h"
 #include "IMeshSceneNode.h"
-#include "CFPSCounter.h"
 #include "S3DVertex.h"
 #include "SVertexIndex.h"
 #include "SExposedVideoData.h"
 
-namespace irr
-{
 namespace io
 {
 class IWriteFile;
@@ -50,11 +49,20 @@ public:
 	//! queries the features of the driver, returns true if feature is available
 	bool queryFeature(E_VIDEO_DRIVER_FEATURE feature) const override;
 
-	//! Get attributes of the actual video driver
-	const io::IAttributes &getDriverAttributes() const override;
-
 	//! sets transformation
 	void setTransform(E_TRANSFORMATION_STATE state, const core::matrix4 &mat) override;
+
+	//! Returns the maximum number of joint transformation matrices the hardware and driver support.
+	virtual u16 getMaxJointTransforms() const override
+	{
+		return 0;
+	}
+
+	//! Sets joint transformation matrices for skinned meshes.
+	virtual void setJointTransforms(const std::vector<core::matrix4> &jointMatrices) override
+	{
+		assert(jointMatrices.size() <= getMaxJointTransforms());
+	};
 
 	//! Retrieve the number of image loaders
 	u32 getImageLoaderCount() const override;
@@ -84,10 +92,12 @@ public:
 
 	ITexture *addTexture(const io::path &name, IImage *image) override;
 
+	ITexture *addArrayTexture(const io::path &name, IImage **images, u32 count) override;
+
 	virtual ITexture *addTextureCubemap(const io::path &name, IImage *imagePosX, IImage *imageNegX, IImage *imagePosY,
 			IImage *imageNegY, IImage *imagePosZ, IImage *imageNegZ) override;
 
-	ITexture *addTextureCubemap(const irr::u32 sideLen, const io::path &name, ECOLOR_FORMAT format = ECF_A8R8G8B8) override;
+	ITexture *addTextureCubemap(const u32 sideLen, const io::path &name, ECOLOR_FORMAT format = ECF_A8R8G8B8) override;
 
 	virtual bool setRenderTargetEx(IRenderTarget *target, u16 clearFlag, SColor clearColor = SColor(255, 0, 0, 0),
 			f32 clearDepth = 1.f, u8 clearStencil = 0) override;
@@ -179,9 +189,6 @@ public:
 			f32 &start, f32 &end, f32 &density,
 			bool &pixelFog, bool &rangeFog) override;
 
-	//! get color format of the current color buffer
-	ECOLOR_FORMAT getColorFormat() const override;
-
 	//! get screen size
 	const core::dimension2d<u32> &getScreenSize() const override;
 
@@ -191,10 +198,7 @@ public:
 	//! get render target size
 	const core::dimension2d<u32> &getCurrentRenderTargetSize() const override;
 
-	// get current frames per second value
-	s32 getFPS() const override;
-
-	SFrameStats getFrameStats() const override;
+	SFrameStats &getFrameStats() override;
 
 	//! \return Returns the name of the video driver. Example: In case of the DIRECT3D8
 	//! driver, it would return "Direct3D8.1".
@@ -223,20 +227,10 @@ public:
 			const io::path &name, const ECOLOR_FORMAT format = ECF_UNKNOWN) override;
 
 	//! Creates a render target texture for a cubemap
-	ITexture *addRenderTargetTextureCubemap(const irr::u32 sideLen,
+	ITexture *addRenderTargetTextureCubemap(const u32 sideLen,
 			const io::path &name, const ECOLOR_FORMAT format) override;
 
-	//! Creates an 1bit alpha channel of the texture based of an color key.
-	void makeColorKeyTexture(video::ITexture *texture, video::SColor color) const override;
-
-	//! Creates an 1bit alpha channel of the texture based of an color key position.
-	virtual void makeColorKeyTexture(video::ITexture *texture,
-			core::position2d<s32> colorKeyPixelPos) const override;
-
-	//! Returns the maximum amount of primitives (mostly vertices) which
-	//! the device is able to render with one drawIndexedTriangleList
-	//! call.
-	u32 getMaximalPrimitiveCount() const override;
+	SDriverLimits getLimits() const override;
 
 	//! Enables or disables a texture creation flag.
 	void setTextureCreationFlag(E_TEXTURE_CREATION_FLAG flag, bool enabled) override;
@@ -284,55 +278,37 @@ public:
 	//! Check if the driver supports creating textures with the given color format
 	bool queryTextureFormat(ECOLOR_FORMAT format) const override
 	{
-		return false;
+		return format == video::ECF_A8R8G8B8;
 	}
 
 protected:
-	/// Links a hardware buffer to either a vertex or index buffer
+
+	/// Links a hardware buffer to its software counterpart
 	struct SHWBufferLink
 	{
-		SHWBufferLink(const scene::IVertexBuffer *vb) :
-				VertexBuffer(vb), IsVertex(true)
+		SHWBufferLink(const scene::HWBuffer *buf) : Buffer(buf)
 		{
-			if (VertexBuffer) {
-				VertexBuffer->grab();
-				VertexBuffer->setHWBuffer(this);
-			}
-		}
-		SHWBufferLink(const scene::IIndexBuffer *ib) :
-				IndexBuffer(ib), IsVertex(false)
-		{
-			if (IndexBuffer) {
-				IndexBuffer->grab();
-				IndexBuffer->setHWBuffer(this);
-			}
+			if (!buf)
+				return;
+			buf->grab();
+			buf->Link = this;
 		}
 
 		virtual ~SHWBufferLink()
 		{
-			if (IsVertex && VertexBuffer) {
-				VertexBuffer->setHWBuffer(nullptr);
-				VertexBuffer->drop();
-			} else if (!IsVertex && IndexBuffer) {
-				IndexBuffer->setHWBuffer(nullptr);
-				IndexBuffer->drop();
-			}
+			if (!Buffer)
+				return;
+			Buffer->Link = nullptr;
+			Buffer->drop();
 		}
 
-		union {
-			const scene::IVertexBuffer *VertexBuffer;
-			const scene::IIndexBuffer *IndexBuffer;
-		};
+		const scene::HWBuffer *Buffer;
 		size_t ListPosition = static_cast<size_t>(-1);
 		u32 ChangedID = 0;
-		bool IsVertex;
 	};
 
-	//! Gets hardware buffer link from a vertex buffer (may create or update buffer)
-	virtual SHWBufferLink *getBufferLink(const scene::IVertexBuffer *mb);
-
-	//! Gets hardware buffer link from a index buffer (may create or update buffer)
-	virtual SHWBufferLink *getBufferLink(const scene::IIndexBuffer *mb);
+	//! Gets hardware buffer link from a buffer (may create or update buffer)
+	virtual SHWBufferLink *getBufferLink(const scene::HWBuffer *buf);
 
 	//! updates hardware buffer if needed  (only some drivers can)
 	virtual bool updateHardwareBuffer(SHWBufferLink *HWBuffer) { return false; }
@@ -340,22 +316,13 @@ protected:
 	//! Delete hardware buffer
 	virtual void deleteHardwareBuffer(SHWBufferLink *HWBuffer);
 
-	//! Create hardware buffer from vertex buffer
-	virtual SHWBufferLink *createHardwareBuffer(const scene::IVertexBuffer *vb) { return 0; }
-
-	//! Create hardware buffer from index buffer
-	virtual SHWBufferLink *createHardwareBuffer(const scene::IIndexBuffer *ib) { return 0; }
+	virtual SHWBufferLink *createHardwareBuffer(const scene::HWBuffer *buf) { return nullptr; }
 
 public:
-	virtual void updateHardwareBuffer(const scene::IVertexBuffer *vb) override;
-
-	virtual void updateHardwareBuffer(const scene::IIndexBuffer *ib) override;
+	virtual void updateHardwareBuffer(const scene::HWBuffer *buf) override;
 
 	//! Remove hardware buffer
-	void removeHardwareBuffer(const scene::IVertexBuffer *vb) override;
-
-	//! Remove hardware buffer
-	void removeHardwareBuffer(const scene::IIndexBuffer *ib) override;
+	void removeHardwareBuffer(const scene::HWBuffer *buf) override;
 
 	//! Remove all hardware buffers
 	void removeAllHardwareBuffers() override;
@@ -363,11 +330,8 @@ public:
 	//! Run garbage-collection on all HW buffers
 	void expireHardwareBuffers();
 
-	//! is vbo recommended?
-	virtual bool isHardwareBufferRecommend(const scene::IVertexBuffer *mb);
-
-	//! is vbo recommended?
-	virtual bool isHardwareBufferRecommend(const scene::IIndexBuffer *mb);
+	//! Is VBO recommended?
+	virtual bool isHardwareBufferRecommend(const scene::HWBuffer *buf);
 
 	//! Create occlusion query.
 	/** Use node for identification and mesh for occlusion test. */
@@ -443,8 +407,6 @@ public:
 	//! Returns amount of currently available material renderers.
 	u32 getMaterialRendererCount() const override;
 
-	//! Returns name of the material renderer
-	const char *getMaterialRendererName(u32 idx) const override;
 
 	//! Adds a new material renderer to the VideoDriver, based on a high level shading language.
 	virtual s32 addHighLevelShaderMaterial(
@@ -499,9 +461,6 @@ public:
 	//! Writes the provided image to a file.
 	bool writeImageToFile(IImage *image, io::IWriteFile *file, u32 param = 0) override;
 
-	//! Sets the name of a material renderer.
-	void setMaterialRendererName(u32 idx, const char *name) override;
-
 	//! Swap the material renderers used for certain id's
 	void swapMaterialRenderers(u32 idx1, u32 idx2, bool swapNames) override;
 
@@ -533,11 +492,8 @@ public:
 		AllowZWriteOnTransparent = flag;
 	}
 
-	//! Returns the maximum texture size supported.
-	core::dimension2du getMaxTextureSize() const override;
-
 	//! Used by some SceneNodes to check if a material should be rendered in the transparent render pass
-	bool needsTransparentRenderPass(const irr::video::SMaterial &material) const override;
+	bool needsTransparentRenderPass(const video::SMaterial &material) const override;
 
 protected:
 	//! deletes all textures
@@ -549,9 +505,8 @@ protected:
 	//! adds a surface, not loaded or created by the Irrlicht Engine
 	void addTexture(ITexture *surface);
 
-	virtual ITexture *createDeviceDependentTexture(const io::path &name, IImage *image);
-
-	virtual ITexture *createDeviceDependentTextureCubemap(const io::path &name, const std::vector<IImage*> &image);
+	virtual ITexture *createDeviceDependentTexture(const io::path &name, E_TEXTURE_TYPE type,
+		const std::vector<IImage*> &images);
 
 	//! checks triangle count and print warning if wrong
 	bool checkPrimitiveCount(u32 prmcnt) const;
@@ -616,7 +571,7 @@ protected:
 
 		void *lock(E_TEXTURE_LOCK_MODE mode = ETLM_READ_WRITE, u32 mipmapLevel = 0, u32 layer = 0, E_TEXTURE_LOCK_FLAGS lockFlags = ETLF_FLIP_Y_UP_RTT) override { return 0; }
 		void unlock() override {}
-		void regenerateMipMapLevels(void *data = 0, u32 layer = 0) override {}
+		void regenerateMipMapLevels() override {}
 	};
 	core::array<SSurface> Textures;
 
@@ -703,7 +658,6 @@ protected:
 	core::dimension2d<u32> ScreenSize;
 	core::matrix4 TransformationMatrix;
 
-	CFPSCounter FPSCounter;
 	SFrameStats FrameStats;
 
 	u32 MinVertexCountForVBO;
@@ -715,8 +669,6 @@ protected:
 	f32 FogDensity;
 	SColor FogColor;
 	SExposedVideoData ExposedData;
-
-	io::IAttributes *DriverAttributes;
 
 	SOverrideMaterial OverrideMaterial;
 	SMaterial OverrideMaterial2D;
@@ -732,4 +684,3 @@ protected:
 };
 
 } // end namespace video
-} // end namespace irr

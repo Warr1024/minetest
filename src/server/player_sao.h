@@ -6,10 +6,12 @@
 #pragma once
 
 #include "constants.h"
+#include "inventorymanager.h" // InventoryLocation
 #include "metadata.h"
 #include "network/networkprotocol.h"
 #include "unit_sao.h"
 #include "util/numeric.h"
+#include <set>
 
 /*
 	PlayerSAO needs some internals exposed.
@@ -78,6 +80,7 @@ public:
 	void addPos(const v3f &added_pos) override;
 	void moveTo(v3f pos, bool continuous) override;
 	void setPlayerYaw(const float yaw);
+	std::string getGUID() const override { return m_player_name; }
 	// Data should not be sent at player initialization
 	void setPlayerYawAndSend(const float yaw);
 	void setLookPitch(const float pitch);
@@ -98,7 +101,7 @@ public:
 		Interaction interface
 	*/
 
-	u32 punch(v3f dir, const ToolCapabilities *toolcap, ServerActiveObject *puncher,
+	u32 punch(v3f dir, const ToolCapabilities &toolcap, ServerActiveObject *puncher,
 			float time_from_last_punch, u16 initial_wear = 0) override;
 	void rightClick(ServerActiveObject *clicker) override;
 	void setHP(s32 hp, const PlayerHPChangeReason &reason) override
@@ -138,7 +141,7 @@ public:
 	float resetTimeFromLastPunch()
 	{
 		float r = m_time_from_last_punch;
-		m_time_from_last_punch = 0.0;
+		m_time_from_last_punch = 0;
 		return r;
 	}
 	void noCheatDigStart(const v3s16 &p)
@@ -170,7 +173,7 @@ public:
 
 	void finalize(RemotePlayer *player, const std::set<std::string> &privs);
 
-	v3f getEyePosition() const { return m_base_position + getEyeOffset(); }
+	v3f getEyePosition() const { return getBasePosition() + getEyeOffset(); }
 	v3f getEyeOffset() const;
 	float getZoomFOV() const;
 
@@ -182,6 +185,8 @@ private:
 	std::string generateUpdatePhysicsOverrideCommand() const;
 
 	RemotePlayer *m_player = nullptr;
+	// Extra variable because during shutdown m_player is unavailable, but we still need to know.
+	std::string m_player_name; ///< used as GUID
 	session_t m_peer_id_initial = 0; ///< only used to initialize RemotePlayer
 
 	// Cheat prevention
@@ -245,7 +250,7 @@ struct PlayerHPChangeReason
 
 	// For PLAYER_PUNCH
 	ServerActiveObject *object = nullptr;
-	// For NODE_DAMAGE
+	// For NODE_DAMAGE and DROWNING
 	std::string node;
 	v3s16 node_pos;
 

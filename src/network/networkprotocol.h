@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "irrTypes.h"
-using namespace irr;
+#include "irrlichttypes.h"
 
 extern const u16 LATEST_PROTOCOL_VERSION;
 
@@ -17,7 +16,13 @@ constexpr u16 CLIENT_PROTOCOL_VERSION_MIN = 37;
 
 extern const u16 FORMSPEC_API_VERSION;
 
+// (applies to all media files, not just textures)
 #define TEXTURENAME_ALLOWED_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-"
+
+// Due to our network protocol the maximum window size determines the maximum
+// media size we can safely allow. See the comment and check in Connection::Send().
+// This is a bit lower to include safety margin.
+#define MEDIAFILE_MAX_SIZE (16700000U)
 
 typedef u16 session_t;
 
@@ -33,24 +38,28 @@ enum ToClientCommand : u16
 		u32 supported auth methods
 		std::string unused (used to be username)
 	*/
+
 	TOCLIENT_AUTH_ACCEPT = 0x03,
 	/*
 		Message from server to accept auth.
 
-		v3s16 player's position + v3f(0,BS/2,0) floatToInt'd
+		v3f unused
 		u64 map seed
 		f1000 recommended send interval
 		u32 : supported auth methods for sudo mode
 		      (where the user can change their password)
 	*/
+
 	TOCLIENT_ACCEPT_SUDO_MODE = 0x04,
 	/*
 		Sent to client to show it is in sudo mode now.
 	*/
+
 	TOCLIENT_DENY_SUDO_MODE = 0x05,
 	/*
 		Signals client that sudo mode auth failed.
 	*/
+
 	TOCLIENT_ACCESS_DENIED = 0x0A,
 	/*
 		u8 reason
@@ -59,18 +68,26 @@ enum ToClientCommand : u16
 	*/
 
 	TOCLIENT_BLOCKDATA = 0x20,
+	/*
+		v3s16 position
+		serialized MapBlock
+	*/
+
 	TOCLIENT_ADDNODE = 0x21,
 	/*
 		v3s16 position
 		serialized mapnode
-		u8 keep_metadata // Added in protocol version 22
+		u8 keep_metadata
 	*/
+
 	TOCLIENT_REMOVENODE = 0x22,
+	/*
+		v3s16 position
+	*/
 
 	TOCLIENT_INVENTORY = 0x27,
 	/*
-		[0] u16 command
-		[2] serialized inventory
+		serialized inventory
 	*/
 
 	TOCLIENT_TIME_OF_DAY = 0x29,
@@ -167,40 +184,38 @@ enum ToClientCommand : u16
 
 	TOCLIENT_MEDIA = 0x38,
 	/*
-		u16 total number of texture bunches
+		u16 total number of bunches
 		u16 index of this bunch
 		u32 number of files in this bunch
 		for each file {
 			u16 length of name
 			string name
 			u32 length of data
-			data
+			data (zstd-compressed)
 		}
-		u16 length of remote media server url (if applicable)
-		string url
 	*/
 
 	TOCLIENT_NODEDEF = 0x3a,
 	/*
-		u32 length of the next item
-		serialized NodeDefManager
+		u32 length of buffer
+		serialized NodeDefManager (zstd-compressed)
 	*/
 
 	TOCLIENT_ANNOUNCE_MEDIA = 0x3c,
 	/*
-		u32 number of files
-		for each texture {
-			u16 length of name
-			string name
-			u16 length of sha1_digest
-			string sha1_digest
+		u32 length of compressed name array
+		string16array names (zstd-compressed)
+		for each file {
+			char[20] sha1_digest
 		}
+		u16 length of remote media server url
+		string url
 	*/
 
 	TOCLIENT_ITEMDEF = 0x3d,
 	/*
-		u32 length of next item
-		serialized ItemDefManager
+		u32 length of buffer
+		serialized ItemDefManager (zstd-compressed)
 	*/
 
 	TOCLIENT_PLAY_SOUND = 0x3f,
@@ -273,6 +288,8 @@ enum ToClientCommand : u16
 
 	TOCLIENT_SPAWN_PARTICLE = 0x46,
 	/*
+		ParticleParameters params:
+
 		using range<T> = RangedParameter<T> {
 			T min, max
 			f32 bias
@@ -442,6 +459,11 @@ enum ToClientCommand : u16
 
 	*/
 
+	TOCLIENT_CAMERA = 0x48,
+	/*
+		u8 allowed_camera_mode
+	*/
+
 	TOCLIENT_HUDADD = 0x49,
 	/*
 		u32 id
@@ -458,7 +480,7 @@ enum ToClientCommand : u16
 		v2f1000 align
 		v2f1000 offset
 		v3f1000 world_pos
-		v2s32 size
+		v2f size	// if protocol >= 52. Otherwise, v2s32
 		s16 z_index
 		u16 len3
 		u8[len3] text2
@@ -670,9 +692,23 @@ enum ToClientCommand : u16
 			f32 speed_dark_bright
 			f32 speed_bright_dark
 			f32 center_weight_power
+		f32 volumetric_light_strength
+		SColor shadow_tint
+		bloom parameters
+			f32 bloom_intensity
+			f32 bloom_strength_factor
+			f32 bloom_radius
+		v3f shadow_direction ({0,0,0} = unset)
 	*/
 
-	TOCLIENT_NUM_MSG_TYPES = 0x64,
+	TOCLIENT_SPAWN_PARTICLE_BATCH = 0x64,
+	/*
+		std::string data, zstd-compressed, for each particle:
+			u32 len
+			u8[len] serialized ParticleParameters
+	*/
+
+	TOCLIENT_NUM_MSG_TYPES = 0x65,
 };
 
 enum ToServerCommand : u16
@@ -716,18 +752,16 @@ enum ToServerCommand : u16
 
 	TOSERVER_PLAYERPOS = 0x23,
 	/*
-		[0] u16 command
-		[2] v3s32 position*100
-		[2+12] v3s32 speed*100
-		[2+12+12] s32 pitch*100
-		[2+12+12+4] s32 yaw*100
-		[2+12+12+4+4] u32 keyPressed
-		[2+12+12+4+4+4] u8 fov*80
-		[2+12+12+4+4+4+1] u8 ceil(wanted_range / MAP_BLOCKSIZE)
-		[2+12+12+4+4+4+1+1] u8 camera_inverted (bool)
-		[2+12+12+4+4+4+1+1+1] f32 movement_speed
-		[2+12+12+4+4+4+1+1+1+4] f32 movement_direction
-
+		v3s32 position*100
+		v3s32 speed*100
+		s32 pitch*100
+		s32 yaw*100
+		u32 keyPressed
+		u8 fov*80
+		u8 ceil(wanted_range / MAP_BLOCKSIZE)
+		u8 camera_inverted (bool)
+		f32 movement_speed
+		f32 movement_direction
 	*/
 
 	TOSERVER_GOTBLOCKS = 0x24,

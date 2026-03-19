@@ -8,10 +8,10 @@
 #include <vector>
 #include <IGUIFont.h>
 #include <SMaterial.h>
-#include <SMeshBuffer.h>
+#include <CMeshBuffer.h>
 #include "irr_ptr.h"
 #include "irr_aabb3d.h"
-#include "../hud.h"
+#include "hud_element.h"
 
 class Client;
 class ITextureSource;
@@ -20,12 +20,12 @@ class InventoryList;
 class LocalPlayer;
 struct ItemStack;
 
-namespace irr::scene
+namespace scene
 {
 	class IMesh;
 }
 
-namespace irr::video
+namespace video
 {
 	class ITexture;
 	class IVideoDriver;
@@ -74,9 +74,15 @@ public:
 
 	v3f getSelectionPos() const { return m_selection_pos; }
 
-	void setSelectionRotation(v3f rotation) { m_selection_rotation = rotation; }
+	void setSelectionRotationRadians(v3f rotation)
+	{
+		m_selection_rotation_radians = rotation;
+	}
 
-	v3f getSelectionRotation() const { return m_selection_rotation; }
+	v3f getSelectionRotationRadians() const
+	{
+		return m_selection_rotation_radians;
+	}
 
 	void setSelectionMeshColor(const video::SColor &color)
 	{
@@ -96,7 +102,7 @@ private:
 	bool calculateScreenPos(const v3s16 &camera_offset, HudElement *e, v2s32 *pos);
 	void drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 			const std::string &texture, const std::string& bgtexture,
-			s32 count, s32 maxcount, v2s32 offset, v2s32 size = v2s32());
+			s32 count, s32 maxcount, v2s32 offset, v2f size = v2f());
 
 	void drawItems(v2s32 screen_pos, v2s32 screen_offset, s32 itemcount, v2f alignment,
 			s32 inv_offset, InventoryList *mainlist, u16 selectitem,
@@ -129,7 +135,7 @@ private:
 	std::vector<aabb3f> m_halo_boxes;
 	v3f m_selection_pos;
 	v3f m_selection_pos_with_offset;
-	v3f m_selection_rotation;
+	v3f m_selection_rotation_radians;
 
 	scene::IMesh *m_selection_mesh = nullptr;
 	video::SColor m_selection_mesh_color;
@@ -147,32 +153,3 @@ private:
 		HIGHLIGHT_NONE
 	} m_mode;
 };
-
-enum ItemRotationKind
-{
-	IT_ROT_SELECTED,
-	IT_ROT_HOVERED,
-	IT_ROT_DRAGGED,
-	IT_ROT_OTHER,
-	IT_ROT_NONE, // Must be last, also serves as number
-};
-
-void drawItemStack(video::IVideoDriver *driver,
-		gui::IGUIFont *font,
-		const ItemStack &item,
-		const core::rect<s32> &rect,
-		const core::rect<s32> *clip,
-		Client *client,
-		ItemRotationKind rotation_kind);
-
-void drawItemStack(
-		video::IVideoDriver *driver,
-		gui::IGUIFont *font,
-		const ItemStack &item,
-		const core::rect<s32> &rect,
-		const core::rect<s32> *clip,
-		Client *client,
-		ItemRotationKind rotation_kind,
-		const v3s16 &angle,
-		const v3s16 &rotation_speed);
-

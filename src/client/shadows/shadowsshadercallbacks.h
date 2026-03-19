@@ -4,12 +4,12 @@
 
 #pragma once
 #include <IMaterialRendererServices.h>
-#include <IShaderConstantSetCallBack.h>
 #include "client/shader.h"
+#include "util/string.h"
 
 // Used by main game rendering
 
-class ShadowConstantSetter : public IShaderConstantSetter
+class ShadowUniformSetter : public IShaderUniformSetter
 {
 	CachedPixelShaderSetting<f32, 16> m_shadow_view_proj{"m_ShadowViewProj"};
 	CachedPixelShaderSetting<f32, 3> m_light_direction{"v_LightDirection"};
@@ -33,29 +33,28 @@ class ShadowConstantSetter : public IShaderConstantSetter
 	CachedPixelShaderSetting<f32> m_perspective_zbias_pixel{"zPerspectiveBias"};
 
 public:
-	ShadowConstantSetter() = default;
-	~ShadowConstantSetter() = default;
+	ShadowUniformSetter() = default;
+	~ShadowUniformSetter() = default;
 
-	virtual void onSetConstants(video::IMaterialRendererServices *services) override;
+	virtual void onSetUniforms(video::IMaterialRendererServices *services) override;
 };
 
-class ShadowConstantSetterFactory : public IShaderConstantSetterFactory
+class ShadowUniformSetterFactory : public IShaderUniformSetterFactory
 {
 public:
-	virtual IShaderConstantSetter *create() {
-		return new ShadowConstantSetter();
+	virtual IShaderUniformSetter *create(const std::string &name) {
+		if (str_starts_with(name, "shadow/"))
+			return nullptr;
+		return new ShadowUniformSetter();
 	}
 };
 
 // Used by depth shader
 
-class ShadowDepthShaderCB : public video::IShaderConstantSetCallBack
+class ShadowDepthUniformSetter : public IShaderUniformSetterRC
 {
 public:
-	void OnSetMaterial(const video::SMaterial &material) override {}
-
-	void OnSetConstants(video::IMaterialRendererServices *services,
-			s32 userData) override;
+	virtual void onSetUniforms(video::IMaterialRendererServices *services) override;
 
 	f32 MaxFar{2048.0f}, MapRes{1024.0f};
 	f32 PerspectiveBiasXY {0.9f}, PerspectiveBiasZ {0.5f};

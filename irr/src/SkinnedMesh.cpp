@@ -3,15 +3,20 @@
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "SkinnedMesh.h"
-#include "IBoneSceneNode.h"
-#include "CBoneSceneNode.h"
-#include "IAnimatedMeshSceneNode.h"
+#include "EHardwareBufferFlags.h"
 #include "SSkinMeshBuffer.h"
+#include "Transform.h"
+#include "aabbox3d.h"
+#include "matrix4.h"
 #include "os.h"
+#include "vector3d.h"
+#include <cassert>
+#include <cstddef>
+#include <variant>
 #include <vector>
+#include <cassert>
+#include <stdexcept>
 
-namespace irr
-{
 namespace scene
 {
 
@@ -32,232 +37,117 @@ f32 SkinnedMesh::getMaxFrameNumber() const
 	return EndFrame;
 }
 
-//! Gets the default animation speed of the animated mesh.
-/** \return Amount of frames per second. If the amount is 0, it is a static, non animated mesh. */
-f32 SkinnedMesh::getAnimationSpeed() const
+void SkinnedMesh::prepareForAnimation(u16 max_hw_joints)
 {
-	return FramesPerSecond;
-}
-
-//! Gets the frame count of the animated mesh.
-/** \param fps Frames per second to play the animation with. If the amount is 0, it is not animated.
-The actual speed is set in the scene node the mesh is instantiated in.*/
-void SkinnedMesh::setAnimationSpeed(f32 fps)
-{
-	FramesPerSecond = fps;
-}
-
-//! returns the animated mesh based
-IMesh *SkinnedMesh::getMesh(f32 frame)
-{
-	// animate(frame,startFrameLoop, endFrameLoop);
-	if (frame == -1)
-		return this;
-
-	animateMesh(frame);
-	skinMesh();
-	return this;
-}
-
-//--------------------------------------------------------------------------
-//			Keyframe Animation
-//--------------------------------------------------------------------------
-
-//! Animates joints based on frame input
-void SkinnedMesh::animateMesh(f32 frame)
-{
-	if (!HasAnimation || LastAnimatedFrame == frame)
+	if (getJointCount() <= max_hw_joints)
 		return;
 
-	LastAnimatedFrame = frame;
-	SkinnedLastFrame = false;
-
-	for (auto *joint : AllJoints) {
-		// The joints can be animated here with no input from their
-		// parents, but for setAnimationMode extra checks are needed
-		// to their parents
-		joint->keys.updateTransform(frame,
-				joint->Animatedposition,
-				joint->Animatedrotation,
-				joint->Animatedscale);
-	}
-
-	// Note:
-	// LocalAnimatedMatrix needs to be built at some point, but this function may be called lots of times for
-	// one render (to play two animations at the same time) LocalAnimatedMatrix only needs to be built once.
-	// a call to buildAllLocalAnimatedMatrices is needed before skinning the mesh, and before the user gets the joints to move
-
-	//----------------
-	// Temp!
-	buildAllLocalAnimatedMatrices();
-	//-----------------
-
-	updateBoundingBox();
+	for (auto *buf : LocalBuffers)
+		buf->getVertexBuffer()->useSwSkinning();
+	UseSwSkinning = true;
 }
 
-void SkinnedMesh::buildAllLocalAnimatedMatrices()
+void SkinnedMesh::updateStaticPose()
 {
-	for (auto *joint : AllJoints) {
-		// Could be faster:
+	if (!UseSwSkinning)
+		return;
+	for (auto *buf : LocalBuffers) {
+		if (auto *weights = buf->getWeights())
+			weights->updateStaticPose(buf->getVertexBuffer());
+	}
+}
 
-		if (!joint->keys.empty()) {
-			joint->GlobalSkinningSpace = false;
+void SkinnedMesh::resetAnimation()
+{
+	if (!UseSwSkinning)
+		return;
+	for (auto *buf : LocalBuffers) {
+		if (auto *weights = buf->getWeights())
+			weights->resetToStaticPose(buf->getVertexBuffer());
+	}
+}
 
-			// IRR_TEST_BROKEN_QUATERNION_USE: TODO - switched to getMatrix_transposed instead of getMatrix for downward compatibility.
-			//								   Not tested so far if this was correct or wrong before quaternion fix!
-			// Note that using getMatrix_transposed inverts the rotation.
-			joint->Animatedrotation.getMatrix_transposed(joint->LocalAnimatedMatrix);
+// Keyframe Animation
 
-			// --- joint->LocalAnimatedMatrix *= joint->Animatedrotation.getMatrix() ---
-			f32 *m1 = joint->LocalAnimatedMatrix.pointer();
-			core::vector3df &Pos = joint->Animatedposition;
-			m1[0] += Pos.X * m1[3];
-			m1[1] += Pos.Y * m1[3];
-			m1[2] += Pos.Z * m1[3];
-			m1[4] += Pos.X * m1[7];
-			m1[5] += Pos.Y * m1[7];
-			m1[6] += Pos.Z * m1[7];
-			m1[8] += Pos.X * m1[11];
-			m1[9] += Pos.Y * m1[11];
-			m1[10] += Pos.Z * m1[11];
-			m1[12] += Pos.X * m1[15];
-			m1[13] += Pos.Y * m1[15];
-			m1[14] += Pos.Z * m1[15];
-			// -----------------------------------
 
-			if (!joint->keys.scale.empty()) {
-				/*
-				core::matrix4 scaleMatrix;
-				scaleMatrix.setScale(joint->Animatedscale);
-				joint->LocalAnimatedMatrix *= scaleMatrix;
-				*/
+using VariantTransform = SkinnedMesh::SJoint::VariantTransform;
+std::vector<VariantTransform> SkinnedMesh::animateMesh(f32 frame)
+{
+	assert(HasAnimation);
+	std::vector<VariantTransform> result;
+	result.reserve(AllJoints.size());
+	for (auto *joint : AllJoints)
+		result.push_back(joint->animate(frame));
+	return result;
+}
 
-				// -------- joint->LocalAnimatedMatrix *= scaleMatrix -----------------
-				core::matrix4 &mat = joint->LocalAnimatedMatrix;
-				mat[0] *= joint->Animatedscale.X;
-				mat[1] *= joint->Animatedscale.X;
-				mat[2] *= joint->Animatedscale.X;
-				mat[3] *= joint->Animatedscale.X;
-				mat[4] *= joint->Animatedscale.Y;
-				mat[5] *= joint->Animatedscale.Y;
-				mat[6] *= joint->Animatedscale.Y;
-				mat[7] *= joint->Animatedscale.Y;
-				mat[8] *= joint->Animatedscale.Z;
-				mat[9] *= joint->Animatedscale.Z;
-				mat[10] *= joint->Animatedscale.Z;
-				mat[11] *= joint->Animatedscale.Z;
-				// -----------------------------------
-			}
-		} else {
-			joint->LocalAnimatedMatrix = joint->LocalMatrix;
+core::aabbox3df SkinnedMesh::calculateBoundingBox(
+		const std::vector<core::matrix4> &global_transforms)
+{
+	assert(global_transforms.size() == AllJoints.size());
+	core::aabbox3df result = StaticPartsBox;
+	// skeletal animation
+	for (u16 i = 0; i < AllJoints.size(); ++i) {
+		auto box = AllJoints[i]->LocalBoundingBox;
+		global_transforms[i].transformBoxEx(box);
+		result.addInternalBox(box);
+	}
+	// rigid animation
+	for (u16 i = 0; i < AllJoints.size(); ++i) {
+		for (u32 j : AllJoints[i]->AttachedMeshes) {
+			auto box = (*SkinningBuffers)[j]->BoundingBox;
+			global_transforms[i].transformBoxEx(box);
+			result.addInternalBox(box);
 		}
 	}
-	SkinnedLastFrame = false;
+	return result;
 }
 
-void SkinnedMesh::buildAllGlobalAnimatedMatrices(SJoint *joint, SJoint *parentJoint)
+// Software Skinning
+
+std::vector<core::matrix4> SkinnedMesh::calculateSkinMatrices(const std::vector<core::matrix4> &global_matrices) const
 {
-	if (!joint) {
-		for (auto *rootJoint : RootJoints)
-			buildAllGlobalAnimatedMatrices(rootJoint, 0);
-		return;
-	} else {
-		// Find global matrix...
-		if (!parentJoint || joint->GlobalSkinningSpace)
-			joint->GlobalAnimatedMatrix = joint->LocalAnimatedMatrix;
-		else
-			joint->GlobalAnimatedMatrix = parentJoint->GlobalAnimatedMatrix * joint->LocalAnimatedMatrix;
+	assert(global_matrices.size() == AllJoints.size());
+	std::vector<core::matrix4> skin_matrices;
+	skin_matrices.reserve(AllJoints.size());
+	for (u16 i = 0; i < AllJoints.size(); ++i) {
+		auto skin_mat = global_matrices[i];
+		if (AllJoints[i]->GlobalInversedMatrix)
+			skin_mat = skin_mat * (*AllJoints[i]->GlobalInversedMatrix);
+		skin_matrices.push_back(skin_mat);
 	}
-
-	for (auto *childJoint : joint->Children)
-		buildAllGlobalAnimatedMatrices(childJoint, joint);
+	return skin_matrices;
 }
 
-//--------------------------------------------------------------------------
-//				Software Skinning
-//--------------------------------------------------------------------------
-
-//! Preforms a software skin on this mesh based of joint positions
-void SkinnedMesh::skinMesh()
+void SkinnedMesh::rigidAnimation(const std::vector<core::matrix4> &global_matrices)
 {
-	if (!HasAnimation || SkinnedLastFrame)
+	for (size_t i = 0; i < AllJoints.size(); ++i) {
+		auto *joint = AllJoints[i];
+		for (u32 attachedMeshIdx : joint->AttachedMeshes) {
+			SSkinMeshBuffer *Buffer = (*SkinningBuffers)[attachedMeshIdx];
+			Buffer->Transformation = global_matrices[i];
+		}
+	}
+}
+
+void SkinnedMesh::skinMesh(const std::vector<core::matrix4> &global_matrices)
+{
+	if (!HasAnimation)
 		return;
 
-	//----------------
-	// This is marked as "Temp!".  A shiny dubloon to whomever can tell me why.
-	buildAllGlobalAnimatedMatrices();
-	//-----------------
-
-	SkinnedLastFrame = true;
-	if (!HardwareSkinning) {
-		// rigid animation
-		for (auto *joint : AllJoints) {
-			for (u32 attachedMeshIdx : joint->AttachedMeshes) {
-				SSkinMeshBuffer *Buffer = (*SkinningBuffers)[attachedMeshIdx];
-				Buffer->Transformation = joint->GlobalAnimatedMatrix;
-			}
-		}
-
-		// clear skinning helper array
-		for (std::vector<char> &buf : Vertices_Moved)
-			std::fill(buf.begin(), buf.end(), false);
-
-		// skin starting with the root joints
-		for (auto *rootJoint : RootJoints)
-			skinJoint(rootJoint, 0);
-
-		for (auto *buffer : *SkinningBuffers)
-			buffer->setDirty(EBT_VERTEX);
-	}
-	updateBoundingBox();
-}
-
-void SkinnedMesh::skinJoint(SJoint *joint, SJoint *parentJoint)
-{
-	if (joint->Weights.size()) {
-		// Find this joints pull on vertices...
-		// Note: It is assumed that the global inversed matrix has been calculated at this point.
-		core::matrix4 jointVertexPull = joint->GlobalAnimatedMatrix * joint->GlobalInversedMatrix.value();
-
-		core::vector3df thisVertexMove, thisNormalMove;
-
-		auto &buffersUsed = *SkinningBuffers;
-
-		// Skin Vertices Positions and Normals...
-		for (const auto &weight : joint->Weights) {
-			// Pull this vertex...
-			jointVertexPull.transformVect(thisVertexMove, weight.StaticPos);
-
-			if (AnimateNormals) {
-				thisNormalMove = jointVertexPull.rotateAndScaleVect(weight.StaticNormal);
-				thisNormalMove.normalize(); // must renormalize after potentially scaling
-			}
-
-			if (!(*(weight.Moved))) {
-				*(weight.Moved) = true;
-
-				buffersUsed[weight.buffer_id]->getVertex(weight.vertex_id)->Pos = thisVertexMove * weight.strength;
-
-				if (AnimateNormals)
-					buffersUsed[weight.buffer_id]->getVertex(weight.vertex_id)->Normal = thisNormalMove * weight.strength;
-
-				//*(weight._Pos) = thisVertexMove * weight.strength;
-			} else {
-				buffersUsed[weight.buffer_id]->getVertex(weight.vertex_id)->Pos += thisVertexMove * weight.strength;
-
-				if (AnimateNormals)
-					buffersUsed[weight.buffer_id]->getVertex(weight.vertex_id)->Normal += thisNormalMove * weight.strength;
-
-				//*(weight._Pos) += thisVertexMove * weight.strength;
-			}
-
-			buffersUsed[weight.buffer_id]->boundingBoxNeedsRecalculated();
-		}
+	// Premultiply with global inversed matrices, if present
+	// (which they should be for joints with weights)
+	std::vector<core::matrix4> joint_transforms = global_matrices;
+	for (u16 i = 0; i < AllJoints.size(); ++i) {
+		auto *joint = AllJoints[i];
+		if (joint->GlobalInversedMatrix)
+			joint_transforms[i] = joint_transforms[i] * (*joint->GlobalInversedMatrix);
 	}
 
-	// Skin all children
-	for (auto *childJoint : joint->Children)
-		skinJoint(childJoint, joint);
+	for (auto *buffer : *SkinningBuffers) {
+		if (auto *weights = buffer->getWeights())
+			weights->skin(buffer->getVertexBuffer(), joint_transforms);
+	}
 }
 
 //! Gets joint count.
@@ -309,16 +199,12 @@ IMeshBuffer *SkinnedMesh::getMeshBuffer(const video::SMaterial &material) const
 		if (LocalBuffers[i]->getMaterial() == material)
 			return LocalBuffers[i];
 	}
-	return 0;
+	return nullptr;
 }
 
 u32 SkinnedMesh::getTextureSlot(u32 meshbufNr) const
 {
 	return TextureSlots.at(meshbufNr);
-}
-
-void SkinnedMesh::setTextureSlot(u32 meshbufNr, u32 textureSlot) {
-	TextureSlots.at(meshbufNr) = textureSlot;
 }
 
 //! set the hardware mapping hint, for driver
@@ -336,418 +222,281 @@ void SkinnedMesh::setDirty(E_BUFFER_TYPE buffer)
 		LocalBuffers[i]->setDirty(buffer);
 }
 
-//! (This feature is not implemented in irrlicht yet)
-bool SkinnedMesh::setHardwareSkinning(bool on)
+//! Turns the given array of local matrices into an array of global matrices
+//! by multiplying with respective parent matrices.
+void SkinnedMesh::calculateGlobalMatrices(std::vector<core::matrix4> &matrices) const
 {
-	if (HardwareSkinning != on) {
-		if (on) {
+	// Note that the joints are topologically sorted.
+	for (u16 i = 0; i < AllJoints.size(); ++i) {
+		if (auto parent_id = AllJoints[i]->ParentJointID) {
+			matrices[i] = matrices[*parent_id] * matrices[i];
+		}
+	}
+}
 
-			// set mesh to static pose...
-			for (auto *joint : AllJoints) {
-				for (const auto &weight : joint->Weights) {
-					const u16 buffer_id = weight.buffer_id;
-					const u32 vertex_id = weight.vertex_id;
-					LocalBuffers[buffer_id]->getVertex(vertex_id)->Pos = weight.StaticPos;
-					LocalBuffers[buffer_id]->getVertex(vertex_id)->Normal = weight.StaticNormal;
-					LocalBuffers[buffer_id]->boundingBoxNeedsRecalculated();
+bool SkinnedMesh::checkForWeights() const
+{
+	return std::any_of(LocalBuffers.begin(), LocalBuffers.end(),
+			[](const auto *buf) { return buf->getWeights() != nullptr; });
+}
+
+bool SkinnedMesh::checkForKeys() const
+{
+	return std::any_of(AllJoints.begin(), AllJoints.end(),
+			[](const auto *joint) { return !joint->keys.empty(); });
+}
+
+void SkinnedMesh::prepareForSkinning()
+{
+	HasWeights = checkForWeights();
+	// Meshes with weights are animatable (e.g. with bone overrides)
+	HasAnimation = HasWeights || checkForKeys();
+	if (!HasAnimation || PreparedForSkinning)
+		return;
+
+	PreparedForSkinning = true;
+
+	EndFrame = 0.0f;
+	for (const auto *joint : AllJoints) {
+		EndFrame = std::max(EndFrame, joint->keys.getEndFrame());
+	}
+
+	for (auto *joint : AllJoints) {
+		joint->keys.cleanup();
+	}
+}
+
+void SkinnedMesh::calculateStaticBoundingBox()
+{
+	bool first = true;
+	std::vector<bool> animated;
+	for (u16 mb = 0; mb < getMeshBufferCount(); mb++) {
+		auto *buf = LocalBuffers[mb];
+		animated.clear();
+		animated.resize(buf->getVertexCount(), false);
+		if (const auto *weights = buf->getWeights()) {
+			for (u32 vert_id : weights->animated_vertices.value()) {
+				animated[vert_id] = true;
+			}
+		}
+		for (u32 v = 0; v < buf->getVertexCount(); v++) {
+			if (animated[v])
+				continue;
+
+			auto pos = getMeshBuffer(mb)->getVertexBuffer()->getPosition(v);
+			if (!first) {
+				StaticPartsBox.addInternalPoint(pos);
+			} else {
+				StaticPartsBox.reset(pos);
+				first = false;
+			}
+		}
+	}
+}
+
+void SkinnedMesh::calculateJointBoundingBoxes()
+{
+	std::vector<std::optional<core::aabbox3df>> joint_boxes(AllJoints.size());
+	for (auto *buf : LocalBuffers) {
+		const auto *weights = buf->getWeights();
+		if (!weights)
+			continue;
+		for (u32 vert_id : weights->animated_vertices.value()) {
+			const auto pos = buf->getVertex(vert_id)->Pos;
+			for (u16 j = 0; j < WeightBuffer::MAX_WEIGHTS_PER_VERTEX; j++) {
+				const u16 joint_id = weights->getJointIds(vert_id)[j];
+				const SJoint *joint = AllJoints[joint_id];
+				const f32 weight = weights->getWeights(vert_id)[j];
+				if (core::equals(weight, 0.0f))
+					continue;
+				auto trans_pos = pos;
+				joint->GlobalInversedMatrix.value().transformVect(trans_pos);
+				if (joint_boxes[joint_id]) {
+					joint_boxes[joint_id]->addInternalPoint(trans_pos);
+				} else {
+					joint_boxes[joint_id] = core::aabbox3df{trans_pos};
 				}
 			}
 		}
-
-		HardwareSkinning = on;
 	}
-	return HardwareSkinning;
-}
-
-void SkinnedMesh::refreshJointCache()
-{
-	// copy cache from the mesh...
-	for (auto *joint : AllJoints) {
-		for (auto &weight : joint->Weights) {
-			const u16 buffer_id = weight.buffer_id;
-			const u32 vertex_id = weight.vertex_id;
-			weight.StaticPos = LocalBuffers[buffer_id]->getVertex(vertex_id)->Pos;
-			weight.StaticNormal = LocalBuffers[buffer_id]->getVertex(vertex_id)->Normal;
-		}
+	for (u16 joint_id = 0; joint_id < AllJoints.size(); joint_id++) {
+		auto *joint = AllJoints[joint_id];
+		joint->LocalBoundingBox = joint_boxes[joint_id].value_or(core::aabbox3df{{0,0,0}});
 	}
 }
 
-void SkinnedMesh::resetAnimation()
+void SkinnedMesh::calculateBufferBoundingBoxes()
 {
-	// copy from the cache to the mesh...
-	for (auto *joint : AllJoints) {
-		for (const auto &weight : joint->Weights) {
-			const u16 buffer_id = weight.buffer_id;
-			const u32 vertex_id = weight.vertex_id;
-			LocalBuffers[buffer_id]->getVertex(vertex_id)->Pos = weight.StaticPos;
-			LocalBuffers[buffer_id]->getVertex(vertex_id)->Normal = weight.StaticNormal;
-		}
+	for (u32 j = 0; j < LocalBuffers.size(); ++j) {
+		// If we use skeletal animation, this will just be a bounding box of the static pose;
+		// if we use rigid animation, this will correctly transform the points first.
+		LocalBuffers[j]->recalculateBoundingBox();
 	}
-	SkinnedLastFrame = false;
-	LastAnimatedFrame = -1;
 }
 
-void SkinnedMesh::calculateGlobalMatrices(SJoint *joint, SJoint *parentJoint)
-{
-	if (!joint && parentJoint) // bit of protection from endless loops
-		return;
-
-	// Go through the root bones
-	if (!joint) {
-		for (auto *rootJoint : RootJoints)
-			calculateGlobalMatrices(rootJoint, nullptr);
-		return;
-	}
-
-	if (!parentJoint)
-		joint->GlobalMatrix = joint->LocalMatrix;
-	else
-		joint->GlobalMatrix = parentJoint->GlobalMatrix * joint->LocalMatrix;
-
-	joint->LocalAnimatedMatrix = joint->LocalMatrix;
-	joint->GlobalAnimatedMatrix = joint->GlobalMatrix;
-
-	if (!joint->GlobalInversedMatrix.has_value()) { // might be pre calculated
-		joint->GlobalInversedMatrix = joint->GlobalMatrix;
-		joint->GlobalInversedMatrix->makeInverse(); // slow
-	}
-
-	for (auto *childJoint : joint->Children)
-		calculateGlobalMatrices(childJoint, joint);
-	SkinnedLastFrame = false;
+void SkinnedMesh::recalculateBaseBoundingBoxes() {
+	calculateStaticBoundingBox();
+	calculateJointBoundingBoxes();
+	calculateBufferBoundingBoxes();
 }
 
-void SkinnedMesh::checkForAnimation()
+void SkinnedMeshBuilder::topoSortJoints()
 {
-	// Check for animation...
-	HasAnimation = false;
-	for (auto *joint : AllJoints) {
-		if (!joint->keys.empty()) {
-			HasAnimation = true;
-			break;
-		}
+	auto &joints = getJoints();
+	const size_t n = joints.size();
+
+	std::vector<u16> new_to_old_id;
+
+	std::vector<std::vector<u16>> children(n);
+	for (u16 i = 0; i < n; ++i) {
+		if (auto parentId = joints[i]->ParentJointID)
+			children[*parentId].push_back(i);
+		else
+		 	new_to_old_id.push_back(i);
 	}
 
-	// meshes with weights, are still counted as animated for ragdolls, etc
-	if (!HasAnimation) {
-		for (auto *joint : AllJoints) {
-			if (joint->Weights.size()) {
-				HasAnimation = true;
-				break;
-			}
-		}
+	// Levelorder
+	for (u16 i = 0; i < n; ++i) {
+		new_to_old_id.insert(new_to_old_id.end(),
+				children[new_to_old_id[i]].begin(),
+				children[new_to_old_id[i]].end());
 	}
 
-	if (HasAnimation) {
-		EndFrame = 0.0f;
-		for (const auto *joint : AllJoints) {
-			EndFrame = std::max(EndFrame, joint->keys.getEndFrame());
-		}
+	std::vector<u16> old_to_new_id(n);
+	for (u16 i = 0; i < n; ++i)
+		old_to_new_id[new_to_old_id[i]] = i;
+
+	std::vector<SJoint *> sorted_joints(n);
+	for (u16 i = 0; i < n; ++i) {
+		auto *joint = joints[new_to_old_id[i]];
+		if (auto parentId = joint->ParentJointID)
+			joint->ParentJointID = old_to_new_id[*parentId];
+		sorted_joints[i] = joint;
+		joint->JointID = i;
 	}
-
-	if (HasAnimation && !PreparedForSkinning) {
-		PreparedForSkinning = true;
-
-		// check for bugs:
-		for (auto *joint : AllJoints) {
-			for (auto &weight : joint->Weights) {
-				const u16 buffer_id = weight.buffer_id;
-				const u32 vertex_id = weight.vertex_id;
-
-				// check for invalid ids
-				if (buffer_id >= LocalBuffers.size()) {
-					os::Printer::log("Skinned Mesh: Weight buffer id too large", ELL_WARNING);
-					weight.buffer_id = weight.vertex_id = 0;
-				} else if (vertex_id >= LocalBuffers[buffer_id]->getVertexCount()) {
-					os::Printer::log("Skinned Mesh: Weight vertex id too large", ELL_WARNING);
-					weight.buffer_id = weight.vertex_id = 0;
-				}
-			}
-		}
-
-		// An array used in skinning
-
-		for (u32 i = 0; i < Vertices_Moved.size(); ++i)
-			for (u32 j = 0; j < Vertices_Moved[i].size(); ++j)
-				Vertices_Moved[i][j] = false;
-
-		// For skinning: cache weight values for speed
-
-		for (auto *joint : AllJoints) {
-			for (auto &weight : joint->Weights) {
-				const u16 buffer_id = weight.buffer_id;
-				const u32 vertex_id = weight.vertex_id;
-
-				weight.Moved = &Vertices_Moved[buffer_id][vertex_id];
-				weight.StaticPos = LocalBuffers[buffer_id]->getVertex(vertex_id)->Pos;
-				weight.StaticNormal = LocalBuffers[buffer_id]->getVertex(vertex_id)->Normal;
-
-				// weight._Pos=&Buffers[buffer_id]->getVertex(vertex_id)->Pos;
-			}
-		}
-
-		// normalize weights
-		normalizeWeights();
+	// Verify that the topological ordering is correct
+	for (u16 i = 0; i < n; ++i) {
+		if (auto pjid = sorted_joints[i]->ParentJointID)
+			assert(*pjid < i);
 	}
-	SkinnedLastFrame = false;
+	getJoints() = std::move(sorted_joints);
+
+	for (auto &weight : weights) {
+		weight.joint_id = old_to_new_id[weight.joint_id];
+	}
 }
 
 //! called by loader after populating with mesh and bone data
-SkinnedMesh *SkinnedMeshBuilder::finalize()
+SkinnedMesh *SkinnedMeshBuilder::finalize() &&
 {
 	os::Printer::log("Skinned Mesh - finalize", ELL_DEBUG);
 
-	// Make sure we recalc the next frame
-	LastAnimatedFrame = -1;
-	SkinnedLastFrame = false;
+	// Topologically sort the joints such that parents come before their children.
+	// From this point on, transformations can be calculated in linear order.
+	// (see e.g. SkinnedMesh::calculateGlobalMatrices)
+	topoSortJoints();
 
-	// calculate bounding box
-	for (auto *buffer : LocalBuffers) {
-		buffer->recalculateBoundingBox();
-	}
-
-	if (AllJoints.size() || RootJoints.size()) {
-		// populate AllJoints or RootJoints, depending on which is empty
-		if (RootJoints.empty()) {
-
-			for (auto *joint : AllJoints) {
-
-				bool foundParent = false;
-				for (const auto *parentJoint : AllJoints) {
-					for (const auto *childJoint : parentJoint->Children) {
-						if (childJoint == joint)
-							foundParent = true;
-					}
-				}
-
-				if (!foundParent)
-					RootJoints.push_back(joint);
-			}
-		} else {
-			AllJoints = RootJoints;
+	// Add all weights such that checkForWeights() works as expected
+	for (const auto &weight : weights) {
+		auto *buf = mesh->LocalBuffers.at(weight.buffer_id);
+		auto *weights = buf->getWeights();
+		if (!weights) {
+			buf->addWeightBuffer();
+			weights = buf->getWeights();
 		}
+		weights->addWeight(weight.vertex_id, weight.joint_id, weight.strength);
 	}
 
-	// Set array sizes...
+	mesh->prepareForSkinning();
 
-	for (u32 i = 0; i < LocalBuffers.size(); ++i) {
-		Vertices_Moved.emplace_back(LocalBuffers[i]->getVertexCount());
+	std::vector<core::matrix4> matrices;
+	matrices.reserve(getJoints().size());
+	for (auto *joint : getJoints()) {
+		if (const auto *matrix = std::get_if<core::matrix4>(&joint->transform))
+			matrices.push_back(*matrix);
+		else
+		 	matrices.push_back(std::get<core::Transform>(joint->transform).buildMatrix());
 	}
+	mesh->calculateGlobalMatrices(matrices);
 
-	checkForAnimation();
-
-	if (HasAnimation) {
-		for (auto *joint : AllJoints) {
-			joint->keys.cleanup();
+	for (size_t i = 0; i < getJoints().size(); ++i) {
+		auto *joint = getJoints()[i];
+		if (!joint->GlobalInversedMatrix) {
+			joint->GlobalInversedMatrix = matrices[i];
+			joint->GlobalInversedMatrix->makeInverse();
 		}
-	}
-
-	// Needed for animation and skinning...
-
-	calculateGlobalMatrices(0, 0);
-
-	// rigid animation for non animated meshes
-	for (auto *joint : AllJoints) {
+		// rigid animation for non animated meshes
 		for (u32 attachedMeshIdx : joint->AttachedMeshes) {
-			SSkinMeshBuffer *Buffer = (*SkinningBuffers)[attachedMeshIdx];
-			Buffer->Transformation = joint->GlobalAnimatedMatrix;
+			SSkinMeshBuffer *Buffer = (*mesh->SkinningBuffers)[attachedMeshIdx];
+			Buffer->Transformation = matrices[i];
 		}
 	}
 
-	// calculate bounding box
-	if (LocalBuffers.empty())
-		BoundingBox.reset(0, 0, 0);
-	else {
-		irr::core::aabbox3df bb(LocalBuffers[0]->BoundingBox);
-		LocalBuffers[0]->Transformation.transformBoxEx(bb);
-		BoundingBox.reset(bb);
-
-		for (u32 j = 1; j < LocalBuffers.size(); ++j) {
-			bb = LocalBuffers[j]->BoundingBox;
-			LocalBuffers[j]->Transformation.transformBoxEx(bb);
-
-			BoundingBox.addInternalBox(bb);
-		}
+	for (auto *buffer : mesh->LocalBuffers) {
+		// With HW skinning, the VBOs should be static by default.
+		// This hint is changed overwritten by calling useSwSkinning()
+		// on the vertex buffer should it become necessary.
+		buffer->setHardwareMappingHint(EHM_STATIC);
+		if (auto *weights = buffer->getWeights())
+			weights->finalize();
 	}
 
-	return this;
-}
+	mesh->recalculateBaseBoundingBoxes();
+	mesh->StaticPoseBox = mesh->calculateBoundingBox(matrices);
 
-void SkinnedMesh::updateBoundingBox()
-{
-	if (!SkinningBuffers)
-		return;
-
-	BoundingBox.reset(0, 0, 0);
-
-	for (auto *buffer : *SkinningBuffers) {
-		buffer->recalculateBoundingBox();
-		core::aabbox3df bb = buffer->BoundingBox;
-		buffer->Transformation.transformBoxEx(bb);
-
-		BoundingBox.addInternalBox(bb);
-	}
+	return mesh.release();
 }
 
 scene::SSkinMeshBuffer *SkinnedMeshBuilder::addMeshBuffer()
 {
 	scene::SSkinMeshBuffer *buffer = new scene::SSkinMeshBuffer();
-	TextureSlots.push_back(LocalBuffers.size());
-	LocalBuffers.push_back(buffer);
+	mesh->TextureSlots.push_back(mesh->LocalBuffers.size());
+	mesh->LocalBuffers.push_back(buffer);
 	return buffer;
 }
 
-void SkinnedMeshBuilder::addMeshBuffer(SSkinMeshBuffer *meshbuf)
+u32 SkinnedMeshBuilder::addMeshBuffer(SSkinMeshBuffer *meshbuf)
 {
-	TextureSlots.push_back(LocalBuffers.size());
-	LocalBuffers.push_back(meshbuf);
+	mesh->TextureSlots.push_back(mesh->LocalBuffers.size());
+	mesh->LocalBuffers.push_back(meshbuf);
+	return mesh->getMeshBufferCount() - 1;
 }
 
 SkinnedMesh::SJoint *SkinnedMeshBuilder::addJoint(SJoint *parent)
 {
 	SJoint *joint = new SJoint;
+	joint->setParent(parent);
 
-	AllJoints.push_back(joint);
-	if (!parent) {
-		// Add root joints to array in finalize()
-	} else {
-		// Set parent (Be careful of the mesh loader also setting the parent)
-		parent->Children.push_back(joint);
-	}
+	joint->JointID = getJoints().size();
+	getJoints().push_back(joint);
 
 	return joint;
 }
 
 void SkinnedMeshBuilder::addPositionKey(SJoint *joint, f32 frame, core::vector3df pos)
 {
-	_IRR_DEBUG_BREAK_IF(!joint);
+	assert(joint);
 	joint->keys.position.pushBack(frame, pos);
 }
 
 void SkinnedMeshBuilder::addScaleKey(SJoint *joint, f32 frame, core::vector3df scale)
 {
-	_IRR_DEBUG_BREAK_IF(!joint);
+	assert(joint);
 	joint->keys.scale.pushBack(frame, scale);
 }
 
 void SkinnedMeshBuilder::addRotationKey(SJoint *joint, f32 frame, core::quaternion rot)
 {
-	_IRR_DEBUG_BREAK_IF(!joint);
+	assert(joint);
 	joint->keys.rotation.pushBack(frame, rot);
 }
 
-SkinnedMesh::SWeight *SkinnedMeshBuilder::addWeight(SJoint *joint)
+void SkinnedMeshBuilder::addWeight(SJoint *joint, u16 buf_id, u32 vert_id, f32 strength)
 {
-	if (!joint)
-		return nullptr;
-
-	joint->Weights.emplace_back();
-	return &joint->Weights.back();
-}
-
-void SkinnedMesh::normalizeWeights()
-{
-	// note: unsure if weights ids are going to be used.
-
-	// Normalise the weights on bones....
-
-	std::vector<std::vector<f32>> verticesTotalWeight;
-
-	verticesTotalWeight.reserve(LocalBuffers.size());
-	for (u32 i = 0; i < LocalBuffers.size(); ++i) {
-		verticesTotalWeight.emplace_back(LocalBuffers[i]->getVertexCount());
-	}
-
-	for (u32 i = 0; i < verticesTotalWeight.size(); ++i)
-		for (u32 j = 0; j < verticesTotalWeight[i].size(); ++j)
-			verticesTotalWeight[i][j] = 0;
-
-	for (auto *joint : AllJoints) {
-		auto &weights = joint->Weights;
-
-		weights.erase(std::remove_if(weights.begin(), weights.end(), [](const auto &weight) {
-			return weight.strength <= 0;
-		}), weights.end());
-
-		for (const auto &weight : weights) {
-			verticesTotalWeight[weight.buffer_id][weight.vertex_id] += weight.strength;
-		}
-	}
-
-	for (auto *joint : AllJoints) {
-		for (auto &weight : joint->Weights) {
-			const f32 total = verticesTotalWeight[weight.buffer_id][weight.vertex_id];
-			if (total != 0 && total != 1)
-				weight.strength /= total;
-		}
-	}
-}
-
-void SkinnedMesh::recoverJointsFromMesh(std::vector<IBoneSceneNode *> &jointChildSceneNodes)
-{
-	for (u32 i = 0; i < AllJoints.size(); ++i) {
-		IBoneSceneNode *node = jointChildSceneNodes[i];
-		SJoint *joint = AllJoints[i];
-		node->setPosition(joint->LocalAnimatedMatrix.getTranslation());
-		node->setRotation(joint->LocalAnimatedMatrix.getRotationDegrees());
-		node->setScale(joint->LocalAnimatedMatrix.getScale());
-
-		node->updateAbsolutePosition();
-	}
-}
-
-void SkinnedMesh::transferJointsToMesh(const std::vector<IBoneSceneNode *> &jointChildSceneNodes)
-{
-	for (u32 i = 0; i < AllJoints.size(); ++i) {
-		const IBoneSceneNode *const node = jointChildSceneNodes[i];
-		SJoint *joint = AllJoints[i];
-
-		joint->LocalAnimatedMatrix.setRotationDegrees(node->getRotation());
-		joint->LocalAnimatedMatrix.setTranslation(node->getPosition());
-		joint->LocalAnimatedMatrix *= core::matrix4().setScale(node->getScale());
-
-		joint->GlobalSkinningSpace = (node->getSkinningSpace() == EBSS_GLOBAL);
-	}
-	// Make sure we recalc the next frame
-	LastAnimatedFrame = -1;
-	SkinnedLastFrame = false;
-}
-
-void SkinnedMesh::addJoints(std::vector<IBoneSceneNode *> &jointChildSceneNodes,
-		IAnimatedMeshSceneNode *node, ISceneManager *smgr)
-{
-	// Create new joints
-	for (u32 i = 0; i < AllJoints.size(); ++i) {
-		jointChildSceneNodes.push_back(new CBoneSceneNode(0, smgr, 0, i, AllJoints[i]->Name));
-	}
-
-	// Match up parents
-	for (u32 i = 0; i < jointChildSceneNodes.size(); ++i) {
-		const SJoint *const joint = AllJoints[i]; // should be fine
-
-		s32 parentID = -1;
-
-		for (u32 j = 0; (parentID == -1) && (j < AllJoints.size()); ++j) {
-			if (i != j) {
-				const SJoint *const parentTest = AllJoints[j];
-				for (u32 n = 0; n < parentTest->Children.size(); ++n) {
-					if (parentTest->Children[n] == joint) {
-						parentID = j;
-						break;
-					}
-				}
-			}
-		}
-
-		IBoneSceneNode *bone = jointChildSceneNodes[i];
-		if (parentID != -1)
-			bone->setParent(jointChildSceneNodes[parentID]);
-		else
-			bone->setParent(node);
-
-		bone->drop();
-	}
-	SkinnedLastFrame = false;
+	assert(joint);
+	if (strength <= 0.0f)
+		return;
+	weights.emplace_back(Weight{joint->JointID, buf_id, vert_id, strength});
 }
 
 void SkinnedMesh::convertMeshToTangents()
@@ -837,4 +586,3 @@ void SkinnedMesh::calculateTangents(
 }
 
 } // end namespace scene
-} // end namespace irr

@@ -5,16 +5,18 @@
 #include "player.h"
 
 #include <cmath>
-#include "threading/mutex_auto_lock.h"
-#include "util/numeric.h"
-#include "hud.h"
+#include "hud_element.h"
 #include "constants.h"
 #include "gamedef.h"
-#include "settings.h"
-#include "log.h"
-#include "porting.h"  // strlcpy
 #include <tuple>
 
+const struct EnumString es_CameraMode[] = {
+	{CAMERA_MODE_ANY, "any"},
+	{CAMERA_MODE_FIRST, "first"},
+	{CAMERA_MODE_THIRD, "third"},
+	{CAMERA_MODE_THIRD_FRONT, "third_front"},
+	{0, nullptr}
+};
 
 bool is_valid_player_name(std::string_view name)
 {
@@ -103,8 +105,6 @@ ItemStack &Player::getWieldedItem(ItemStack *selected, ItemStack *hand) const
 
 u32 Player::addHud(HudElement *toadd)
 {
-	MutexAutoLock lock(m_mutex);
-
 	u32 id = getFreeHudID();
 
 	if (id < hud.size())
@@ -117,37 +117,27 @@ u32 Player::addHud(HudElement *toadd)
 
 HudElement* Player::getHud(u32 id)
 {
-	MutexAutoLock lock(m_mutex);
-
 	if (id < hud.size())
 		return hud[id];
-
-	return NULL;
-}
-
-void Player::hudApply(std::function<void(const std::vector<HudElement*>&)> f)
-{
-	MutexAutoLock lock(m_mutex);
-	f(hud);
+	return nullptr;
 }
 
 HudElement* Player::removeHud(u32 id)
 {
-	MutexAutoLock lock(m_mutex);
-
-	HudElement* retval = NULL;
+	HudElement* retval = nullptr;
 	if (id < hud.size()) {
 		retval = hud[id];
-		hud[id] = NULL;
+		hud[id] = nullptr;
 	}
+	// shrink list if possible
+	while (!hud.empty() && hud.back() == nullptr)
+		hud.pop_back();
 	return retval;
 }
 
 void Player::clearHud()
 {
-	MutexAutoLock lock(m_mutex);
-
-	while(!hud.empty()) {
+	while (!hud.empty()) {
 		delete hud.back();
 		hud.pop_back();
 	}

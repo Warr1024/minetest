@@ -6,6 +6,8 @@
 
 #include "mock_server.h"
 #include "server/luaentity_sao.h"
+#include "serverenvironment.h"
+#include "servermap.h"
 #include "emerge.h"
 
 /*
@@ -197,8 +199,8 @@ void TestSAO::testActivate(ServerEnvironment *env)
 	UASSERT(block);
 	block->m_static_objects.insert(0, s_obj);
 
-	// Activating the block will convert it to active.
-	env->activateBlock(block);
+	// this will convert it to an active object
+	env->forceActivateBlock(block);
 
 	const u16 obj_id = assert_active_in_block(block);
 	auto *obj = env->getActiveObject(obj_id);
@@ -239,7 +241,7 @@ void TestSAO::testStaticToFalse(ServerEnvironment *env)
 	UASSERT(block);
 	block->m_static_objects.insert(0, s_obj);
 
-	env->activateBlock(block);
+	env->forceActivateBlock(block);
 
 	const u16 obj_id = assert_active_in_block(block);
 	auto *obj = env->getActiveObject(obj_id);

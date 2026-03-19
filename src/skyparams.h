@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
+#include "SColor.h"
+#include "irr_v2d.h"
+
 
 struct SkyColor
 {
@@ -32,6 +37,7 @@ struct SkyboxParams
 	s16 fog_distance { -1 };
 	float fog_start { -1.0f };
 	video::SColor fog_color { 0 }; // override, only used if alpha > 0
+	bool auto_dim_skybox { true };
 };
 
 struct SunParams
@@ -59,6 +65,7 @@ struct StarParams
 	video::SColor starcolor;
 	f32 scale;
 	f32 day_opacity;
+	u64 star_seed;
 };
 
 struct CloudParams
@@ -137,6 +144,7 @@ public:
 		stars.starcolor = video::SColor(105, 235, 235, 255);
 		stars.scale = 1;
 		stars.day_opacity = 0;
+		stars.star_seed = 0;
 		return stars;
 	}
 

@@ -19,7 +19,7 @@ the arrow buttons where there is insufficient space.
 GUIScrollBar::GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s32 id,
 		core::rect<s32> rectangle, bool horizontal, bool auto_scale,
 		ISimpleTextureSource *tsrc) :
-		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
+		IGUIScrollBar(environment, parent, id, rectangle),
 		up_button(nullptr), down_button(nullptr), is_dragging(false),
 		is_horizontal(horizontal), is_auto_scaling(auto_scale),
 		dragged_by_slider(false), tray_clicked(false), scroll_pos(0),
@@ -69,17 +69,6 @@ bool GUIScrollBar::OnEvent(const SEvent &event)
 				if (absorb)
 					return true;
 			}
-			break;
-		case EET_GUI_EVENT:
-			if (event.GUIEvent.EventType == EGET_BUTTON_CLICKED) {
-				if (event.GUIEvent.Caller == up_button)
-					setPosInterpolated(getTargetPos() - small_step);
-				else if (event.GUIEvent.Caller == down_button)
-					setPosInterpolated(getTargetPos() + small_step);
-				return true;
-			} else if (event.GUIEvent.EventType == EGET_ELEMENT_FOCUS_LOST)
-				if (event.GUIEvent.Caller == this)
-					is_dragging = false;
 			break;
 		case EET_MOUSE_INPUT_EVENT: {
 			const core::position2di p(event.MouseInput.X, event.MouseInput.Y);
@@ -220,6 +209,33 @@ void GUIScrollBar::OnPostRender(u32 time_ms)
 	last_delta_ms = porting::getDeltaMs(last_time_ms, time_ms);
 	last_time_ms = time_ms;
 	interpolatePos();
+
+	const bool up_pressed = up_button && up_button->isPressed();
+	const bool down_pressed = down_button && down_button->isPressed();
+
+	// if neither is pressed, reset counter
+	if (!up_pressed && !down_pressed) {
+		m_arrow_counter = 0; // reset counter when no arrow is held
+		return;
+	}
+
+	const u32 initial_delay = 300; // ms before repeating starts
+	const u32 repeat_delay  = 150; // ms between repeats
+	assert(initial_delay > repeat_delay);
+
+	const bool is_initial = (m_arrow_counter == 0);
+	// counter is 0, so start counting
+	m_arrow_counter += last_delta_ms;
+
+	// wait for initial delay
+	if (m_arrow_counter < initial_delay && !is_initial)
+		return;
+
+	// after initial delay, repeat every repeat_delay
+	const s32 autoscroll_stepsize = small_step * (up_pressed ? -1 : 1);
+	setPosInterpolated(getTargetPos() + autoscroll_stepsize);
+	if (!is_initial)
+		m_arrow_counter -= repeat_delay;
 }
 
 void GUIScrollBar::updateAbsolutePosition()
@@ -249,7 +265,7 @@ void GUIScrollBar::updatePos()
 	setPosRaw(scroll_pos);
 }
 
-void GUIScrollBar::setPosRaw(const s32 &pos)
+void GUIScrollBar::setPosRaw(const s32 pos)
 {
 	s32 thumb_area = 0;
 	s32 thumb_min = 0;
@@ -275,13 +291,13 @@ void GUIScrollBar::setPosRaw(const s32 &pos)
 		border_size;
 }
 
-void GUIScrollBar::setPos(const s32 &pos)
+void GUIScrollBar::setPos(const s32 pos)
 {
 	setPosRaw(pos);
 	target_pos = std::nullopt;
 }
 
-void GUIScrollBar::setPosAndSend(const s32 &pos)
+void GUIScrollBar::setPosAndSend(const s32 pos)
 {
 	const s32 old_pos = scroll_pos;
 	setPos(pos);
@@ -295,7 +311,7 @@ void GUIScrollBar::setPosAndSend(const s32 &pos)
 	}
 }
 
-void GUIScrollBar::setPosInterpolated(const s32 &pos)
+void GUIScrollBar::setPosInterpolated(const s32 pos)
 {
 	if (!g_settings->getBool("smooth_scrolling")) {
 		setPosAndSend(pos);
@@ -311,17 +327,17 @@ void GUIScrollBar::setPosInterpolated(const s32 &pos)
 	}
 }
 
-void GUIScrollBar::setSmallStep(const s32 &step)
+void GUIScrollBar::setSmallStep(const s32 step)
 {
 	small_step = step > 0 ? step : 10;
 }
 
-void GUIScrollBar::setLargeStep(const s32 &step)
+void GUIScrollBar::setLargeStep(const s32 step)
 {
 	large_step = step > 0 ? step : 50;
 }
 
-void GUIScrollBar::setMax(const s32 &max)
+void GUIScrollBar::setMax(const s32 max)
 {
 	max_pos = max;
 	if (min_pos > max_pos)
@@ -333,7 +349,7 @@ void GUIScrollBar::setMax(const s32 &max)
 	updatePos();
 }
 
-void GUIScrollBar::setMin(const s32 &min)
+void GUIScrollBar::setMin(const s32 min)
 {
 	min_pos = min;
 	if (max_pos < min_pos)
@@ -345,7 +361,7 @@ void GUIScrollBar::setMin(const s32 &min)
 	updatePos();
 }
 
-void GUIScrollBar::setPageSize(const s32 &size)
+void GUIScrollBar::setPageSize(const s32 size)
 {
 	page_size = size;
 	updatePos();

@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 // Copyright (C) 2010-2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 
+#include <map>
 #include "irrlichttypes_bloated.h"
-#include "irrlicht.h" // createDevice
-#include "irrlicht_changes/printing.h"
-#include "benchmark/benchmark.h"
 #include "chat_interface.h"
 #include "debug.h"
 #include "unittest/test.h"
@@ -17,6 +15,7 @@
 #include "gettext.h"
 #include "log.h"
 #include "log_internal.h"
+#include "util/serialize.h"
 #include "util/quicktune.h"
 #include "httpfetch.h"
 #include "gameparams.h"
@@ -25,16 +24,20 @@
 #include "player.h"
 #include "porting.h"
 #include "serialization.h" // SER_FMT_VER_HIGHEST_*
+#include "serverenvironment.h"
+#include "servermap.h"
+#include "settings.h"
 #include "network/socket.h"
+#include "network/networkexceptions.h"
 #include "mapblock.h"
 #if USE_CURSES
 	#include "terminal_chat_console.h"
 #endif
 #if CHECK_CLIENT_BUILD()
-#include "gui/guiMainMenu.h"
 #include "client/clientlauncher.h"
-#include "gui/guiEngine.h"
-#include "gui/mainmenumanager.h"
+#endif
+#if BUILD_BENCHMARKS
+#include "benchmark/benchmark.h"
 #endif
 
 // for version information only
@@ -68,6 +71,7 @@ extern "C" {
 #define ENV_NO_COLOR "NO_COLOR"
 #define ENV_CLICOLOR "CLICOLOR"
 #define ENV_CLICOLOR_FORCE "CLICOLOR_FORCE"
+#define ENV_LOG_TIMESTAMP "LOG_TIMESTAMP"
 
 typedef std::map<std::string, ValueSpec> OptionList;
 
@@ -290,7 +294,7 @@ static void get_env_opts(Settings &args)
 	// CLICOLOR != 0: ANSI colors are supported (auto-detection, this is the default)
 	// CLICOLOR == 0: ANSI colors are NOT supported
 	const char *clicolor = std::getenv(ENV_CLICOLOR);
-	if (clicolor && std::string(clicolor) == "0") {
+	if (clicolor && std::string_view(clicolor) == "0") {
 		args.set("color", "never");
 	}
 	// NO_COLOR only specifies that no color is allowed.
@@ -301,10 +305,15 @@ static void get_env_opts(Settings &args)
 	}
 	// CLICOLOR_FORCE is another option, which should turn on colors "no matter what".
 	const char *clicolor_force = std::getenv(ENV_CLICOLOR_FORCE);
-	if (clicolor_force && std::string(clicolor_force) != "0") {
+	if (clicolor_force && std::string_view(clicolor_force) != "0") {
 		// should ALWAYS have colors, so we ignore tty (no "auto")
 		args.set("color", "always");
 	}
+
+	// No standard, Luanti-specific
+	const char *log_ts = std::getenv(ENV_LOG_TIMESTAMP);
+	if (log_ts)
+		args.set("log-timestamp", log_ts);
 }
 
 static bool get_cmdline_opts(int argc, char *argv[], Settings *cmd_args)
@@ -352,8 +361,10 @@ static void set_allowed_options(OptionList *allowed_options)
 			"'name' lists names, 'both' lists both)"))));
 	allowed_options->insert(std::make_pair("quiet", ValueSpec(VALUETYPE_FLAG,
 			_("Print only errors to console"))));
-	allowed_options->insert(std::make_pair("color", ValueSpec(VALUETYPE_STRING,
-			_("Coloured logs ('always', 'never' or 'auto'), defaults to 'auto'"))));
+	allowed_options->emplace("color", ValueSpec(VALUETYPE_STRING,
+			_("Coloured logs ('always', 'never' or 'auto'), default: 'auto'")));
+	allowed_options->emplace("log-timestamp", ValueSpec(VALUETYPE_STRING,
+			_("Timestamped logs ('wall', 'relative' or 'none'), default: 'wall'")));
 	allowed_options->insert(std::make_pair("info", ValueSpec(VALUETYPE_FLAG,
 			_("Print more information to console"))));
 	allowed_options->insert(std::make_pair("verbose",  ValueSpec(VALUETYPE_FLAG,
@@ -405,6 +416,22 @@ static void print_help(const OptionList &allowed_options)
 {
 	std::cout << _("Allowed options:") << std::endl;
 	print_allowed_options(allowed_options);
+	std::cout << std::endl;
+
+	std::pair<const char*, std::vector<std::string>> the_list[] = {
+		{"map", ServerMap::getDatabaseBackends()},
+		{"players", ServerEnvironment::getPlayerDatabaseBackends()},
+		{"auth", ServerEnvironment::getAuthDatabaseBackends()},
+		{"mod storage", Server::getModStorageDatabaseBackends()},
+	};
+
+	std::cout << "Supported database backends:";
+	for (auto &e : the_list) {
+		SORT_AND_UNIQUE(e.second);
+		std::cout << "\n  " << padStringRight(e.first, 16)
+			<< ": " << str_join(e.second, ", ");
+	}
+	std::cout << std::endl;
 }
 
 static void print_allowed_options(const OptionList &allowed_options)
@@ -505,11 +532,9 @@ static bool setup_log_params(const Settings &cmd_args)
 		g_logger.addOutputMaxLevel(&stderr_output, LL_ERROR);
 	}
 
-	// Coloured log messages (see log.h)
+	// Message color
 	std::string color_mode;
-	if (cmd_args.exists("color")) {
-		color_mode = cmd_args.get("color");
-	}
+	cmd_args.getNoEx("color", color_mode);
 	if (!color_mode.empty()) {
 		if (color_mode == "auto") {
 			Logger::color_mode = LOG_COLOR_AUTO;
@@ -519,6 +544,22 @@ static bool setup_log_params(const Settings &cmd_args)
 			Logger::color_mode = LOG_COLOR_NEVER;
 		} else {
 			errorstream << "Invalid color mode: " << color_mode << std::endl;
+			return false;
+		}
+	}
+
+	// Timestamp
+	std::string ts_mode;
+	cmd_args.getNoEx("log-timestamp", ts_mode);
+	if (!ts_mode.empty()) {
+		if (ts_mode == "wall") {
+			Logger::timestamp_mode = LOG_TIMESTAMP_WALL;
+		} else if (ts_mode == "relative") {
+			Logger::timestamp_mode = LOG_TIMESTAMP_RELATIVE;
+		} else if (ts_mode == "none") {
+			Logger::timestamp_mode = LOG_TIMESTAMP_NONE;
+		} else {
+			errorstream << "Invalid timestamp mode: " << ts_mode << std::endl;
 			return false;
 		}
 	}
@@ -624,6 +665,7 @@ static bool use_debugger(int argc, char *argv[])
 		warningstream << "Couldn't find a debugger to use. Try installing gdb or lldb." << std::endl;
 		return false;
 	}
+	verbosestream << "Found debugger " << debugger_path << std::endl;
 
 	// Try to be helpful
 #ifdef NDEBUG
@@ -682,11 +724,11 @@ static bool use_debugger(int argc, char *argv[])
 static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 {
 	startup_message();
-	set_default_settings();
 
 	sockets_init();
 
 	// Initialize g_settings
+	set_default_settings();
 	Settings::createLayer(SL_GLOBAL);
 
 	// Set cleanup callback(s) to run at process exit
@@ -700,12 +742,19 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 	init_log_streams(cmd_args);
 
 	// Initialize random seed
-	{
-		u32 seed = static_cast<u32>(time(nullptr)) << 16;
-		seed |= porting::getTimeUs() & 0xffff;
-		srand(seed);
-		mysrand(seed);
+	u64 seed;
+	if (!porting::secure_rand_fill_buf(&seed, sizeof(seed))) {
+		infostream << "Secure randomness not available to seed global RNG!" << std::endl;
+		std::ostringstream oss;
+		// stuff that's somewhat unpredictable:
+		oss << time(nullptr) << porting::getTimeUs() << argc
+			<< g_settings_path << reinterpret_cast<intptr_t>(argv);
+		print_version(oss);
+		std::string data = oss.str();
+		seed = murmur_hash_64_ua(data.c_str(), data.size(), 0xc0ffee);
 	}
+	srand(seed);
+	mysrand(seed);
 
 	// Initialize HTTP fetcher
 	httpfetch_init(g_settings->getS32("curl_parallel_limit"));
@@ -730,9 +779,8 @@ static void uninit_common()
 static void startup_message()
 {
 	print_version(infostream);
-	infostream << "SER_FMT_VER_HIGHEST_READ=" <<
-		TOSTRING(SER_FMT_VER_HIGHEST_READ) <<
-		" LATEST_PROTOCOL_VERSION=" << LATEST_PROTOCOL_VERSION
+	infostream << "SER_FMT_VER_HIGHEST_READ=" << (int)SER_FMT_VER_HIGHEST_READ
+		<< " LATEST_PROTOCOL_VERSION=" << (int)LATEST_PROTOCOL_VERSION
 		<< std::endl;
 }
 
@@ -772,10 +820,13 @@ static bool read_config_file(const Settings &cmd_args)
 		}
 
 		// If no path found, use the first one (menu creates the file)
-		if (g_settings_path.empty())
+		if (g_settings_path.empty()) {
 			g_settings_path = filenames[0];
+			g_first_run = true;
+		}
 	}
-	infostream << "Global configuration file: " << g_settings_path << std::endl;
+	infostream << "Global configuration file: " << g_settings_path
+		<< (g_first_run ? " (first run)" : "") << std::endl;
 
 	return true;
 }
@@ -990,8 +1041,7 @@ static bool get_game_from_cmdline(GameParams *game_params, const Settings &cmd_a
 			errorstream << "Game \"" << gameid << "\" not found" << std::endl;
 			return false;
 		}
-		dstream << _("Using game specified by --gameid on the command line")
-		        << std::endl;
+		infostream << "Using commanded gameid [" << commanded_gamespec.id << "]" << std::endl;
 		game_params->game_spec = commanded_gamespec;
 		return true;
 	}
@@ -1001,18 +1051,19 @@ static bool get_game_from_cmdline(GameParams *game_params, const Settings &cmd_a
 
 static bool determine_subgame(GameParams *game_params)
 {
-	SubgameSpec gamespec;
+	if (!game_params->is_dedicated_server) {
+		// ClientLauncher has its own logic to choose a game
+		return true;
+	}
 
+	SubgameSpec gamespec;
 	assert(!game_params->world_path.empty());	// Pre-condition
 
-	// If world doesn't exist
-	if (!game_params->world_path.empty()
-		&& !getWorldExists(game_params->world_path)) {
+	if (!getWorldExists(game_params->world_path)) {
 		// Try to take gamespec from command line
 		if (game_params->game_spec.isValid()) {
 			gamespec = game_params->game_spec;
-			infostream << "Using commanded gameid [" << gamespec.id << "]" << std::endl;
-		} else if (game_params->is_dedicated_server) {
+		} else {
 			auto games = getAvailableGameIds();
 			// If there's exactly one obvious choice then do the right thing
 			if (games.size() > 1)
@@ -1043,16 +1094,12 @@ static bool determine_subgame(GameParams *game_params)
 				            << world_gameid << "]" << std::endl;
 			}
 		} else {
-			// If world contains an embedded game, use it;
-			// Otherwise find world from local system.
 			gamespec = findWorldSubgame(game_params->world_path);
 			infostream << "Using world gameid [" << gamespec.id << "]" << std::endl;
 		}
 	}
 
 	if (!gamespec.isValid()) {
-		if (!game_params->is_dedicated_server)
-			return true; // not an error, this would prevent the main menu from running
 		errorstream << "Game [" << gamespec.id << "] could not be found."
 		            << std::endl;
 		return false;
@@ -1130,7 +1177,7 @@ static bool run_dedicated_server(const GameParams &game_params, const Settings &
 			return false;
 		}
 		ChatInterface iface;
-		bool &kill = *porting::signal_handler_killstatus();
+		volatile auto &kill = *porting::signal_handler_killstatus();
 
 		try {
 			// Create server
@@ -1173,7 +1220,7 @@ static bool run_dedicated_server(const GameParams &game_params, const Settings &
 			server.start();
 
 			// Run server
-			bool &kill = *porting::signal_handler_killstatus();
+			volatile auto &kill = *porting::signal_handler_killstatus();
 			dedicated_server_loop(server, kill);
 
 		} catch (const ModError &e) {
@@ -1218,12 +1265,12 @@ static bool migrate_map_database(const GameParams &game_params, const Settings &
 
 	u32 count = 0;
 	u64 last_update_time = 0;
-	bool &kill = *porting::signal_handler_killstatus();
+	volatile auto &kill = *porting::signal_handler_killstatus();
 
 	std::vector<v3s16> blocks;
 	old_db->listAllLoadableBlocks(blocks);
 	new_db->beginSave();
-	for (std::vector<v3s16>::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
+	for (auto it = blocks.begin(); it != blocks.end(); ++it) {
 		if (kill) return false;
 
 		std::string data;
@@ -1272,8 +1319,9 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 
 	u32 count = 0;
 	u64 last_update_time = 0;
-	bool &kill = *porting::signal_handler_killstatus();
+	volatile auto &kill = *porting::signal_handler_killstatus();
 	const u8 serialize_as_ver = SER_FMT_VER_HIGHEST_WRITE;
+	const s16 map_compression_level = rangelim(g_settings->getS16("map_compression_level_disk"), -1, 9);
 
 	// This is ok because the server doesn't actually run
 	std::vector<v3s16> blocks;
@@ -1301,7 +1349,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 			oss.str("");
 			oss.clear();
 			writeU8(oss, serialize_as_ver);
-			mb.serialize(oss, serialize_as_ver, true, -1);
+			mb.serialize(oss, serialize_as_ver, true, map_compression_level);
 		}
 
 		db->saveBlock(*it, oss.str());

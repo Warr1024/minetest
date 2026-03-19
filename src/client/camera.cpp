@@ -3,11 +3,9 @@
 // Copyright (C) 2010-2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 
 #include "camera.h"
-#include "debug.h"
 #include "client.h"
-#include "config.h"
-#include "map.h"
 #include "clientmap.h"     // MapDrawControl
+#include "localplayer.h"
 #include "player.h"
 #include <cmath>
 #include "client/renderingengine.h"
@@ -22,9 +20,12 @@
 #include "fontengine.h"
 #include "script/scripting_client.h"
 #include "gettext.h"
-#include <SViewFrustum.h>
+
+#include <ICameraSceneNode.h>
 #include <IGUIFont.h>
+#include <ISceneNode.h>
 #include <IVideoDriver.h>
+#include <SViewFrustum.h>
 
 static constexpr f32 CAMERA_OFFSET_STEP = 200;
 
@@ -34,13 +35,14 @@ static constexpr f32 CAMERA_OFFSET_STEP = 200;
 #define WIELDMESH_AMPLITUDE_Y 10.0f
 
 static const char *setting_names[] = {
-	"fall_bobbing_amount", "view_bobbing_amount", "fov", "arm_inertia",
+	"view_bobbing_amount", "fov", "arm_inertia",
 	"show_nametag_backgrounds",
 };
 
 Camera::Camera(MapDrawControl &draw_control, Client *client, RenderingEngine *rendering_engine):
 	m_draw_control(draw_control),
 	m_client(client),
+	m_camera_mode(CAMERA_MODE_FIRST),
 	m_player_light_color(0xFFFFFFFF)
 {
 	auto smgr = rendering_engine->get_scene_manager();
@@ -78,7 +80,6 @@ void Camera::readSettings()
 	 *       (as opposed to the this local caching). This can be addressed in
 	 *       a later release.
 	 */
-	m_cache_fall_bobbing_amount = g_settings->getFloat("fall_bobbing_amount", 0.0f, 100.0f);
 	m_cache_view_bobbing_amount = g_settings->getFloat("view_bobbing_amount", 0.0f, 7.9f);
 	// 45 degrees is the lowest FOV that doesn't cause the server to treat this
 	// as a zoom FOV and load world beyond the set server limits.
@@ -91,6 +92,11 @@ Camera::~Camera()
 {
 	g_settings->deregisterAllChangedCallbacks(this);
 	m_wieldmgr->drop();
+}
+
+v3f Camera::getHeadPosition() const
+{
+	return m_headnode->getAbsolutePosition();
 }
 
 void Camera::notifyFovChange()
@@ -130,19 +136,13 @@ inline f32 my_modf(f32 x)
 
 void Camera::step(f32 dtime)
 {
-	if(m_view_bobbing_fall > 0)
-	{
-		m_view_bobbing_fall -= 3 * dtime;
-		if(m_view_bobbing_fall <= 0)
-			m_view_bobbing_fall = -1; // Mark the effect as finished
-	}
-
 	bool was_under_zero = m_wield_change_timer < 0;
 	m_wield_change_timer = MYMIN(m_wield_change_timer + dtime, 0.125);
 
 	if (m_wield_change_timer >= 0 && was_under_zero) {
 		m_wieldnode->setItem(m_wield_item_next, m_client);
-		m_wieldnode->setNodeLightColor(m_player_light_color);
+		m_wieldnode->setLightColorAndAnimation(m_player_light_color,
+				m_client->getAnimationTime());
 	}
 
 	if (m_view_bobbing_state != 0)
@@ -351,30 +351,13 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	// Get camera tilt timer (hurt animation)
 	float cameratilt = fabs(fabs(player->hurt_tilt_timer-0.75)-0.75);
 
-	// Fall bobbing animation
-	float fall_bobbing = 0;
-	if(player->camera_impact >= 1 && m_camera_mode < CAMERA_MODE_THIRD)
-	{
-		if(m_view_bobbing_fall == -1) // Effect took place and has finished
-			player->camera_impact = m_view_bobbing_fall = 0;
-		else if(m_view_bobbing_fall == 0) // Initialize effect
-			m_view_bobbing_fall = 1;
-
-		// Convert 0 -> 1 to 0 -> 1 -> 0
-		fall_bobbing = m_view_bobbing_fall < 0.5 ? m_view_bobbing_fall * 2 : -(m_view_bobbing_fall - 0.5) * 2 + 1;
-		// Smoothen and invert the above
-		fall_bobbing = sin(fall_bobbing * 0.5 * M_PI) * -1;
-		// Amplify according to the intensity of the impact
-		if (player->camera_impact > 0.0f)
-			fall_bobbing *= (1 - rangelim(50 / player->camera_impact, 0, 1)) * 5;
-
-		fall_bobbing *= m_cache_fall_bobbing_amount;
-	}
-
 	// Calculate and translate the head SceneNode offsets
 	{
 		v3f eye_offset = player->getEyeOffset();
 		switch(m_camera_mode) {
+		case CAMERA_MODE_ANY:
+			assert(false);
+			break;
 		case CAMERA_MODE_FIRST:
 			eye_offset += player->eye_offset_first;
 			break;
@@ -389,7 +372,7 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 		}
 
 		// Set head node transformation
-		eye_offset.Y += cameratilt * -player->hurt_tilt_strength + fall_bobbing;
+		eye_offset.Y += cameratilt * -player->hurt_tilt_strength;
 		m_headnode->setPosition(eye_offset);
 		m_headnode->setRotation(v3f(pitch, 0,
 			cameratilt * player->hurt_tilt_strength));
@@ -562,7 +545,8 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	m_wieldnode->setRotation(wield_rotation);
 
 	m_player_light_color = player->light_color;
-	m_wieldnode->setNodeLightColor(m_player_light_color);
+	m_wieldnode->setLightColorAndAnimation(m_player_light_color,
+			m_client->getAnimationTime());
 
 	// Set render distance
 	updateViewingRange();
@@ -596,12 +580,12 @@ void Camera::updateViewingRange()
 
 	m_cameranode->setNearValue(0.1f * BS);
 
-	m_draw_control.wanted_range = std::fmin(adjustDist(viewing_range, getFovMax()), 4000);
+	m_draw_control.wanted_range = std::fmin(adjustDist(viewing_range, getFovMax()), 6000);
 	if (m_draw_control.range_all) {
 		m_cameranode->setFarValue(100000.0);
 		return;
 	}
-	m_cameranode->setFarValue((viewing_range < 2000) ? 2000 * BS : viewing_range * BS);
+	m_cameranode->setFarValue(std::fmax(2000, m_draw_control.wanted_range) * BS);
 }
 
 void Camera::setDigging(s32 button)
@@ -622,7 +606,7 @@ void Camera::wield(const ItemStack &item)
 	}
 }
 
-void Camera::drawWieldedTool(irr::core::matrix4* translation)
+void Camera::drawWieldedTool(core::matrix4* translation)
 {
 	// Clear Z buffer so that the wielded tool stays in front of world geometry
 	m_wieldmgr->getVideoDriver()->clearBuffers(video::ECBF_DEPTH);
@@ -635,12 +619,12 @@ void Camera::drawWieldedTool(irr::core::matrix4* translation)
 	cam->setFarValue(1000);
 	if (translation != NULL)
 	{
-		irr::core::matrix4 startMatrix = cam->getAbsoluteTransformation();
-		irr::core::vector3df focusPoint = (cam->getTarget()
+		core::matrix4 startMatrix = cam->getAbsoluteTransformation();
+		core::vector3df focusPoint = (cam->getTarget()
 				- cam->getAbsolutePosition()).setLength(1)
 				+ cam->getAbsolutePosition();
 
-		irr::core::vector3df camera_pos =
+		core::vector3df camera_pos =
 				(startMatrix * *translation).getTranslation();
 		cam->setPosition(camera_pos);
 		cam->updateAbsolutePosition();
@@ -649,66 +633,116 @@ void Camera::drawWieldedTool(irr::core::matrix4* translation)
 	m_wieldmgr->drawAll();
 }
 
+void Camera::toggleCameraMode()
+{
+	if (m_camera_mode == CAMERA_MODE_FIRST)
+		m_camera_mode = CAMERA_MODE_THIRD;
+	else if (m_camera_mode == CAMERA_MODE_THIRD)
+		m_camera_mode = CAMERA_MODE_THIRD_FRONT;
+	else
+		m_camera_mode = CAMERA_MODE_FIRST;
+}
+
 void Camera::drawNametags()
 {
 	core::matrix4 trans = m_cameranode->getProjectionMatrix();
 	trans *= m_cameranode->getViewMatrix();
 
-	gui::IGUIFont *font = g_fontengine->getFont();
+	// This isn't the actual size, just a placeholder so we can easily apply
+	// the user's font size preference...
+	const u32 default_font_size = 16;
+	// ...by multiplying this in.
+	const f32 font_size_mult = g_fontengine->getFontSize(FM_Unspecified) / (float)default_font_size;
+
+	// Minimum distance until z-scaled nametags actually become smaller
+	const f32 minimum_d = 3.0f * BS;
+	// Smoothing constant: larger = slower size falloff with distance
+	const f32 smoothing_k = 4.0f * BS;
+
 	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
 	v2u32 screensize = driver->getScreenSize();
 
+	// Note: hidden nametags (e.g. GenericCAO) are removed from the array
 	for (const Nametag *nametag : m_nametags) {
-		// Nametags are hidden in GenericCAO::updateNametag()
-
 		v3f pos = nametag->parent_node->getAbsolutePosition() + nametag->pos * BS;
 		f32 transformed_pos[4] = { pos.X, pos.Y, pos.Z, 1.0f };
 		trans.multiplyWith1x4Matrix(transformed_pos);
-		if (transformed_pos[3] > 0) {
-			std::wstring nametag_colorless =
-				unescape_translate(utf8_to_wide(nametag->text));
-			core::dimension2d<u32> textsize = font->getDimension(
-				nametag_colorless.c_str());
-			f32 zDiv = transformed_pos[3] == 0.0f ? 1.0f :
-				core::reciprocal(transformed_pos[3]);
-			v2s32 screen_pos;
-			screen_pos.X = screensize.X *
-				(0.5 * transformed_pos[0] * zDiv + 0.5) - textsize.Width / 2;
-			screen_pos.Y = screensize.Y *
-				(0.5 - transformed_pos[1] * zDiv * 0.5) - textsize.Height / 2;
-			core::rect<s32> size(0, 0, textsize.Width, textsize.Height);
+		if (transformed_pos[3] <= 0) // negative Z means behind camera
+			continue;
+		f32 zDiv = transformed_pos[3] == 0.0f ? 1.0f : (1.0f / transformed_pos[3]);
 
-			auto bgcolor = nametag->getBgColor(m_show_nametag_backgrounds);
-			if (bgcolor.getAlpha() != 0) {
-				core::rect<s32> bg_size(-2, 0, textsize.Width + 2, textsize.Height);
-				driver->draw2DRectangle(bgcolor, bg_size + screen_pos);
-			}
-
-			font->draw(
-				translate_string(utf8_to_wide(nametag->text)).c_str(),
-				size + screen_pos, nametag->textcolor);
+		u32 font_size = 0;
+		if (nametag->scale_z) {
+			// Higher default since nametag should be reasonably visible
+			// even at distance.
+			u32 base_size = nametag->textsize.value_or(default_font_size * 3.2f);
+			f32 adjusted_d = std::max(transformed_pos[3] - minimum_d, 0.0f);
+			// Normalized for base_size * BS
+			f32 scale = (smoothing_k / (adjusted_d + smoothing_k)) / BS;
+			font_size = myround(font_size_mult *
+				rangelim(base_size * BS * scale, 0, base_size));
+		} else {
+			font_size = myround(font_size_mult * nametag->textsize.value_or(default_font_size));
 		}
+		if (font_size <= 1)
+			continue;
+		// TODO: This is quite primitive. It would be better to let the GPU handle
+		// scaling (draw to RTT first?).
+		{
+			// Because the current approach puts a high load on the font engine
+			// we quantize the font size and set an arbitrary maximum...
+			font_size = MYMIN(font_size, 256);
+			if (font_size > 128)
+				font_size &= ~(1|2|4);
+			else if (font_size > 64)
+				font_size &= ~(1|2);
+			else if (font_size > 32)
+				font_size &= ~1;
+		}
+		auto *font = g_fontengine->getFont(font_size);
+		assert(font);
+
+		const auto wtext = utf8_to_wide(nametag->text);
+		// Measure dimensions with escapes removed
+		core::dimension2du textsize = font->getDimension(unescape_translate(wtext).c_str());
+		v2s32 screen_pos;
+		screen_pos.X = screensize.X *
+			(0.5f + transformed_pos[0] * zDiv * 0.5f) - textsize.Width / 2;
+		screen_pos.Y = screensize.Y *
+			(0.5f - transformed_pos[1] * zDiv * 0.5f) - textsize.Height / 2;
+		core::rect<s32> size(0, 0, textsize.Width, textsize.Height);
+
+		auto bgcolor = nametag->getBgColor(m_show_nametag_backgrounds);
+		if (bgcolor.getAlpha() != 0) {
+			core::rect<s32> bg_size(-2, 0, textsize.Width + 2, textsize.Height);
+			driver->draw2DRectangle(bgcolor, bg_size + screen_pos);
+		}
+
+		// but draw text with escapes
+		font->draw(translate_string(wtext).c_str(),
+			size + screen_pos, nametag->textcolor);
 	}
 }
 
-Nametag *Camera::addNametag(scene::ISceneNode *parent_node,
-		const std::string &text, video::SColor textcolor,
-		std::optional<video::SColor> bgcolor, const v3f &pos)
+Nametag *Camera::addNametag(const Nametag &params)
 {
-	Nametag *nametag = new Nametag(parent_node, text, textcolor, bgcolor, pos);
+	assert(params.parent_node);
+	auto *nametag = new Nametag(params);
 	m_nametags.push_back(nametag);
 	return nametag;
 }
 
 void Camera::removeNametag(Nametag *nametag)
 {
-	m_nametags.remove(nametag);
+	auto it = std::find(m_nametags.begin(), m_nametags.end(), nametag);
+	assert(it != m_nametags.end());
+	m_nametags.erase(it);
 	delete nametag;
 }
 
 std::array<core::plane3d<f32>, 4> Camera::getFrustumCullPlanes() const
 {
-	using irr::scene::SViewFrustum;
+	using scene::SViewFrustum;
 	const auto &frustum_planes = m_cameranode->getViewFrustum()->planes;
 	return {
 		frustum_planes[SViewFrustum::VF_LEFT_PLANE],

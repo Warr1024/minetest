@@ -1,19 +1,6 @@
---Luanti
---Copyright (C) 2022 rubenwardy
---
---This program is free software; you can redistribute it and/or modify
---it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
---(at your option) any later version.
---
---This program is distributed in the hope that it will be useful,
---but WITHOUT ANY WARRANTY; without even the implied warranty of
---MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
---GNU Lesser General Public License for more details.
---
---You should have received a copy of the GNU Lesser General Public License along
---with this program; if not, write to the Free Software Foundation, Inc.,
---51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-- Luanti
+-- Copyright (C) 2022 rubenwardy
+-- SPDX-License-Identifier: LGPL-2.1-or-later
 
 
 local path = core.get_builtin_path() .. "common" .. DIR_DELIM .. "settings" .. DIR_DELIM
@@ -22,7 +9,6 @@ local component_funcs =  dofile(path .. "components.lua")
 local shadows_component =  dofile(path .. "shadows_component.lua")
 
 local loaded = false
-local full_settings
 local info_icon_path = core.formspec_escape(defaulttexturedir .. "settings_info.png")
 local reset_icon_path = core.formspec_escape(defaulttexturedir .. "settings_reset.png")
 local all_pages = {}
@@ -32,7 +18,7 @@ local filtered_page_by_id = page_by_id
 
 
 local function get_setting_info(name)
-	for _, entry in ipairs(full_settings) do
+	for _, entry in ipairs(core.full_settingtypes) do
 		if entry.type ~= "category" and entry.name == name then
 			return entry
 		end
@@ -63,6 +49,7 @@ local function load_settingtypes()
 		if not page then
 			page = add_page({
 				id = (section or "general"):lower():gsub(" ", "_"),
+				-- TRANSLATORS: Category for general settings
 				title = section or fgettext_ne("General"),
 				section = section,
 				content = {},
@@ -70,7 +57,7 @@ local function load_settingtypes()
 		end
 	end
 
-	for _, entry in ipairs(full_settings) do
+	for _, entry in ipairs(core.full_settingtypes) do
 		if entry.type == "category" then
 			if entry.level == 0 then
 				section = entry.name
@@ -104,29 +91,14 @@ local function load()
 	end
 	loaded = true
 
-	full_settings = settingtypes.parse_config_file(false, true)
-
-	local change_keys = {
-		query_text = "Controls",
-		requires = {
-			keyboard_mouse = true,
-		},
-		get_formspec = function(self, avail_w)
-			local btn_w = math.min(avail_w, 3)
-			return ("button[0,0;%f,0.8;btn_change_keys;%s]"):format(btn_w, fgettext("Controls")), 0.8
-		end,
-		on_submit = function(self, fields)
-			if fields.btn_change_keys then
-				core.show_keys_menu()
-			end
-		end,
-	}
+	core.full_settingtypes = settingtypes.parse_config_file(false, true)
 
 	local touchscreen_layout = {
 		query_text = "Touchscreen layout",
 		requires = {
 			touchscreen = true,
 		},
+		context = "client",
 		get_formspec = function(self, avail_w)
 			local btn_w = math.min(avail_w, 6)
 			return ("button[0,0;%f,0.8;btn_touch_layout;%s]"):format(btn_w, fgettext("Touchscreen layout")), 0.8
@@ -159,33 +131,42 @@ local function load()
 			{ heading = fgettext_ne("Movement") },
 			"arm_inertia",
 			"view_bobbing_amount",
-			"fall_bobbing_amount",
+			{ heading = fgettext_ne("Damage") },
+			"hurt_flash_enabled"
 		},
 	})
 
 	load_settingtypes()
 
-	table.insert(page_by_id.controls_keyboard_and_mouse.content, 1, change_keys)
 	-- insert after "touch_controls"
 	table.insert(page_by_id.controls_touchscreen.content, 2, touchscreen_layout)
+
 	do
 		local content = page_by_id.graphics_and_audio_effects.content
 		local idx = table.indexof(content, "enable_dynamic_shadows")
 		table.insert(content, idx, shadows_component)
 
 		idx = table.indexof(content, "enable_auto_exposure") + 1
+		local setting_info = get_setting_info("enable_auto_exposure")
+		--[[ TRANSLATORS: "automatic exposure" refers to light. This note
+		will be displayed for the graphics setting 'enable_auto_exposure' ]]
 		local note = component_funcs.note(fgettext_ne("(The game will need to enable automatic exposure as well)"))
-		note.requires = get_setting_info("enable_auto_exposure").requires
+		note.requires = setting_info.requires
+		note.context = setting_info.context
 		table.insert(content, idx, note)
 
 		idx = table.indexof(content, "enable_bloom") + 1
+		setting_info = get_setting_info("enable_bloom")
 		note = component_funcs.note(fgettext_ne("(The game will need to enable bloom as well)"))
-		note.requires = get_setting_info("enable_bloom").requires
+		note.requires = setting_info.requires
+		note.context = setting_info.context
 		table.insert(content, idx, note)
 
 		idx = table.indexof(content, "enable_volumetric_lighting") + 1
+		setting_info = get_setting_info("enable_volumetric_lighting")
 		note = component_funcs.note(fgettext_ne("(The game will need to enable volumetric lighting as well)"))
-		note.requires = get_setting_info("enable_volumetric_lighting").requires
+		note.requires = setting_info.requires
+		note.context = setting_info.context
 		table.insert(content, idx, note)
 	end
 
@@ -256,9 +237,26 @@ local function load()
 	}
 
 	get_setting_info("touch_controls").option_labels = {
+		-- TRANSLATORS: Automatic
 		["auto"] = fgettext_ne("Auto"),
 		["true"] = fgettext_ne("Enabled"),
 		["false"] = fgettext_ne("Disabled"),
+	}
+
+	get_setting_info("touch_interaction_style").option_labels = {
+		-- TRANSLATORS: Touchscreen interaction style
+		["tap"] = fgettext_ne("Tap"),
+		-- TRANSLATORS: Touchscreen interaction style
+		["tap_crosshair"] = fgettext_ne("Tap with crosshair"),
+		-- TRANSLATORS: Touchscreen interaction style
+		["buttons_crosshair"] = fgettext("Buttons with crosshair"),
+	}
+
+	get_setting_info("touch_punch_gesture").option_labels = {
+		-- TRANSLATORS: Touchscreen gesture
+		["short_tap"] = fgettext_ne("Short tap"),
+		-- TRANSLATORS: Touchscreen gesture
+		["long_tap"] = fgettext_ne("Long tap"),
 	}
 end
 
@@ -352,14 +350,26 @@ local function update_filtered_pages(query)
 end
 
 
-local function check_requirements(name, requires)
+local shown_contexts = {
+	common = true,
+	client = true,
+	server = INIT ~= "pause_menu" or core.is_internal_server(),
+	world_creation = INIT ~= "pause_menu",
+}
+
+local function check_requirements(name, requires, context)
+	if context and not shown_contexts[context] then
+		return false
+	end
+
 	if requires == nil then
 		return true
 	end
 
-	local video_driver = core.get_active_driver()
 	local touch_support = core.irrlicht_device_supports_touch()
 	local touch_controls = core.settings:get("touch_controls")
+	local touch_interaction_style = core.settings:get("touch_interaction_style")
+	local shadows_support = core.driver_supports_shadows()
 	local special = {
 		android = PLATFORM == "Android",
 		desktop = PLATFORM ~= "Android",
@@ -368,8 +378,8 @@ local function check_requirements(name, requires)
 		-- be used, so we show settings for both.
 		touchscreen = touch_support and (touch_controls == "auto" or core.is_yes(touch_controls)),
 		keyboard_mouse = not touch_support or (touch_controls == "auto" or not core.is_yes(touch_controls)),
-		opengl = (video_driver == "opengl" or video_driver == "opengl3"),
-		gles = video_driver:sub(1, 5) == "ogles",
+		touch_interaction_style_tap = touch_interaction_style ~= "buttons_crosshair",
+		shadows_support = shadows_support,
 	}
 
 	for req_key, req_value in pairs(requires) do
@@ -408,18 +418,8 @@ function page_has_contents(page, actual_content)
 	for _, item in ipairs(actual_content) do
 		if item == false or item.heading then --luacheck: ignore
 			-- skip
-		elseif type(item) == "string" then
-			local setting = get_setting_info(item)
-			assert(setting, "Unknown setting: " .. item)
-			if check_requirements(setting.name, setting.requires) then
-				return true
-			end
-		elseif item.get_formspec then
-			if check_requirements(item.id, item.requires) then
-				return true
-			end
 		else
-			error("Unknown content in page: " .. dump(item))
+			return true
 		end
 	end
 
@@ -430,6 +430,7 @@ end
 local function build_page_components(page)
 	-- Filter settings based on requirements
 	local content = {}
+	local settings_off = {}
 	local last_heading
 	for _, item in ipairs(page.content) do
 		if item == false then --luacheck: ignore
@@ -437,25 +438,30 @@ local function build_page_components(page)
 		elseif item.heading then
 			last_heading = item
 		else
-			local name, requires
+			local name, requires, context
+			local setting
 			if type(item) == "string" then
-				local setting = get_setting_info(item)
+				setting = get_setting_info(item)
 				assert(setting, "Unknown setting: " .. item)
 				name = setting.name
 				requires = setting.requires
+				context = setting.context
 			elseif item.get_formspec then
 				name = item.id
 				requires = item.requires
+				context = item.context
 			else
 				error("Unknown content in page: " .. dump(item))
 			end
 
-			if check_requirements(name, requires) then
+			if check_requirements(name, requires, context) then
 				if last_heading then
 					content[#content + 1] = last_heading
 					last_heading = nil
 				end
 				content[#content + 1] = item
+			elseif setting then
+				settings_off[#settings_off + 1] = setting
 			end
 		end
 	end
@@ -473,6 +479,14 @@ local function build_page_components(page)
 		elseif item.heading then
 			retval[i] = component_funcs.heading(item.heading)
 		end
+	end
+
+	if #settings_off > 0 then
+		retval[#retval + 1] = component_funcs.heading(fgettext_ne("Unavailable"),
+			-- luacheck: ignore
+			fgettext_ne("These settings are unavailable due to your platform, hardware or in combination with the current settings.")
+		)
+		retval[#retval + 1] = component_funcs.unavail_list(settings_off)
 	end
 	return retval
 end
@@ -517,12 +531,14 @@ local function get_formspec(dialogdata)
 
 		("button[0,%f;%f,0.8;back;%s]"):format(
 				tabsize.height + 0.2, back_w,
-				fgettext(INIT == "pause_menu" and "Exit" or "Back")),
+				-- TRANSLATORS: Button text to go back
+				fgettext("Back")),
 
 		("box[%f,%f;%f,0.8;#0000008C]"):format(
 			back_w + 0.2, tabsize.height + 0.2, checkbox_w),
 		("checkbox[%f,%f;show_technical_names;%s;%s]"):format(
 			back_w + 2*0.2, tabsize.height + 0.6,
+			-- TRANSLATORS: Checkbox that toggles displaying the technical setting names
 			fgettext("Show technical names"), tostring(show_technical_names)),
 
 		("box[%f,%f;%f,0.8;#0000008C]"):format(
@@ -539,6 +555,7 @@ local function get_formspec(dialogdata)
 			"image_button[0,0;0.75,0.75;", core.formspec_escape(defaulttexturedir .. "search.png"), ";search;]",
 			"image_button[0.75,0;0.75,0.75;", core.formspec_escape(defaulttexturedir .. "clear.png"), ";search_clear;]",
 			"tooltip[search;", fgettext("Search"), "]",
+			-- TRANSLATORS: Tooltip of a button that clears input
 			"tooltip[search_clear;", fgettext("Clear"), "]",
 		"container_end[]",
 		("scroll_container[0.25,1.25;%f,%f;leftscroll;vertical;0.1;0]"):format(
@@ -565,6 +582,7 @@ local function get_formspec(dialogdata)
 
 	if #filtered_pages == 0 then
 		fs[#fs + 1] = "label[0.1,0.41;"
+		-- TRANSLATORS: No search results
 		fs[#fs + 1] = fgettext("No results")
 		fs[#fs + 1] = "]"
 	end
@@ -613,8 +631,32 @@ local function get_formspec(dialogdata)
 
 		if show_reset then
 			local default = comp.setting.default
+
+			if comp.setting.type == "bool" then
+				if default == "true" then
+					default = fgettext_ne("Enabled")
+				elseif default == "false" then
+					default = fgettext_ne("Disabled")
+				end
+			elseif comp.setting.type == "key" then
+				default = (default ~= "")
+					and core.get_key_description(default)
+
+					-- TRANSLATORS: Indicates that the action does not have a corresponding keybinding.
+					or fgettext_ne("Not bound")
+			else
+				local sinfo = get_setting_info(comp.setting.name)
+				if sinfo and sinfo.option_labels and sinfo.option_labels[default] then
+					default = sinfo.option_labels[default]
+				elseif default == "" then
+					-- TRANSLATORS: Shown when a default setting is the empty string
+					default = fgettext_ne("<empty>")
+				end
+			end
+
 			local reset_tooltip = default and
-					fgettext("Reset setting to default ($1)", tostring(default)) or
+					-- TRANSLATORS: $1 will be replaced with a default setting value
+					fgettext("Reset setting to default: $1", tostring(default)) or
 					fgettext("Reset setting to default")
 			fs[#fs + 1] = ("image_button[%f,%f;0.5,0.5;%s;%s;]"):format(
 					right_pane_width - 1.4, info_reset_y, reset_icon_path, "reset_" .. i)
@@ -632,7 +674,13 @@ local function get_formspec(dialogdata)
 		fs[#fs + 1] = "container_end[]"
 
 		if used_h > 0 then
-			y = y + used_h + 0.25
+			local spacing = 0.25
+			local next_comp = dialogdata.components[i + 1]
+			if next_comp and next_comp.spacing then
+				spacing = next_comp.spacing
+			end
+
+			y = y + used_h + spacing
 		end
 	end
 
@@ -771,11 +819,11 @@ end
 
 
 if INIT == "mainmenu" then
-	function create_settings_dlg()
+	function create_settings_dlg(page_id)
 		load()
 		local dlg = dialog_create("dlg_settings", get_formspec, buttonhandler, eventhandler)
 
-		dlg.data.page_id = update_filtered_pages("")
+		dlg.data.page_id = page_id or update_filtered_pages("")
 
 		return dlg
 	end

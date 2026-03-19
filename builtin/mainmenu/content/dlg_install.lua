@@ -1,19 +1,6 @@
---Luanti
---Copyright (C) 2018-24 rubenwardy
---
---This program is free software; you can redistribute it and/or modify
---it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
---(at your option) any later version.
---
---This program is distributed in the hope that it will be useful,
---but WITHOUT ANY WARRANTY; without even the implied warranty of
---MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
---GNU Lesser General Public License for more details.
---
---You should have received a copy of the GNU Lesser General Public License along
---with this program; if not, write to the Free Software Foundation, Inc.,
---51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-- Luanti
+-- Copyright (C) 2018-24 rubenwardy
+-- SPDX-License-Identifier: LGPL-2.1-or-later
 
 local function is_still_visible(dlg)
 	local this = ui.find_by_name("install_dialog")
@@ -87,6 +74,7 @@ local function get_formspec(data)
 			formatted_deps[#formatted_deps + 1] = fgettext("Already installed")
 		elseif dep.package then
 			formatted_deps[#formatted_deps + 1] = "#cfc"
+			-- TRANSLATORS: Package (mod, texture pack, etc.) info: $1 = package name, $2 = package author
 			formatted_deps[#formatted_deps + 1] = fgettext("$1 by $2", dep.package.title, dep.package.author)
 			deps_to_install = deps_to_install + 1
 		else
@@ -99,8 +87,10 @@ local function get_formspec(data)
 	local message_bg = "#3333"
 	local message
 	if will_install_deps then
+		-- TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 		message = fgettext("$1 and $2 dependencies will be installed.", package.title, deps_to_install)
 	else
+		-- TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 		message = fgettext("$1 will be installed, and $2 dependencies will be skipped.", package.title, deps_to_install)
 	end
 	if deps_not_found > 0 then

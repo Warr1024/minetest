@@ -1,19 +1,6 @@
---Luanti
---Copyright (C) 2014 sapier
---
---This program is free software; you can redistribute it and/or modify
---it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
---(at your option) any later version.
---
---This program is distributed in the hope that it will be useful,
---but WITHOUT ANY WARRANTY; without even the implied warranty of
---MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
---GNU Lesser General Public License for more details.
---
---You should have received a copy of the GNU Lesser General Public License along
---with this program; if not, write to the Free Software Foundation, Inc.,
---51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-- Luanti
+-- Copyright (C) 2014 sapier
+-- SPDX-License-Identifier: LGPL-2.1-or-later
 
 local function get_sorted_servers()
 	local servers = {
@@ -112,7 +99,13 @@ local function get_formspec(tabview, name, tabdata)
 	local retval =
 		-- Search
 		"field[0.25,0.25;7,0.75;te_search;;" .. core.formspec_escape(tabdata.search_for) .. "]" ..
-		"tooltip[te_search;" .. fgettext("Possible filters\ngame:<name>\nmod:<name>\nplayer:<name>") .. "]" ..
+		"tooltip[te_search;" .. table.concat({
+				fgettext("Possible filters"),
+				"game:<name>",
+				"mod:<name>",
+				"player:<name>",
+				"sort:[-](name|relevance|players|mods|uptime|ping|lag)",
+		}, "\n") .. "]" ..
 		"field_enter_after_edit[te_search;true]" ..
 		"container[7.25,0.25]" ..
 		"image_button[0,0;0.75,0.75;" .. core.formspec_escape(defaulttexturedir .. "search.png") .. ";btn_mp_search;]" ..
@@ -120,14 +113,16 @@ local function get_formspec(tabview, name, tabdata)
 		"image_button[1.5,0;0.75,0.75;" .. core.formspec_escape(defaulttexturedir .. "refresh.png") .. ";btn_mp_refresh;]" ..
 		"tooltip[btn_mp_clear;" .. fgettext("Clear") .. "]" ..
 		"tooltip[btn_mp_search;" .. fgettext("Search") .. "]" ..
+		-- TRANSLATORS: As in 'reload'/'check again'
 		"tooltip[btn_mp_refresh;" .. fgettext("Refresh") .. "]" ..
 		"container_end[]" ..
 
 		"container[9.75,0]" ..
 		"box[0,0;5.75,7.1;#666666]" ..
 
-		-- Address / Port
+		-- TRANSLATORS: Network address
 		"label[0.25,0.35;" .. fgettext("Address") .. "]" ..
+		-- TRANSLATORS: Network port
 		"label[4.25,0.35;" .. fgettext("Port") .. "]" ..
 		"field[0.25,0.5;4,0.75;te_address;;" ..
 			core.formspec_escape(core.settings:get("address")) .. "]" ..
@@ -147,15 +142,18 @@ local function get_formspec(tabview, name, tabdata)
 		"container_end[]" ..
 
 		-- Connect
+		-- TRANSLATORS: Login to server
 		"button[3,6;2.5,0.75;btn_mp_login;" .. fgettext("Login") .. "]"
 
 	if core.settings:get_bool("enable_split_login_register") then
+		-- TRANSLATORS: Register an account on a server
 		retval = retval .. "button[0.25,6;2.5,0.75;btn_mp_register;" .. fgettext("Register") .. "]"
 	end
 
 	local selected_server = find_selected_server()
 
 	if selected_server then
+		gamedata.serverdescription = selected_server.description
 		if gamedata.serverdescription then
 			retval = retval .. "textarea[0.25,1.85;5.25,2.7;;;" ..
 				core.formspec_escape(gamedata.serverdescription) .. "]"
@@ -190,10 +188,11 @@ local function get_formspec(tabview, name, tabdata)
 			local max_clients = 5
 			if #clients_list > max_clients then
 				retval = retval .. "tooltip[btn_view_clients;" ..
-						fgettext("Clients:\n$1", table.concat(clients_list, "\n", 1, max_clients)) .. "\n..." .. "]"
+						-- TRANSLATORS: $1 is a list of players
+						fgettext("Players:\n$1", table.concat(clients_list, "\n", 1, max_clients)) .. "\n..." .. "]"
 			else
 				retval = retval .. "tooltip[btn_view_clients;" ..
-						fgettext("Clients:\n$1", table.concat(clients_list, "\n")) .. "]"
+						fgettext("Players:\n$1", table.concat(clients_list, "\n")) .. "]"
 			end
 			retval = retval .. "style[btn_view_clients;padding=6]"
 			retval = retval .. "image_button[4.5,1.3;0.5,0.5;" .. core.formspec_escape(defaulttexturedir ..
@@ -232,6 +231,7 @@ local function get_formspec(tabview, name, tabdata)
 
 	-- Table
 	retval = retval .. "tablecolumns[" ..
+		-- TRANSLATORS: Also known as "latency"
 		"image,tooltip=" .. fgettext("Ping") .. "," ..
 		"0=" .. core.formspec_escape(defaulttexturedir .. "blank.png") .. "," ..
 		"1=" .. core.formspec_escape(defaulttexturedir .. "server_ping_4.png") .. "," ..
@@ -249,7 +249,7 @@ local function get_formspec(tabview, name, tabdata)
 		"0=" .. core.formspec_escape(defaulttexturedir .. "blank.png") .. "," ..
 		"1=" .. core.formspec_escape(defaulttexturedir .. "server_flags_creative.png") .. "," ..
 		"align=inline,padding=0.25,width=1.5;" ..
-		--~ PvP = Player versus Player
+		-- TRANSLATORS: PvP = Player versus Player
 		"image,tooltip=" .. fgettext("Damage / PvP") .. "," ..
 		"0=" .. core.formspec_escape(defaulttexturedir .. "blank.png") .. "," ..
 		"1=" .. core.formspec_escape(defaulttexturedir .. "server_flags_damage.png") .. "," ..
@@ -328,7 +328,9 @@ local function parse_search_input(input)
 		table.insert(query.players, player)
 		local game = word:match("^game:(.*)")
 		query.game = query.game or game
-		if not (mod or player or game) then
+		local sort = word:match("^sort:(.*)")
+		query.sort = query.sort or sort
+		if not (mod or player or game or sort) then
 			table.insert(query.keywords, word)
 		end
 	end
@@ -391,11 +393,62 @@ local function matches_query(server, query)
 	return name_matches and 50 or description_matches and 0
 end
 
-local function search_server_list(input)
+-- Sorts the serverlist depending on the query
+local function sort_servers(servers, query)
+	local sort_by = query.sort or "relevance"
+
+	local reverse = false
+	if string.sub(sort_by, 1, 1) == "-" then
+		reverse = true
+		sort_by = string.sub(sort_by, 2)
+	end
+
+	local get_compare_val
+	if sort_by == "mods" then
+		get_compare_val = function(v)
+			return v.mods and #v.mods or 0
+		end
+	elseif sort_by == "lag" then
+		get_compare_val = function(v)
+			return v.lag or math.huge
+		end
+	else
+		local sort_indices = {
+			players = "clients",
+			uptime = "uptime",
+			name = "name",
+			ping = "ping",
+			relevance = "points",
+		}
+		get_compare_val = function(v)
+			return v[sort_indices[sort_by] or "points"]
+		end
+	end
+
+	-- For those lower is typically better
+	local asc = {
+		name = true,
+		ping = true,
+		lag = true,
+	}
+
+	table.sort(servers, function(a, b)
+		if reverse == (asc[sort_by] or false) then
+			return get_compare_val(a) > get_compare_val(b)
+		else
+			return get_compare_val(a) < get_compare_val(b)
+		end
+	end)
+end
+
+local function search_server_list(input, tabdata)
 	menudata.search_result = nil
 	if #serverlistmgr.servers < 2 then
 		return
 	end
+
+
+	tabdata.pre_search_selection = tabdata.pre_search_selection or find_selected_server()
 
 	-- setup the search query
 	local query = parse_search_input(input)
@@ -419,10 +472,20 @@ local function search_server_list(input)
 		return
 	end
 
-	table.sort(search_result, function(a, b)
-		return a.points > b.points
-	end)
+	local current_server = find_selected_server()
+
+	sort_servers(search_result, query)
 	menudata.search_result = search_result
+
+	-- Keep current selection if it's in search results
+	if current_server then
+	    for _, server in ipairs(search_result) do
+			if server.address == current_server.address and
+					server.port == current_server.port then
+				return
+			end
+		end
+	end
 
 	-- Find first compatible server (favorite or public)
 	for _, server in ipairs(search_result) do
@@ -434,6 +497,7 @@ local function search_server_list(input)
 	-- If no compatible server found, clear selection
 	set_selected_server(nil)
 end
+
 local function main_button_handler(tabview, fields, name, tabdata)
 	if fields.te_name then
 		gamedata.playername = fields.te_name
@@ -471,6 +535,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 			end
 			if event.type == "CHG" then
 				set_selected_server(server)
+				tabdata.pre_search_selection = nil
 				return true
 			end
 		end
@@ -484,11 +549,9 @@ local function main_button_handler(tabview, fields, name, tabdata)
 	if fields.btn_delete_favorite then
 		local idx = core.get_table_index("servers")
 		if not idx then return end
-		local server = tabdata.lookup[idx]
-		if not server then return end
 
-		serverlistmgr.delete_favorite(server)
-		set_selected_server(server)
+		serverlistmgr.delete_favorite(tabdata.lookup[idx])
+		set_selected_server(tabdata.lookup[idx+1])
 		return true
 	end
 
@@ -516,13 +579,16 @@ local function main_button_handler(tabview, fields, name, tabdata)
 	if fields.btn_mp_clear then
 		tabdata.search_for = ""
 		menudata.search_result = nil
-		set_selected_server(nil)
+		if tabdata.pre_search_selection then
+			set_selected_server(tabdata.pre_search_selection)
+			tabdata.pre_search_selection = nil
+		end
 		return true
 	end
 
 	if fields.btn_mp_search or fields.key_enter_field == "te_search" then
 		tabdata.search_for = fields.te_search
-		search_server_list(fields.te_search)
+		search_server_list(fields.te_search, tabdata)
 		return true
 	end
 

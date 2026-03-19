@@ -5,17 +5,14 @@
 #include "lua_api/l_mainmenu.h"
 #include "lua_api/l_internal.h"
 #include "common/c_content.h"
-#include "cpp_api/s_async.h"
+#include "config.h"
 #include "scripting_mainmenu.h"
 #include "gui/guiEngine.h"
 #include "gui/guiMainMenu.h"
-#include "gui/guiKeyChangeMenu.h"
 #include "gui/guiPathSelectMenu.h"
 #include "gui/touchscreeneditor.h"
-#include "version.h"
 #include "porting.h"
 #include "filesys.h"
-#include "convert_json.h"
 #include "content/content.h"
 #include "content/subgames.h"
 #include "mapgen/mapgen.h"
@@ -26,10 +23,14 @@
 #include "client/texturepaths.h"
 #include "network/networkprotocol.h"
 #include "content/mod_configuration.h"
-#include "threading/mutex_auto_lock.h"
 #include "common/c_converter.h"
 #include "gui/guiOpenURL.h"
 #include "gettext.h"
+#include "log.h"
+#include "util/string.h"
+
+#include <cassert>
+#include <iostream>
 
 /******************************************************************************/
 std::string ModApiMainMenu::getTextData(lua_State *L, const std::string &name)
@@ -126,10 +127,13 @@ int ModApiMainMenu::l_start(lua_State *L)
 	data->simple_singleplayer_mode = getBoolData(L,"singleplayer",valid);
 	data->do_reconnect = getBoolData(L, "do_reconnect", valid);
 	if (!data->do_reconnect) {
-		data->name     = getTextData(L,"playername");
-		data->password = getTextData(L,"password");
-		data->address  = getTextData(L,"address");
-		data->port     = getTextData(L,"port");
+		// Get rid of trailing whitespace in name (may be added by autocompletion
+		// on Android, which would then cause SERVER_ACCESSDENIED_WRONG_CHARS_IN_NAME).
+		data->name     = trim(getTextData(L, "playername"));
+		data->password = getTextData(L, "password");
+		// There's no reason for these to have leading/trailing whitespace either.
+		data->address  = trim(getTextData(L, "address"));
+		data->port     = trim(getTextData(L, "port"));
 
 		const auto val = getTextData(L, "allow_login_or_register");
 		if (val == "login")
@@ -212,6 +216,32 @@ int ModApiMainMenu::l_set_clouds(lua_State *L)
 
 	engine->m_clouds_enabled = value;
 
+	return 0;
+}
+
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_clouds_color(lua_State* L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+
+	video::SColor color;
+	parseColorString(readParam<std::string>(L, 1), color, false);
+
+	engine->setMenuCloudsColor(color);
+	return 0;
+}
+
+int ModApiMainMenu::l_set_sky_color(lua_State* L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+
+	video::SColor color;
+	parseColorString(readParam<std::string>(L, 1), color, false);
+
+	engine->setMenuSkyColor(color);
 	return 0;
 }
 
@@ -323,6 +353,16 @@ int ModApiMainMenu::l_get_games(lua_State *L)
 		lua_pushstring(L,  menuicon.c_str());
 		lua_settable(L,    top_lvl2);
 
+		lua_pushstring(L, "aliases");
+		lua_newtable(L);
+		int table_aliases = lua_gettop(L);
+		for (const auto &alias : game.aliases) {
+			lua_pushstring(L, alias.c_str());
+			lua_pushboolean(L, true);
+			lua_settable(L, table_aliases);
+		}
+		lua_settable(L, top_lvl2);
+
 		lua_pushstring(L, "addon_mods_paths");
 		lua_newtable(L);
 		int table2 = lua_gettop(L);
@@ -351,6 +391,15 @@ int ModApiMainMenu::l_get_content_info(lua_State *L)
 	spec.path = path;
 	parseContentInfo(spec);
 
+	if (spec.type == "unknown") {
+		// In <=5.11.0 the API call was erroneously not documented as
+		// being able to return type "unknown".
+		// TODO inspect call sites and make sure this is handled, then we can
+		// likely remove the warning.
+		warningstream << "Requested content info has type \"unknown\" "
+				<< "(at " << path << ")" << std::endl;
+	}
+
 	lua_newtable(L);
 
 	lua_pushstring(L, spec.name.c_str());
@@ -364,11 +413,6 @@ int ModApiMainMenu::l_get_content_info(lua_State *L)
 
 	lua_pushstring(L, spec.author.c_str());
 	lua_setfield(L, -2, "author");
-
-	if (!spec.title.empty()) {
-		lua_pushstring(L, spec.title.c_str());
-		lua_setfield(L, -2, "title");
-	}
 
 	lua_pushinteger(L, spec.release);
 	lua_setfield(L, -2, "release");
@@ -385,7 +429,12 @@ int ModApiMainMenu::l_get_content_info(lua_State *L)
 	if (spec.type == "mod") {
 		ModSpec spec;
 		spec.path = path;
-		parseModContents(spec);
+		// Since the content was already determined to be a mod,
+		// the parsing is guaranteed to succeed unless the init.lua
+		// file happens to be deleted between the content parse and
+		// the mod parse.
+		[[maybe_unused]] bool success = parseModContents(spec);
+		assert(success);
 
 		// Dependencies
 		lua_newtable(L);
@@ -406,6 +455,34 @@ int ModApiMainMenu::l_get_content_info(lua_State *L)
 		lua_setfield(L, -2, "optional_depends");
 	}
 
+	return 1;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_get_mod_list(lua_State *L)
+{
+	std::string path = luaL_checkstring(L, 1);
+	std::string virtual_path = luaL_checkstring(L, 2);
+
+	CHECK_SECURE_PATH(L, path.c_str(), false)
+
+	std::vector<ModSpec> mods_flat = flattenMods(getModsInPath(path, virtual_path), false);
+	int i = 0;
+	lua_createtable(L, mods_flat.size(), 0);
+	for (const ModSpec &spec : mods_flat) {
+		push_mod_spec(L, spec, false);
+
+		lua_pushboolean(L, spec.is_name_explicit);
+		lua_setfield(L, -2, "is_name_explicit");
+
+		lua_pushboolean(L, spec.is_modpack);
+		lua_setfield(L, -2, "is_modpack");
+
+		lua_pushinteger(L, spec.modpack_depth);
+		lua_setfield(L, -2, "modpack_depth");
+
+		lua_rawseti(L, -2, ++i); // assign to return table
+	}
 	return 1;
 }
 
@@ -522,22 +599,6 @@ int ModApiMainMenu::l_get_content_translation(lua_State *L)
 }
 
 /******************************************************************************/
-int ModApiMainMenu::l_show_keys_menu(lua_State *L)
-{
-	GUIEngine *engine = getGuiEngine(L);
-	sanity_check(engine != NULL);
-
-	GUIKeyChangeMenu *kmenu = new GUIKeyChangeMenu(
-			engine->m_rendering_engine->get_gui_env(),
-			engine->m_parent,
-			-1,
-			engine->m_menumanager,
-			engine->m_texture_source.get());
-	kmenu->drop();
-	return 0;
-}
-
-/******************************************************************************/
 int ModApiMainMenu::l_show_touchscreen_layout(lua_State *L)
 {
 	GUIEngine *engine = getGuiEngine(L);
@@ -633,11 +694,10 @@ int ModApiMainMenu::l_delete_world(lua_State *L)
 int ModApiMainMenu::l_set_topleft_text(lua_State *L)
 {
 	GUIEngine* engine = getGuiEngine(L);
-	sanity_check(engine != NULL);
+	sanity_check(engine);
 
 	std::string text;
-
-	if (!lua_isnone(L,1) &&	!lua_isnil(L,1))
+	if (!lua_isnoneornil(L, 1))
 		text = luaL_checkstring(L, 1);
 
 	engine->setTopleftText(text);
@@ -928,8 +988,9 @@ int ModApiMainMenu::l_get_active_renderer(lua_State *L)
 /******************************************************************************/
 int ModApiMainMenu::l_get_active_irrlicht_device(lua_State *L)
 {
-	const char *device_name = [] {
-		switch (RenderingEngine::get_raw_device()->getType()) {
+	auto device = RenderingEngine::get_raw_device();
+	std::string device_name = [device] {
+		switch (device->getType()) {
 		case EIDT_WIN32: return "WIN32";
 		case EIDT_X11: return "X11";
 		case EIDT_OSX: return "OSX";
@@ -938,11 +999,12 @@ int ModApiMainMenu::l_get_active_irrlicht_device(lua_State *L)
 		default: return "Unknown";
 		}
 	}();
-	lua_pushstring(L, device_name);
+	if (auto version = device->getVersionString(); !version.empty())
+		device_name.append(" ").append(version);
+	lua_pushstring(L, device_name.c_str());
 	return 1;
 }
 
-/******************************************************************************/
 int ModApiMainMenu::l_get_min_supp_proto(lua_State *L)
 {
 	lua_pushinteger(L, CLIENT_PROTOCOL_VERSION_MIN);
@@ -955,14 +1017,25 @@ int ModApiMainMenu::l_get_max_supp_proto(lua_State *L)
 	return 1;
 }
 
-/******************************************************************************/
 int ModApiMainMenu::l_get_formspec_version(lua_State  *L)
 {
 	lua_pushinteger(L, FORMSPEC_API_VERSION);
 	return 1;
 }
 
-/******************************************************************************/
+int ModApiMainMenu::l_is_debug_build(lua_State  *L)
+{
+	bool ret = false;
+	// We can't know for sure, but as far as our own build types go the following
+	// two use -O0. Check NDEBUG too to definitely exclude release builds.
+#ifndef NDEBUG
+	if (strcmp(BUILD_TYPE, "Debug") == 0 || strcmp(BUILD_TYPE, "None") == 0)
+		ret = true;
+#endif
+	lua_pushboolean(L, ret);
+	return 1;
+}
+
 int ModApiMainMenu::l_open_url(lua_State *L)
 {
 	std::string url = luaL_checkstring(L, 1);
@@ -1041,16 +1114,18 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(update_formspec);
 	API_FCT(set_formspec_prepend);
 	API_FCT(set_clouds);
+	API_FCT(set_sky_color);
+	API_FCT(set_clouds_color);
 	API_FCT(get_textlist_index);
 	API_FCT(get_table_index);
 	API_FCT(get_worlds);
 	API_FCT(get_games);
 	API_FCT(get_content_info);
+	API_FCT(get_mod_list);
 	API_FCT(check_mod_configuration);
 	API_FCT(get_content_translation);
 	API_FCT(start);
 	API_FCT(close);
-	API_FCT(show_keys_menu);
 	API_FCT(show_touchscreen_layout);
 	API_FCT(create_world);
 	API_FCT(delete_world);
@@ -1082,11 +1157,15 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
 	API_FCT(get_formspec_version);
+	API_FCT(is_debug_build);
 	API_FCT(open_url);
 	API_FCT(open_url_dialog);
 	API_FCT(open_dir);
 	API_FCT(share_file);
 	API_FCT(do_async_callback);
+
+	lua_pushboolean(L, g_first_run);
+	lua_setfield(L, top, "is_first_run");
 }
 
 /******************************************************************************/
@@ -1111,8 +1190,9 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(extract_zip);
 	API_FCT(may_modify_path);
 	API_FCT(download_file);
+	API_FCT(get_language);
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
 	API_FCT(get_formspec_version);
-	API_FCT(get_language);
+	API_FCT(is_debug_build);
 }

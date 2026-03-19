@@ -6,7 +6,6 @@
 
 #include "lua_api/l_base.h"
 
-class AsyncEngine;
 
 class ModApiUtil : public ModApiBase
 {
@@ -28,6 +27,9 @@ private:
 
 	// get us precision time
 	static int l_get_us_time(lua_State *L);
+
+	// get_us_time() for SSCSM. less precise
+	static int l_get_us_time_sscsm(lua_State *L);
 
 	// parse_json(str[, nullvalue])
 	static int l_parse_json(lua_State *L);
@@ -52,6 +54,9 @@ private:
 
 	// is_yes(arg)
 	static int l_is_yes(lua_State *L);
+
+	// path_exists(path)
+	static int l_path_exists(lua_State *L);
 
 	// get_builtin_path()
 	static int l_get_builtin_path(lua_State *L);
@@ -128,8 +133,12 @@ private:
 	// is_valid_player_name(name)
 	static int l_is_valid_player_name(lua_State *L);
 
+	// strip_escapes(str)
+	static int l_strip_escapes(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 	static void InitializeAsync(lua_State *L, int top);
 	static void InitializeClient(lua_State *L, int top);
+	static void InitializeSSCSM(lua_State *L, int top);
 };

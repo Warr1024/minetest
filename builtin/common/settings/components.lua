@@ -1,19 +1,6 @@
---Luanti
---Copyright (C) 2022 rubenwardy
---
---This program is free software; you can redistribute it and/or modify
---it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
---(at your option) any later version.
---
---This program is distributed in the hope that it will be useful,
---but WITHOUT ANY WARRANTY; without even the implied warranty of
---MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
---GNU Lesser General Public License for more details.
---
---You should have received a copy of the GNU Lesser General Public License along
---with this program; if not, write to the Free Software Foundation, Inc.,
---51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-- Luanti
+-- Copyright (C) 2022 rubenwardy
+-- SPDX-License-Identifier: LGPL-2.1-or-later
 
 local make = {}
 
@@ -37,6 +24,7 @@ local make = {}
 --     * `fs` is a string for the formspec.
 --       Components should be relative to `0,0`, and not exceed `avail_w` or the returned `used_height`.
 --     * `used_height` is the space used by components in `fs`.
+-- * `spacing`: (Optional) the vertical margin to be added before the component (default 0.25)
 -- * `on_submit = function(self, fields, parent)`:
 --     * `fields`: submitted formspec fields
 --     * `parent`: the fstk element for the settings UI, use to show dialogs
@@ -57,15 +45,32 @@ local function is_valid_number(value)
 end
 
 
-function make.heading(text)
+function make.heading(text, info_text)
 	return {
 		full_width = true,
+		info_text = info_text,
 		get_formspec = function(self, avail_w)
 			return ("label[0,0.6;%s]box[0,0.9;%f,0.05;#ccc6]"):format(core.formspec_escape(text), avail_w), 1.2
 		end,
 	}
 end
 
+
+function make.unavail_list(settings)
+	return {
+		full_width = true,
+		get_formspec = function(self, avail_w)
+			local h = 0.2
+			local fs = {}
+			for _, setting in ipairs(settings) do
+				fs[#fs + 1] = ("label[0.3,%f;%s]"):format(h,
+					core.colorize("#bbb", core.formspec_escape(get_label(setting))))
+				h = h + 0.4
+			end
+			return table.concat(fs, ""), h
+		end,
+	}
+end
 
 function make.note(text)
 	return {
@@ -442,13 +447,144 @@ local function make_noise_params(setting)
 	}
 end
 
+local function has_keybinding_conflict(t1, t2)
+	for _, v1 in pairs(t1) do
+		for _, v2 in pairs(t2) do
+			if core.are_keycodes_equal(v1, v2) then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function get_key_setting(name)
+	return core.settings:get(name):split("|")
+end
+
+-- Setting names where an empty field shall be shown to assign new keybindings.
+local key_add_empty = {}
+
+function make.key(setting)
+	local btn_bind = "bind_" .. setting.name
+	local btn_clear = "unbind_" .. setting.name
+	local btn_add = "add_" .. setting.name
+	local function add_conflict_warnings(fs, height)
+		local value = get_key_setting(setting.name)
+		if value == "" then
+			return height
+		end
+
+		local critical_keys = {
+			keymap_drop = true,
+			keymap_dig = true,
+			keymap_place = true,
+		}
+
+		for _, o in ipairs(core.full_settingtypes) do
+			if o.type == "key" and o.name ~= setting.name and
+					has_keybinding_conflict(get_key_setting(o.name), value) then
+
+				local is_current_close_world = setting.name == "keymap_close_world"
+				local is_other_close_world = o.name == "keymap_close_world"
+				local is_current_critical = critical_keys[setting.name]
+				local is_other_critical = critical_keys[o.name]
+
+				if (is_other_critical or is_current_critical) or
+						(not is_current_close_world and not is_other_close_world) then
+					table.insert(fs, ("label[0,%f;%s]"):format(height + 0.3,
+							core.colorize(mt_color_orange, fgettext([[Conflicts with "$1"]], fgettext(o.readable_name)))))
+					height = height + 0.6
+				end
+			end
+		end
+		return height
+	end
+
+	local add_empty = key_add_empty[setting.name]
+	key_add_empty[setting.name] = nil
+
+	return {
+		info_text = setting.comment,
+		setting = setting,
+		spacing = 0.1,
+
+		get_formspec = function(self, avail_w)
+			local value_string = core.settings:get(setting.name) or ""
+			local default_value = setting.default or ""
+			self.resettable = core.settings:has(setting.name) and (value_string ~= default_value)
+			local value_width = math.max(2.5, avail_w / 2)
+			local value = get_key_setting(setting.name)
+			local fs = {
+				("label[0,0.4;%s]"):format(get_label(setting)),
+			}
+
+			local function add_keybinding_row(idx)
+				local btn_bind_width = value_width - 1.6
+				local has_value = value[idx]
+				local y = (idx - 1) * 0.8
+				if not has_value then
+					btn_bind_width = idx == 1 and value_width or (value_width - 0.8)
+				end
+				table.insert(fs, ("button_key[%f,%f;%f,0.8;%s_%d;%s]"):format(
+						value_width, y, btn_bind_width,
+						btn_bind, idx, core.formspec_escape(value[idx] or "")))
+				if has_value then
+					table.insert(fs, ("image_button[%f,%f;0.8,0.8;%s;%s_%d;]"):format(
+							avail_w - 1.6, y,
+							core.formspec_escape(defaulttexturedir .. "clear.png"),
+							btn_clear, idx))
+					table.insert(fs, ("tooltip[%s_%d;%s]"):format(btn_clear, idx,
+							fgettext("Remove keybinding")))
+				end
+			end
+
+			local height = #value * 0.8
+			for i = 1, #value do
+				add_keybinding_row(i)
+			end
+			if add_empty or #value == 0 then
+				add_keybinding_row(#value+1)
+				height = height + 0.8
+			else
+				table.insert(fs, ("image_button[%f,%f;0.8,0.8;%s;%s;]"):format(
+						avail_w - 0.8, height - 0.8,
+						core.formspec_escape(defaulttexturedir .. "plus.png"), btn_add))
+				table.insert(fs, ("tooltip[%s;%s]"):format(btn_add, fgettext("Add keybinding")))
+			end
+
+			height = add_conflict_warnings(fs, height)
+			return table.concat(fs), height
+		end,
+
+		on_submit = function(self, fields)
+			if fields[btn_add] then
+				key_add_empty[setting.name] = true
+				return true
+			end
+			local value = get_key_setting(setting.name)
+			for i = 1, #value + 1 do
+				if fields[("%s_%d"):format(btn_bind, i)] then
+					value[i] = fields[("%s_%d"):format(btn_bind, i)]
+					core.settings:set(setting.name, table.concat(value, "|"))
+					return true
+				elseif fields[("%s_%d"):format(btn_clear, i)] then
+					table.remove(value, i)
+					core.settings:set(setting.name, table.concat(value, "|"))
+					return true
+				end
+			end
+		end,
+	}
+end
+
 if INIT == "pause_menu" then
 	-- Making the noise parameter dialog work in the pause menu settings would
 	-- require porting "FSTK" (at least the dialog API) from the mainmenu formspec
 	-- API to the in-game formspec API.
 	-- There's no reason you'd want to adjust mapgen noise parameter settings
-	-- in-game (they only apply to new worlds), so there's no reason to implement
-	-- this.
+	-- in-game (they only apply to new worlds, hidden as [world_creation]),
+	-- so there's no reason to implement this.
 	local empty = function()
 		return { get_formspec = function() return "", 0 end }
 	end

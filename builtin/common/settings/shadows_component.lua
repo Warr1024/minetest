@@ -1,20 +1,7 @@
---Luanti
---Copyright (C) 2021-2 x2048
---Copyright (C) 2022-3 rubenwardy
---
---This program is free software; you can redistribute it and/or modify
---it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
---(at your option) any later version.
---
---This program is distributed in the hope that it will be useful,
---but WITHOUT ANY WARRANTY; without even the implied warranty of
---MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
---GNU Lesser General Public License for more details.
---
---You should have received a copy of the GNU Lesser General Public License along
---with this program; if not, write to the Free Software Foundation, Inc.,
---51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-- Luanti
+-- Copyright (C) 2021-2 x2048
+-- Copyright (C) 2022-3 rubenwardy
+-- SPDX-License-Identifier: LGPL-2.1-or-later
 
 
 local shadow_levels_labels = {
@@ -47,9 +34,9 @@ local function detect_mapping_idx()
 
 	local shadow_map_max_distance = tonumber(core.settings:get("shadow_map_max_distance"))
 	local shadow_map_texture_size = tonumber(core.settings:get("shadow_map_texture_size"))
-	local shadow_map_texture_32bit = core.settings:get_bool("shadow_map_texture_32bit", false)
+	local shadow_map_texture_32bit = core.settings:get_bool("shadow_map_texture_32bit")
 	local shadow_filters = tonumber(core.settings:get("shadow_filters"))
-	local shadow_map_color = core.settings:get_bool("shadow_map_color", false)
+	local shadow_map_color = core.settings:get_bool("shadow_map_color")
 
 	for i = 2, 6 do
 		local preset = shadow_presets[i]
@@ -82,8 +69,9 @@ end
 return {
 	query_text = "Shadows",
 	requires = {
-		opengl = true,
+		shadows_support = true,
 	},
+	context = "client",
 	get_formspec = function(self, avail_w)
 		local labels = table.copy(shadow_levels_labels)
 		local idx = detect_mapping_idx()
@@ -93,8 +81,14 @@ return {
 			table.remove(labels, PRESET_CUSTOM)
 		end
 
+		-- Don't show anything if shadows are disabled
+		-- Reason: there's a separate checkbox and users can't see the suggested default in the dropdown
+		if idx == PRESET_DISABLED then
+			return "", 0
+		end
+
 		local fs =
-			"label[0,0.2;" .. fgettext("Dynamic shadows") .. "]" ..
+			"label[0,0.2;" .. fgettext("Quality preset") .. "]" ..
 			"dropdown[0,0.4;3,0.8;dd_shadows;" .. table.concat(labels, ",") .. ";" .. idx .. ";true]" ..
 			"label[0,1.5;" .. core.colorize("#bbb", fgettext("(The game will need to enable shadows as well)")) .. "]"
 		return fs, 1.8

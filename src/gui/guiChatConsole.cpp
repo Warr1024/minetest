@@ -5,8 +5,6 @@
 #include "guiChatConsole.h"
 #include "chat.h"
 #include "client/client.h"
-#include "debug.h"
-#include "gettime.h"
 #include "client/keycode.h"
 #include "settings.h"
 #include "porting.h"
@@ -17,6 +15,7 @@
 #include "irrlicht_changes/CGUITTFont.h"
 #include "util/string.h"
 #include "guiScrollBar.h"
+#include <IOSOperator.h>
 #include <string>
 
 inline u32 clamp_u8(s32 value)
@@ -24,7 +23,7 @@ inline u32 clamp_u8(s32 value)
 	return (u32) MYMIN(MYMAX(value, 0), 255);
 }
 
-inline bool isInCtrlKeys(const irr::EKEY_CODE& kc)
+inline bool isInCtrlKeys(const EKEY_CODE& kc)
 {
 	return kc == KEY_LCONTROL || kc == KEY_RCONTROL || kc == KEY_CONTROL;
 }
@@ -123,7 +122,6 @@ bool GUIChatConsole::isOpenInhibited() const
 void GUIChatConsole::closeConsole()
 {
 	m_open = false;
-	Environment->removeFocus(this);
 	m_menumgr->deletingMenu(this);
 	m_scrollbar->setVisible(false);
 }
@@ -332,7 +330,7 @@ void GUIChatConsole::drawText()
 			core::rect<s32> destrect(
 				x, y, x + m_fontsize.X * fragment.text.size(), y + m_fontsize.Y);
 
-			if (m_font->getType() == irr::gui::EGFT_CUSTOM) {
+			if (m_font->getType() == gui::EGFT_CUSTOM) {
 				// Draw colored text if possible
 				auto *tmp = static_cast<gui::CGUITTFont*>(m_font.get());
 				tmp->draw(
@@ -436,7 +434,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 
 		// Key input
-		if (KeyPress(event.KeyInput) == getKeySetting("keymap_console")) {
+		if (keySettingHasMatch("keymap_console", event.KeyInput)) {
 			closeConsole();
 
 			// inhibit open so the_game doesn't reopen immediately

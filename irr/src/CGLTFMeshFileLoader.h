@@ -17,9 +17,6 @@
 #include <tuple>
 #include <vector>
 
-namespace irr
-{
-
 namespace scene
 {
 
@@ -99,9 +96,10 @@ private:
 	class MeshExtractor
 	{
 	public:
-		MeshExtractor(tiniergltf::GlTF &&model,
-				SkinnedMeshBuilder *mesh) noexcept
-			: m_gltf_model(std::move(model)), m_irr_model(mesh) {};
+		MeshExtractor(tiniergltf::GlTF &&model) noexcept
+			: m_gltf_model(std::move(model))
+			, m_irr_model(SkinnedMesh::SourceFormat::GLTF)
+		{}
 
 		/* Gets indices for the given mesh/primitive.
 		 *
@@ -117,14 +115,14 @@ private:
 
 		std::size_t getPrimitiveCount(const std::size_t meshIdx) const;
 
-		void load();
+		SkinnedMesh *load();
 		const std::unordered_set<std::string> &getWarnings() {
 			return warnings;
 		}
 
 	private:
 		const tiniergltf::GlTF m_gltf_model;
-		SkinnedMeshBuilder *m_irr_model;
+		SkinnedMeshBuilder m_irr_model;
 
 		std::vector<std::function<void()>> m_mesh_loaders;
 		std::vector<SkinnedMesh::SJoint *> m_loaded_nodes;
@@ -164,6 +162,4 @@ private:
 };
 
 } // namespace scene
-
-} // namespace irr
 

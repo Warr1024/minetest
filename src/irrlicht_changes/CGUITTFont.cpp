@@ -33,24 +33,19 @@
 
 #include "CGUITTFont.h"
 
-#include "irr_ptr.h"
 #include "log.h"
-#include "filesys.h"
 #include "debug.h"
-#include "IFileSystem.h"
 #include "IGUIEnvironment.h"
 
 #include <cstdlib>
 #include <iostream>
 
-namespace irr
-{
+
 namespace gui
 {
 
-std::map<io::path, SGUITTFace*> SGUITTFace::faces;
 FT_Library SGUITTFace::freetype_library = nullptr;
-std::size_t SGUITTFace::n_faces = 0;
+size_t SGUITTFace::n_faces = 0;
 
 FT_Library SGUITTFace::getFreeTypeLibrary()
 {
@@ -87,54 +82,28 @@ SGUITTFace* SGUITTFace::createFace(std::string &&buffer)
 	auto ft = getFreeTypeLibrary();
 	if (!ft)
 		return nullptr;
-	return (FT_New_Memory_Face(ft,
+	bool ok = FT_New_Memory_Face(ft,
 			reinterpret_cast<const FT_Byte*>(face->face_buffer.data()),
-			face->face_buffer.size(), 0, &face->face))
-			? nullptr : face.release();
+			face->face_buffer.size(), 0, &face->face) == 0;
+	return ok ? face.release() : nullptr;
 }
 
 SGUITTFace* SGUITTFace::loadFace(const io::path &filename)
 {
-	auto it = faces.find(filename);
-	if (it != faces.end()) {
-		it->second->grab();
-		return it->second;
-	}
-
-	std::string buffer;
-	if (!fs::ReadFile(filename.c_str(), buffer, true)) {
-		errorstream << "CGUITTFont: Reading file " << filename.c_str() << " failed." << std::endl;
+	irr_ptr<SGUITTFace> face(new SGUITTFace(""));
+	auto ft = getFreeTypeLibrary();
+	if (!ft)
 		return nullptr;
-	}
-
-	auto *face = SGUITTFace::createFace(std::move(buffer));
-	if (!face) {
-		errorstream << "CGUITTFont: FT_New_Memory_Face failed." << std::endl;
-		return nullptr;
-	}
-	faces.emplace(filename, face);
-	return face;
-}
-
-void SGUITTFace::dropFilename()
-{
-	if (!filename.has_value())
-		return;
-
-	auto it = faces.find(*filename);
-	if (it == faces.end())
-		return;
-
-	SGUITTFace* f = it->second;
-	// Drop our face.  If this was the last face, the destructor will clean up.
-	if (f->drop())
-		faces.erase(*filename);
+	// Prefer FT_New_Face because it doesn't require loading everything
+	// to memory.
+	bool ok = FT_New_Face(ft, filename.c_str(), 0, &face->face) == 0;
+	return ok ? face.release() : nullptr;
 }
 
 video::IImage* SGUITTGlyph::createGlyphImage(const FT_Bitmap& bits, video::IVideoDriver* driver) const
 {
 	// Make sure our casts to s32 in the loops below will not cause problems
-	if ((s32)bits.rows < 0 || (s32)bits.width < 0)
+	if (bits.rows > INT32_MAX || bits.width > INT32_MAX)
 		FATAL_ERROR("Insane font glyph size");
 
 	// Determine what our texture size should be.
@@ -142,8 +111,8 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Bitmap& bits, video::IVide
 	core::dimension2du d(bits.width + 1, bits.rows + 1);
 	core::dimension2du texture_size;
 
-	// Create and load our image now.
-	video::IImage* image = 0;
+	// Turn bitmap into an image
+	video::IImage *image = nullptr;
 	switch (bits.pixel_mode)
 	{
 		case FT_PIXEL_MODE_MONO:
@@ -235,44 +204,89 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, CGUITTFont *parent, u32 
 			return;
 	}
 
+	// Allocate slot from page
 	glyph_page = parent->getLastGlyphPageIndex();
 	u32 texture_side_length = page->texture->getOriginalSize().Width;
 	core::vector2di page_position(
 		(page->used_slots % (texture_side_length / font_size)) * font_size,
 		(page->used_slots / (texture_side_length / font_size)) * font_size
-		);
+	);
 	source_rect.UpperLeftCorner = page_position;
 	source_rect.LowerRightCorner = core::vector2di(page_position.X + bits.width, page_position.Y + bits.rows);
 
-	page->dirty = true;
 	++page->used_slots;
 	--page->available_slots;
 
-	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
-	surface = createGlyphImage(bits, parent->getDriver());
+	// createGlyphImage can now be called, the next preload() call will however
+	// invalidate the data in `bits`.
 }
 
 void SGUITTGlyph::unload()
 {
-	if (surface)
-	{
-		surface->drop();
-		surface = 0;
-	}
 	// reset isLoaded to false
 	source_rect = core::recti();
 }
 
+bool CGUITTGlyphPage::createPageTexture(const u8 pixel_mode,
+	const core::dimension2du texture_size)
+{
+	if (texture)
+		return false;
+
+	bool flgmip = driver->getTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS);
+	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
+	bool flgcpy = driver->getTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY);
+	driver->setTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY, true);
+
+	// Create texture
+	switch (pixel_mode) {
+		case FT_PIXEL_MODE_MONO:
+			texture = driver->addTexture(texture_size, name, video::ECF_A1R5G5B5);
+			break;
+		case FT_PIXEL_MODE_GRAY:
+		default:
+			texture = driver->addTexture(texture_size, name, video::ECF_A8R8G8B8);
+			break;
+	}
+
+	// Restore texture creation flags
+	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, flgmip);
+	driver->setTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY, flgcpy);
+
+	return texture ? true : false;
+}
+
+//! Updates the texture atlas with new glyphs.
+void CGUITTGlyphPage::updateTexture()
+{
+	if (!isDirty())
+		return;
+
+	void *ptr = texture->lock();
+	if (!ptr)
+		return;
+
+	video::ECOLOR_FORMAT format = texture->getColorFormat();
+	core::dimension2du size = texture->getOriginalSize();
+	video::IImage* pageholder = driver->createImageFromData(format, size, ptr, true, false);
+
+	for (auto &it : glyph_to_be_paged)
+		it.surface->copyTo(pageholder, it.glyph->source_rect.UpperLeftCorner);
+
+	pageholder->drop();
+	texture->unlock();
+	glyph_to_be_paged.clear();
+}
+
 //////////////////////
 
-CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
+CGUITTFont *CGUITTFont::createTTFont(IGUIEnvironment *env,
 		SGUITTFace *face, u32 size, bool antialias,
-		bool transparency, u32 shadow, u32 shadow_alpha)
+		bool preload, u32 shadow, u32 shadow_alpha)
 {
-	CGUITTFont* font = new CGUITTFont(env);
-	bool ret = font->load(face, size, antialias, transparency);
-	if (!ret)
-	{
+	CGUITTFont *font = new CGUITTFont(env);
+	bool ret = font->load(face, size, antialias, true, preload);
+	if (!ret) {
 		font->drop();
 		return 0;
 	}
@@ -286,10 +300,9 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 //////////////////////
 
 //! Constructor.
-CGUITTFont::CGUITTFont(IGUIEnvironment *env)
-: use_monochrome(false), use_transparency(true), use_hinting(true), use_auto_hinting(true),
-batch_load_size(1), Driver(0), GlobalKerningWidth(0), GlobalKerningHeight(0),
-shadow_offset(0), shadow_alpha(0), fallback(0)
+CGUITTFont::CGUITTFont(IGUIEnvironment *env) :
+	use_monochrome(false), use_hinting(true), use_auto_hinting(true),
+	batch_load_size(1)
 {
 
 	if (env) {
@@ -303,16 +316,16 @@ shadow_offset(0), shadow_alpha(0), fallback(0)
 	setInvisibleCharacters(L" ");
 }
 
-bool CGUITTFont::load(SGUITTFace *face, const u32 size, const bool antialias, const bool transparency)
+bool CGUITTFont::load(SGUITTFace *face, const u32 size, const bool antialias,
+	const bool transparency, const bool preload)
 {
 	if (!Driver || size == 0 || !face)
 		return false;
 
 	this->size = size;
 
-	// Update the font loading flags when the font is first loaded.
+	// Update the font loading flags when the font is first loaded
 	this->use_monochrome = !antialias;
-	this->use_transparency = transparency;
 	update_load_flags();
 
 	// Store our face.
@@ -330,11 +343,13 @@ bool CGUITTFont::load(SGUITTFace *face, const u32 size, const bool antialias, co
 	Glyphs.clear();
 	Glyphs.set_used(tt_face->num_glyphs);
 
-	// Cache the first 127 ascii characters.
-	u32 old_size = batch_load_size;
-	batch_load_size = 127;
-	getGlyphIndexByChar((char32_t)0);
-	batch_load_size = old_size;
+	// Cache the first 127 ASCII characters
+	if (preload) {
+		u32 old_size = batch_load_size;
+		batch_load_size = 127;
+		getGlyphIndexByChar(U' '); // char needs to exist, so pick space
+		batch_load_size = old_size;
+	}
 
 	return true;
 }
@@ -369,31 +384,27 @@ void CGUITTFont::update_glyph_pages() const
 {
 	for (u32 i = 0; i != Glyph_Pages.size(); ++i)
 	{
-		if (Glyph_Pages[i]->dirty)
+		if (Glyph_Pages[i]->isDirty())
 			Glyph_Pages[i]->updateTexture();
 	}
 }
 
 CGUITTGlyphPage* CGUITTFont::getLastGlyphPage() const
 {
-	CGUITTGlyphPage* page = 0;
 	if (Glyph_Pages.empty())
-		return 0;
-	else
-	{
-		page = Glyph_Pages[getLastGlyphPageIndex()];
-		if (page->available_slots == 0)
-			page = 0;
-	}
+		return nullptr;
+	CGUITTGlyphPage *page = Glyph_Pages[getLastGlyphPageIndex()];
+	if (page->available_slots == 0)
+		return nullptr;
 	return page;
 }
 
 CGUITTGlyphPage* CGUITTFont::createGlyphPage(const u8 pixel_mode)
 {
-	CGUITTGlyphPage* page = 0;
+	CGUITTGlyphPage *page = nullptr;
 
 	// Name of our page.
-	io::path name("TTFontGlyphPage_");
+	io::path name("glyph_");
 	name += tt_face->family_name;
 	name += ".";
 	name += tt_face->style_name;
@@ -406,19 +417,15 @@ CGUITTGlyphPage* CGUITTFont::createGlyphPage(const u8 pixel_mode)
 	page = new CGUITTGlyphPage(Driver, name);
 
 	// Determine our maximum texture size.
-	// If we keep getting 0, set it to 1024x1024, as that number is pretty safe.
-	core::dimension2du max_texture_size = max_page_texture_size;
-	if (max_texture_size.Width == 0 || max_texture_size.Height == 0)
-		max_texture_size = Driver->getMaxTextureSize();
-	if (max_texture_size.Width == 0 || max_texture_size.Height == 0)
-		max_texture_size = core::dimension2du(1024, 1024);
+	core::dimension2du max_texture_size = Driver->getMaxTextureSize();
 
-	// We want to try to put at least 144 glyphs on a single texture.
+	// We want to try to put at least 180 glyphs on a single texture.
+	// magic number = floor(texture_size / sqrt(180))
 	core::dimension2du page_texture_size;
-	if (size <= 21) page_texture_size = core::dimension2du(256, 256);
-	else if (size <= 42) page_texture_size = core::dimension2du(512, 512);
-	else if (size <= 84) page_texture_size = core::dimension2du(1024, 1024);
-	else if (size <= 168) page_texture_size = core::dimension2du(2048, 2048);
+	if (size <= 19) page_texture_size = core::dimension2du(256, 256);
+	else if (size <= 38) page_texture_size = core::dimension2du(512, 512);
+	else if (size <= 76) page_texture_size = core::dimension2du(1024, 1024);
+	else if (size <= 152) page_texture_size = core::dimension2du(2048, 2048);
 	else page_texture_size = core::dimension2du(4096, 4096);
 
 	if (page_texture_size.Width > max_texture_size.Width || page_texture_size.Height > max_texture_size.Height)
@@ -431,19 +438,16 @@ CGUITTGlyphPage* CGUITTFont::createGlyphPage(const u8 pixel_mode)
 		return 0;
 	}
 
-	if (page)
-	{
-		// Determine the number of glyph slots on the page and add it to the list of pages.
-		page->available_slots = (page_texture_size.Width / size) * (page_texture_size.Height / size);
-		Glyph_Pages.push_back(page);
-	}
+	// Determine the number of glyph slots on the page and add it to the list of pages
+	page->available_slots = (page_texture_size.Width / size) * (page_texture_size.Height / size);
+	Glyph_Pages.push_back(page);
 	return page;
 }
 
-void CGUITTFont::setTransparency(const bool flag)
+void CGUITTFont::setFallback(gui::IGUIFont *font)
 {
-	use_transparency = flag;
-	reset_images();
+	sanity_check(font != this);
+	fallback.grab(font);
 }
 
 void CGUITTFont::setMonochrome(const bool flag)
@@ -470,6 +474,7 @@ void CGUITTFont::draw(const core::stringw& text, const core::rect<s32>& position
 void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& position, bool hcenter, bool vcenter, const core::rect<s32>* clip)
 {
 	const auto &colors = text.getColors();
+	constexpr video::SColor fallback_color(255, 255, 255, 255); // if colors is too short
 
 	if (!Driver)
 		return;
@@ -492,35 +497,31 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 		textDimension = getDimension(text.c_str());
 
 		if (hcenter)
-			offset.X = ((position.getWidth() - textDimension.Width) >> 1) + offset.X;
+			offset.X = ((position.getWidth() - textDimension.Width) / 2) + offset.X;
 
 		if (vcenter)
-			offset.Y = ((position.getHeight() - textDimension.Height) >> 1) + offset.Y;
+			offset.Y = ((position.getHeight() - textDimension.Height) / 2) + offset.Y;
 	}
 
 	// Convert to a unicode string.
-	std::u32string utext = convertWCharToU32String(text.c_str());
-
-	// Set up our render map.
-	std::map<u32, CGUITTGlyphPage*> Render_Map;
+	const std::u32string utext = convertWCharToU32String(text.c_str());
+	const u32 lineHeight = getLineHeight();
 
 	// Start parsing characters.
-	u32 n;
+	// The same logic is applied to `CGUITTFont::getDimension`
 	char32_t previousChar = 0;
-	std::u32string::const_iterator iter = utext.begin();
-	while (iter != utext.end())
+	for (size_t i = 0; i < utext.size(); ++i)
 	{
-		char32_t currentChar = *iter;
-		n = getGlyphIndexByChar(currentChar);
-		bool visible = (Invisible.find_first_of(currentChar) == std::u32string::npos);
-		bool lineBreak=false;
-		if (currentChar == L'\r') // Mac or Windows breaks
+		char32_t currentChar = utext[i];
+		bool lineBreak = false;
+		if (currentChar == U'\r') // Mac or Windows breaks
 		{
 			lineBreak = true;
-			if (*(iter + 1) == (char32_t)'\n') 	// Windows line breaks.
-				currentChar = *(++iter);
+			// `std::u32string` is '\0'-terminated, thus this check is OK
+			if (utext[i + 1] == U'\n') // Windows line breaks.
+				currentChar = utext[++i];
 		}
-		else if (currentChar == (char32_t)'\n') // Unix breaks
+		else if (currentChar == U'\n') // Unix breaks
 		{
 			lineBreak = true;
 		}
@@ -528,82 +529,91 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 		if (lineBreak)
 		{
 			previousChar = 0;
-			offset.Y += font_metrics.height / 64;
+			offset.Y += lineHeight;
 			offset.X = position.UpperLeftCorner.X;
 
 			if (hcenter)
-				offset.X += (position.getWidth() - textDimension.Width) >> 1;
-			++iter;
+				offset.X += (position.getWidth() - textDimension.Width) / 2;
 			continue;
 		}
 
-		if (n > 0 && visible)
+		// Draw visible text
+
+		SGUITTGlyph *glyph = nullptr;
+		const u32 width = getWidthFromCharacter(currentChar);
+
+		// Skip whitespace characters
+		if (InvisibleChars.find(currentChar) != std::u32string::npos)
+			goto skip_invisible;
+
+		if (clip) {
+			// Skip fully clipped characters.
+			const core::recti rect(
+				offset,
+				offset + core::vector2di(width, lineHeight)
+			);
+			if (!clip->isRectCollided(rect))
+				goto skip_invisible;
+		}
+
+		{
+			// Retrieve the glyph
+			const u32 n = getGlyphIndexByChar(currentChar);
+			if (n > 0)
+				glyph = &Glyphs[n - 1];
+		}
+
+		if (glyph)
 		{
 			// Calculate the glyph offset.
-			s32 offx = Glyphs[n-1].offset.X;
-			s32 offy = (font_metrics.ascender / 64) - Glyphs[n-1].offset.Y;
+			const s32 offx = glyph->offset.X;
+			const s32 offy = (font_metrics.ascender / 64) - glyph->offset.Y;
 
 			// Apply kerning.
-			core::vector2di k = getKerning(currentChar, previousChar);
-			offset.X += k.X;
-			offset.Y += k.Y;
+			offset += getKerning(currentChar, previousChar);
 
 			// Determine rendering information.
-			SGUITTGlyph& glyph = Glyphs[n-1];
-			CGUITTGlyphPage* const page = Glyph_Pages[glyph.glyph_page];
-			page->render_positions.push_back(core::position2di(offset.X + offx, offset.Y + offy));
-			page->render_source_rects.push_back(glyph.source_rect);
-			const size_t iterPos = iter - utext.begin();
-			if (iterPos < colors.size())
-				page->render_colors.push_back(colors[iterPos]);
-			else
-				page->render_colors.push_back(video::SColor(255,255,255,255));
-			Render_Map[glyph.glyph_page] = page;
+			CGUITTGlyphPage *const page = Glyph_Pages[glyph->glyph_page];
+			page->render_positions.emplace_back(offset.X + offx, offset.Y + offy);
+			page->render_source_rects.push_back(glyph->source_rect);
+			page->render_colors.push_back(i < colors.size() ? colors[i] : fallback_color);
 		}
-		if (n > 0)
-		{
-			offset.X += getWidthFromCharacter(currentChar);
-		}
-		else if (fallback != 0)
+		else if (fallback)
 		{
 			// Let the fallback font draw it, this isn't super efficient but hopefully that doesn't matter
 			wchar_t l1[] = { (wchar_t) currentChar, 0 };
 
-			if (visible)
-			{
-				// Apply kerning.
-				offset += fallback->getKerning(*l1, (wchar_t) previousChar);
+			// Apply kerning.
+			offset += fallback->getKerning(*l1, (wchar_t) previousChar);
 
-				const u32 current_color = iter - utext.begin();
-				fallback->draw(core::stringw(l1),
-					core::rect<s32>({offset.X-1, offset.Y-1}, position.LowerRightCorner), // ???
-					current_color < colors.size() ? colors[current_color] : video::SColor(255, 255, 255, 255),
-					false, false, clip);
-			}
-
-			offset.X += fallback->getDimension(l1).Width;
+			fallback->draw(core::stringw(l1),
+				core::rect<s32>({offset.X-1, offset.Y-1}, position.LowerRightCorner), // ???
+				i < colors.size() ? colors[i] : fallback_color,
+				false, false, clip);
 		}
 
+skip_invisible:
+		offset.X += width;
 		previousChar = currentChar;
-		++iter;
 	}
 
 	// Draw now.
 	update_glyph_pages();
-	auto it = Render_Map.begin();
-	auto ie = Render_Map.end();
 	core::array<core::vector2di> tmp_positions;
 	core::array<core::recti> tmp_source_rects;
-	while (it != ie)
-	{
-		CGUITTGlyphPage* page = it->second;
-		++it;
+	for (u32 page_i = 0; page_i < Glyph_Pages.size(); ++page_i) {
+		CGUITTGlyphPage *page = Glyph_Pages[page_i];
+
+		if (page->render_positions.empty())
+			continue;
+
+		assert(page->render_positions.size() == page->render_colors.size());
+		assert(page->render_positions.size() == page->render_source_rects.size());
 
 		// render runs of matching color in batch
-		size_t ibegin;
 		video::SColor colprev;
 		for (size_t i = 0; i < page->render_positions.size(); ++i) {
-			ibegin = i;
+			const size_t ibegin = i;
 			colprev = page->render_colors[i];
 			do
 				++i;
@@ -611,9 +621,6 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 			tmp_positions.set_data(&page->render_positions[ibegin], i - ibegin);
 			tmp_source_rects.set_data(&page->render_source_rects[ibegin], i - ibegin);
 			--i;
-
-			if (!use_transparency)
-				colprev.color |= 0xff000000;
 
 			if (shadow_offset) {
 				for (size_t i = 0; i < tmp_positions.size(); ++i)
@@ -637,7 +644,7 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
 	return getDimension(convertWCharToU32String(text));
 }
 
-core::dimension2d<u32> CGUITTFont::getDimension(const std::u32string& text) const
+core::dimension2d<u32> CGUITTFont::getDimension(const std::u32string& utext) const
 {
 	// Get the maximum font height.  Unfortunately, we have to do this hack as
 	// Irrlicht will draw things wrong.  In FreeType, the font size is the
@@ -646,38 +653,28 @@ core::dimension2d<u32> CGUITTFont::getDimension(const std::u32string& text) cons
 	// Irrlicht does not understand this concept when drawing fonts.  Also, I
 	// add +1 to give it a 1 pixel blank border.  This makes things like
 	// tooltips look nicer.
-	s32 test1 = getHeightFromCharacter((char32_t)'g') + 1;
-	s32 test2 = getHeightFromCharacter((char32_t)'j') + 1;
-	s32 test3 = getHeightFromCharacter((char32_t)'_') + 1;
-	s32 max_font_height = core::max_(test1, core::max_(test2, test3));
+	const u32 lineHeight = getLineHeight();
 
-	core::dimension2d<u32> text_dimension(0, max_font_height);
-	core::dimension2d<u32> line(0, max_font_height);
+	core::dimension2d<u32> text_dimension(0, lineHeight);
+	core::dimension2d<u32> line(0, lineHeight);
 
+	// The same logic is applied to `CGUITTFont::draw`
 	char32_t previousChar = 0;
-	std::u32string::const_iterator iter = text.begin();
-	for (; iter != text.end(); ++iter)
+	for (size_t i = 0; i < utext.size(); ++i)
 	{
-		char32_t p = *iter;
+		char32_t currentChar = utext[i];
 		bool lineBreak = false;
-		if (p == '\r')	// Mac or Windows line breaks.
+		if (currentChar == U'\r') // Mac or Windows breaks
 		{
 			lineBreak = true;
-			if (iter + 1 != text.end() && *(iter + 1) == '\n')
-			{
-				++iter;
-				p = *iter;
-			}
+			// `std::u32string` is '\0'-terminated, thus this check is OK
+			if (utext[i + 1] == U'\n') // Windows line breaks.
+				currentChar = utext[++i];
 		}
-		else if (p == '\n')	// Unix line breaks.
+		else if (currentChar == U'\n') // Unix breaks
 		{
 			lineBreak = true;
 		}
-
-		// Kerning.
-		core::vector2di k = getKerning(p, previousChar);
-		line.Width += k.X;
-		previousChar = p;
 
 		// Check for linebreak.
 		if (lineBreak)
@@ -687,10 +684,15 @@ core::dimension2d<u32> CGUITTFont::getDimension(const std::u32string& text) cons
 			if (text_dimension.Width < line.Width)
 				text_dimension.Width = line.Width;
 			line.Width = 0;
-			line.Height = max_font_height;
+			line.Height = lineHeight;
 			continue;
 		}
-		line.Width += getWidthFromCharacter(p);
+
+		// Kerning.
+		line.Width += getKerning(currentChar, previousChar).X;
+
+		previousChar = currentChar;
+		line.Width += getWidthFromCharacter(currentChar);
 	}
 	if (text_dimension.Width < line.Width)
 		text_dimension.Width = line.Width;
@@ -706,7 +708,7 @@ inline u32 CGUITTFont::getWidthFromCharacter(char32_t c) const
 		int w = Glyphs[n-1].advance.X / 64;
 		return w;
 	}
-	if (fallback != 0)
+	if (fallback)
 	{
 		wchar_t s[] = { (wchar_t) c, 0 };
 		return fallback->getDimension(s).Width;
@@ -726,7 +728,7 @@ inline u32 CGUITTFont::getHeightFromCharacter(char32_t c) const
 		s32 height = (font_metrics.ascender / 64) - Glyphs[n-1].offset.Y + Glyphs[n-1].source_rect.getHeight();
 		return height;
 	}
-	if (fallback != 0)
+	if (fallback)
 	{
 		wchar_t s[] = { (wchar_t) c, 0 };
 		return fallback->getDimension(s).Height;
@@ -747,13 +749,14 @@ u32 CGUITTFont::getGlyphIndexByChar(char32_t c) const
 		return 0;
 
 	// If our glyph is already loaded, don't bother doing any batch loading code.
-	if (glyph != 0 && Glyphs[glyph - 1].isLoaded())
+	if (Glyphs[glyph - 1].isLoaded())
 		return glyph;
 
 	// Determine our batch loading positions.
 	u32 half_size = (batch_load_size / 2);
 	u32 start_pos = 0;
-	if (c > half_size) start_pos = c - half_size;
+	if (c > half_size)
+		start_pos = c - half_size;
 	u32 end_pos = start_pos + batch_load_size;
 
 	// Load all our characters.
@@ -770,7 +773,8 @@ u32 CGUITTFont::getGlyphIndexByChar(char32_t c) const
 			{
 				auto *this2 = const_cast<CGUITTFont*>(this); // oh well
 				glyph.preload(char_index, tt_face, this2, size, load_flags);
-				Glyph_Pages[glyph.glyph_page]->pushGlyphToBePaged(&glyph);
+				auto *surface = glyph.createGlyphImage(tt_face->glyph->bitmap, Driver);
+				Glyph_Pages[glyph.glyph_page]->pushGlyphToBePaged(&glyph, surface);
 			}
 		}
 	}
@@ -874,50 +878,7 @@ core::vector2di CGUITTFont::getKerning(const char32_t thisLetter, const char32_t
 
 void CGUITTFont::setInvisibleCharacters(const wchar_t *s)
 {
-	Invisible = convertWCharToU32String(s);
-}
-
-video::IImage* CGUITTFont::createTextureFromChar(const char32_t& ch)
-{
-	// This character allows us to print something to the screen for unknown, unrecognizable, or
-	// unrepresentable characters. See Unicode spec.
-	const char32_t UTF_REPLACEMENT_CHARACTER = 0xFFFD;
-
-	u32 n = getGlyphIndexByChar(ch);
-	if (n == 0)
-		n = getGlyphIndexByChar(UTF_REPLACEMENT_CHARACTER);
-
-	const SGUITTGlyph& glyph = Glyphs[n-1];
-	CGUITTGlyphPage* page = Glyph_Pages[glyph.glyph_page];
-
-	if (page->dirty)
-		page->updateTexture();
-
-	video::ITexture* tex = page->texture;
-
-	// Acquire a read-only lock of the corresponding page texture.
-	void* ptr = tex->lock(video::ETLM_READ_ONLY);
-
-	video::ECOLOR_FORMAT format = tex->getColorFormat();
-	core::dimension2du tex_size = tex->getOriginalSize();
-	video::IImage* pageholder = Driver->createImageFromData(format, tex_size, ptr, true, false);
-
-	// Copy the image data out of the page texture.
-	core::dimension2du glyph_size(glyph.source_rect.getSize());
-	video::IImage* image = Driver->createImage(format, glyph_size);
-	pageholder->copyTo(image, core::position2di(0, 0), glyph.source_rect);
-
-	tex->unlock();
-	pageholder->drop();
-	return image;
-}
-
-video::ITexture* CGUITTFont::getPageTextureByIndex(const u32& page_index) const
-{
-	if (page_index < Glyph_Pages.size())
-		return Glyph_Pages[page_index]->texture;
-	else
-		return 0;
+	InvisibleChars = convertWCharToU32String(s);
 }
 
 std::u32string CGUITTFont::convertWCharToU32String(const wchar_t* const charArray) const
@@ -953,4 +914,3 @@ std::u32string CGUITTFont::convertWCharToU32String(const wchar_t* const charArra
 
 
 } // end namespace gui
-} // end namespace irr

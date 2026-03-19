@@ -7,10 +7,10 @@
 #include <cassert>
 #include <unordered_set>
 #include <optional>
+#include <queue>
 #include "irrlichttypes_bloated.h"
 #include "activeobject.h"
 #include "itemgroup.h"
-#include "util/container.h"
 
 
 /*
@@ -63,7 +63,7 @@ public:
 		Some simple getters/setters
 	*/
 	v3f getBasePosition() const { return m_base_position; }
-	void setBasePosition(v3f pos){ m_base_position = pos; }
+	void setBasePosition(v3f pos);
 	ServerEnvironment* getEnv(){ return m_env; }
 
 	/*
@@ -129,7 +129,7 @@ public:
 
 	// Returns added tool wear
 	virtual u32 punch(v3f dir,
-			const ToolCapabilities *toolcap = nullptr,
+			const ToolCapabilities &toolcap,
 			ServerActiveObject *puncher = nullptr,
 			float time_from_last_punch = 1000000.0f,
 			u16 initial_wear = 0)
@@ -140,6 +140,10 @@ public:
 	{}
 	virtual u16 getHP() const
 	{ return 0; }
+
+	/// @brief Returns an unique ID for this object (persistent across unload, server restarts).
+	/// @note Because these strings are very short, copying them is not expensive.
+	virtual std::string getGUID() const = 0;
 
 	virtual void setArmorGroups(const ItemGroupList &armor_groups)
 	{}
@@ -245,7 +249,6 @@ protected:
 	virtual void onMarkedForRemoval() {}
 
 	ServerEnvironment *m_env;
-	v3f m_base_position;
 	std::unordered_set<u32> m_attached_particle_spawners;
 
 	/*
@@ -273,4 +276,7 @@ protected:
 		Queue of messages to be sent to the client
 	*/
 	std::queue<ActiveObjectMessage> m_messages_out;
+
+private:
+	v3f m_base_position; // setBasePosition updates index and MUST be called
 };

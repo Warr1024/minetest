@@ -16,6 +16,7 @@ extern "C" {
 #include "log.h"
 #include "config.h"
 #include "filesys.h"
+#include "settings.h"
 #include "porting.h"
 #include "common/c_internal.h"
 #include "common/c_packer.h"
@@ -23,6 +24,11 @@ extern "C" {
 #include "script/scripting_mainmenu.h"
 #endif
 #include "lua_api/l_base.h"
+
+// if a job is waiting for this duration, an additional thread will be spawned
+static constexpr int AUTOSCALE_DELAY_MS = 1000;
+// if jobs are waiting for this duration, a warning is printed
+static constexpr int STUCK_DELAY_MS = 11500;
 
 /******************************************************************************/
 AsyncEngine::~AsyncEngine()
@@ -91,38 +97,44 @@ void AsyncEngine::addWorkerThread()
 }
 
 /******************************************************************************/
-u32 AsyncEngine::queueAsyncJob(std::string &&func, std::string &&params,
-		const std::string &mod_origin)
+
+u32 AsyncEngine::queueAsyncJob(LuaJobInfo &&job)
 {
 	MutexAutoLock autolock(jobQueueMutex);
 	u32 jobId = jobIdCounter++;
 
-	jobQueue.emplace_back();
-	auto &to_add = jobQueue.back();
-	to_add.id = jobId;
-	to_add.function = std::move(func);
-	to_add.params = std::move(params);
-	to_add.mod_origin = mod_origin;
+	assert(!job.function.empty());
+	job.id = jobId;
+	jobQueue.push_back(std::move(job));
 
 	jobQueueCounter.post();
 	return jobId;
 }
 
+u32 AsyncEngine::queueAsyncJob(std::string &&func, std::string &&params,
+		const std::string &mod_origin)
+{
+	LuaJobInfo to_add(std::move(func), std::move(params), mod_origin);
+	return queueAsyncJob(std::move(to_add));
+}
+
 u32 AsyncEngine::queueAsyncJob(std::string &&func, PackedValue *params,
 		const std::string &mod_origin)
 {
+	LuaJobInfo to_add(std::move(func), params, mod_origin);
+	return queueAsyncJob(std::move(to_add));
+}
+
+bool AsyncEngine::cancelAsyncJob(u32 id)
+{
 	MutexAutoLock autolock(jobQueueMutex);
-	u32 jobId = jobIdCounter++;
-
-	jobQueue.emplace_back();
-	auto &to_add = jobQueue.back();
-	to_add.id = jobId;
-	to_add.function = std::move(func);
-	to_add.params_ext.reset(params);
-	to_add.mod_origin = mod_origin;
-
-	jobQueueCounter.post();
-	return jobId;
+	for (auto job = jobQueue.begin(); job != jobQueue.end(); job++) {
+		if (job->id == id) {
+			jobQueue.erase(job);
+			return true;
+		}
+	}
+	return false;
 }
 
 /******************************************************************************/
@@ -156,6 +168,7 @@ void AsyncEngine::step(lua_State *L)
 {
 	stepJobResults(L);
 	stepAutoscale();
+	stepStuckWarning();
 }
 
 void AsyncEngine::stepJobResults(lua_State *L)
@@ -203,11 +216,9 @@ void AsyncEngine::stepAutoscale()
 	if (autoscaleTimer && porting::getTimeMs() >= autoscaleTimer) {
 		autoscaleTimer = 0;
 		// Determine overlap with previous snapshot
-		unsigned int n = 0;
-		for (const auto &it : jobQueue)
-			n += autoscaleSeenJobs.count(it.id);
-		autoscaleSeenJobs.clear();
-		infostream << "AsyncEngine: " << n << " jobs were still waiting after 1s" << std::endl;
+		size_t n = compareJobs(autoscaleSeenJobs);
+		infostream << "AsyncEngine: " << n << " jobs were still waiting after "
+			<< AUTOSCALE_DELAY_MS << "ms, adding more threads." << std::endl;
 		// Start this many new threads
 		while (workerThreads.size() < autoscaleMaxWorkers && n > 0) {
 			addWorkerThread();
@@ -216,21 +227,42 @@ void AsyncEngine::stepAutoscale()
 		return;
 	}
 
-	// 1) Check if there's anything in the queue
+	// 1) Check queue contents
 	if (!autoscaleTimer && !jobQueue.empty()) {
-		// Take a snapshot of all jobs we have seen
-		for (const auto &it : jobQueue)
-			autoscaleSeenJobs.emplace(it.id);
-		// and set a timer for 1 second
-		autoscaleTimer = porting::getTimeMs() + 1000;
+		autoscaleSeenJobs.clear();
+		snapshotJobs(autoscaleSeenJobs);
+		autoscaleTimer = porting::getTimeMs() + AUTOSCALE_DELAY_MS;
+	}
+}
+
+void AsyncEngine::stepStuckWarning()
+{
+	MutexAutoLock autolock(jobQueueMutex);
+
+	// 2) If the timer elapsed, check again
+	if (stuckTimer && porting::getTimeMs() >= stuckTimer) {
+		stuckTimer = 0;
+		size_t n = compareJobs(stuckSeenJobs);
+		if (n > 0) {
+			warningstream << "AsyncEngine: " << n << " jobs seem to be stuck in queue"
+				" (" << workerThreads.size() << " workers active)" << std::endl;
+		}
+		// fallthrough
+	}
+
+	// 1) Check queue contents
+	if (!stuckTimer && !jobQueue.empty()) {
+		stuckSeenJobs.clear();
+		snapshotJobs(stuckSeenJobs);
+		stuckTimer = porting::getTimeMs() + STUCK_DELAY_MS;
 	}
 }
 
 /******************************************************************************/
 bool AsyncEngine::prepareEnvironment(lua_State* L, int top)
 {
-	for (StateInitializer &stateInitializer : stateInitializers) {
-		stateInitializer(L, top);
+	for (const auto &init : stateInitializers) {
+		init(L, top);
 	}
 
 	auto *script = ModApiBase::getScriptApiBase(L);
@@ -241,7 +273,11 @@ bool AsyncEngine::prepareEnvironment(lua_State* L, int top)
 	} catch (const ModError &e) {
 		errorstream << "Execution of async base environment failed: "
 			<< e.what() << std::endl;
-		FATAL_ERROR("Execution of async base environment failed");
+		if (server)
+			server->setAsyncFatalError(e.what());
+		// FIXME: there's no general way to report such fatal errors to our "owner"
+		// (e.g. GUIEngine)
+		return false;
 	}
 
 	// Load per mod stuff
@@ -394,3 +430,19 @@ void* AsyncWorkerThread::run()
 	return 0;
 }
 
+u32 ScriptApiAsync::queueAsync(std::string &&serialized_func,
+		PackedValue *param, const std::string &mod_origin)
+{
+	return asyncEngine.queueAsyncJob(std::move(serialized_func),
+			param, mod_origin);
+}
+
+bool ScriptApiAsync::cancelAsync(u32 id)
+{
+	return asyncEngine.cancelAsyncJob(id);
+}
+
+void ScriptApiAsync::stepAsync()
+{
+	asyncEngine.step(getStack());
+}

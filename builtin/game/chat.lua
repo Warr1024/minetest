@@ -43,7 +43,7 @@ end
 -- Chat command handler
 --
 
-core.chatcommands = core.registered_chatcommands -- BACKWARDS COMPATIBILITY
+core.chatcommands = core.registered_chatcommands -- backwards compatibility
 
 local msg_time_threshold =
 	tonumber(core.settings:get("chatcommand_msg_time_threshold")) or 0.1
@@ -59,6 +59,8 @@ core.register_on_chat_message(function(name, message)
 	end
 
 	param = param or ""
+
+	core.log("verbose", string.format("Handling chat command %q with params %q", cmd, param))
 
 	-- Run core.registered_on_chatcommands callbacks.
 	if core.run_callbacks(core.registered_on_chatcommands, 5, name, cmd, param) then
@@ -900,6 +902,7 @@ core.register_chatcommand("spawnentity", {
 core.register_chatcommand("pulverize", {
 	params = "",
 	description = S("Destroy item in hand"),
+	privs = {give=true},
 	func = function(name, param)
 		local player = core.get_player_by_name(name)
 		if not player then
@@ -1275,7 +1278,7 @@ core.register_chatcommand("msg", {
 		core.log("action", "DM from " .. name .. " to " .. sendto
 				.. ": " .. message)
 		core.chat_send_player(sendto, S("DM from @1: @2", name, message))
-		return true, S("Message sent.")
+		return true, S("DM sent to @1: @2", sendto, message)
 	end,
 })
 
@@ -1300,6 +1303,7 @@ core.register_chatcommand("last-login", {
 core.register_chatcommand("clearinv", {
 	params = S("[<name>]"),
 	description = S("Clear the inventory of yourself or another player"),
+	privs = {give=true},
 	func = function(name, param)
 		local player
 		if param and param ~= "" and param ~= name then
@@ -1344,7 +1348,7 @@ local function handle_kill_command(killer, victim)
 		core.log("action", string.format("%s killed %s", killer, victim))
 	end
 	-- Kill victim
-	victimref:set_hp(0)
+	victimref:set_hp(0, {type="set_hp", custom_type="__builtin:kill_command"})
 	return true, S("@1 has been killed.", victim)
 end
 

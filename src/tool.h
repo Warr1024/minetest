@@ -6,7 +6,6 @@
 
 #include "irrlichttypes.h"
 #include "itemgroup.h"
-#include "json-forwards.h"
 #include "util/enum_string.h"
 #include <SColor.h>
 
@@ -16,7 +15,8 @@
 #include <map>
 #include <optional>
 
-struct ItemDefinition;
+namespace Json { class Value; }
+
 class IItemDefManager;
 
 /*
@@ -149,11 +149,14 @@ struct HitParams
 };
 
 HitParams getHitParams(const ItemGroupList &armor_groups,
-		const ToolCapabilities *tp, float time_from_last_punch,
+		const ToolCapabilities &tp, float time_from_last_punch,
 		u16 initial_wear = 0);
 
-HitParams getHitParams(const ItemGroupList &armor_groups,
-		const ToolCapabilities *tp);
+inline HitParams getHitParams(const ItemGroupList &armor_groups,
+		const ToolCapabilities &tp)
+{
+	return getHitParams(armor_groups, tp, 1000000);
+}
 
 struct PunchDamageResult
 {
@@ -168,12 +171,13 @@ struct ItemStack;
 
 PunchDamageResult getPunchDamage(
 		const ItemGroupList &armor_groups,
-		const ToolCapabilities *toolcap,
+		const ToolCapabilities &toolcap,
 		const ItemStack *punchitem,
 		float time_from_last_punch,
 		u16 initial_wear = 0
 );
 
 u32 calculateResultWear(const u32 uses, const u16 initial_wear);
+
 f32 getToolRange(const ItemStack &wielded_item, const ItemStack &hand_item,
 		const IItemDefManager *itemdef_manager);

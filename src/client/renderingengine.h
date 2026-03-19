@@ -27,11 +27,8 @@ struct VideoDriverInfo {
 };
 
 class ITextureSource;
-class Camera;
 class Client;
-class LocalPlayer;
 class Hud;
-class Minimap;
 
 class RenderingCore;
 
@@ -45,7 +42,7 @@ struct FpsControl {
 
 	void reset();
 
-	void limit(IrrlichtDevice *device, f32 *dtime, bool assume_paused = false);
+	void limit(IrrlichtDevice *device, f32 *dtime);
 
 	u32 getBusyMs() const { return busy_time / 1000; }
 
@@ -54,11 +51,11 @@ struct FpsControl {
 };
 
 // Populates fogColor, fogDistance, fogShadingParameter with values from Irrlicht
-class FogShaderConstantSetterFactory : public IShaderConstantSetterFactory
+class FogShaderUniformSetterFactory : public IShaderUniformSetterFactory
 {
 public:
-	FogShaderConstantSetterFactory() {};
-	virtual IShaderConstantSetter *create();
+	FogShaderUniformSetterFactory() {};
+	virtual IShaderUniformSetter *create(const std::string &name);
 };
 
 /* Rendering engine class */
@@ -66,8 +63,6 @@ public:
 class RenderingEngine
 {
 public:
-	static const video::SColor MENU_SKY_COLOR;
-
 	RenderingEngine(MyEventReceiver *eventReceiver);
 	~RenderingEngine();
 
@@ -75,8 +70,13 @@ public:
 
 	video::IVideoDriver *getVideoDriver() { return driver; }
 
-	static const VideoDriverInfo &getVideoDriverInfo(irr::video::E_DRIVER_TYPE type);
+	static const VideoDriverInfo &getVideoDriverInfo(video::E_DRIVER_TYPE type);
 	static float getDisplayDensity();
+
+	// Show error message box to user. Intended for situations where graphics
+	// output might not even be working.
+	// Will block.
+	static void showErrorMessageBox(const std::string &message);
 
 	bool setupTopLevelWindow();
 	bool setWindowIcon();
@@ -112,7 +112,7 @@ public:
 		return m_device->getSceneManager();
 	}
 
-	static irr::IrrlichtDevice *get_raw_device()
+	static IrrlichtDevice *get_raw_device()
 	{
 		sanity_check(s_singleton && s_singleton->m_device);
 		return s_singleton->m_device;
@@ -147,10 +147,10 @@ public:
 			return s_singleton->core->get_shadow_renderer();
 		return nullptr;
 	}
-	static std::vector<irr::video::E_DRIVER_TYPE> getSupportedVideoDrivers();
+	static std::vector<video::E_DRIVER_TYPE> getSupportedVideoDrivers();
 
 	static void autosaveScreensizeAndCo(
-			const irr::core::dimension2d<u32> initial_screen_size,
+			const core::dimension2d<u32> initial_screen_size,
 			const bool initial_window_maximized);
 
 	static PointerType getLastPointerType()
@@ -159,13 +159,16 @@ public:
 		return s_singleton->m_receiver->getLastPointerType();
 	}
 
+	video::SColor m_menu_sky_color = video::SColor(255, 140, 186, 250);
+	video::SColor m_menu_clouds_color = video::SColor(255, 240, 240, 255);
+
 private:
 	static void settingChangedCallback(const std::string &name, void *data);
 	v2u32 _getWindowSize() const;
 
 	std::unique_ptr<RenderingCore> core;
-	irr::IrrlichtDevice *m_device = nullptr;
-	irr::video::IVideoDriver *driver;
+	IrrlichtDevice *m_device = nullptr;
+	video::IVideoDriver *driver;
 	MyEventReceiver *m_receiver = nullptr;
 	static RenderingEngine *s_singleton;
 };

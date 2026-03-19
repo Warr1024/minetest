@@ -4,16 +4,15 @@
 
 
 #include <cstdlib>
-#include <cmath>
 #include <algorithm>
 #include <iterator>
 #include <limits>
-#include <sstream>
 #include "guiFormSpecMenu.h"
-#include "constants.h"
+#include "EGUIElementTypes.h"
+#include "itemdef.h"
 #include "gamedef.h"
 #include "client/keycode.h"
-#include "util/strfnd.h"
+#include "gui/guiTable.h"
 #include <IGUIButton.h>
 #include <IGUICheckBox.h>
 #include <IGUIComboBox.h>
@@ -21,23 +20,20 @@
 #include <IGUIFont.h>
 #include <IGUITabControl.h>
 #include <IGUIImage.h>
-#include <IAnimatedMeshSceneNode.h>
+#include <AnimatedMeshSceneNode.h>
 #include "client/renderingengine.h"
 #include "client/joystick_controller.h"
 #include "log.h"
-#include "client/hud.h" // drawItemStack
-#include "filesys.h"
-#include "gettime.h"
+#include "drawItemStack.h"
 #include "gettext.h"
-#include "scripting_server.h"
 #include "mainmenumanager.h"
 #include "porting.h"
 #include "settings.h"
 #include "client/client.h"
 #include "client/fontengine.h"
 #include "client/sound.h"
-#include "util/hex.h"
 #include "util/numeric.h"
+#include "util/screenshot.h"
 #include "util/string.h" // for parseColorString()
 #include "irrlicht_changes/static_text.h"
 #include "client/guiscalingfilter.h"
@@ -47,6 +43,7 @@
 #include "guiButton.h"
 #include "guiButtonImage.h"
 #include "guiButtonItemImage.h"
+#include "guiButtonKey.h"
 #include "guiEditBoxWithScrollbar.h"
 #include "guiInventoryList.h"
 #include "guiItemImage.h"
@@ -73,6 +70,9 @@
 		errorstream << "Attempted to use element " << a << " with m_client == nullptr." << std::endl; \
 		return; \
 	}
+
+// Element ID of the "Proceed" button shown for sizeless formspecs
+constexpr s32 ID_PROCEED_BTN = 257;
 
 /*
 	GUIFormSpecMenu
@@ -105,7 +105,6 @@ GUIFormSpecMenu::GUIFormSpecMenu(JoystickController *joystick,
 	current_keys_pending.key_down = false;
 	current_keys_pending.key_up = false;
 	current_keys_pending.key_enter = false;
-	current_keys_pending.key_escape = false;
 
 	m_tooltip_show_delay = (u32)g_settings->getS32("tooltip_show_delay");
 	m_tooltip_append_itemname = g_settings->getBool("tooltip_append_itemname");
@@ -115,7 +114,6 @@ GUIFormSpecMenu::~GUIFormSpecMenu()
 {
 	removeAll();
 
-	delete m_selected_item;
 	delete m_form_src;
 	delete m_text_dst;
 }
@@ -198,7 +196,7 @@ void GUIFormSpecMenu::setInitialFocus()
 
 	// 3. first table
 	for (gui::IGUIElement *it : children) {
-		if (it->getTypeName() == std::string("GUITable")) {
+		if (it->getType() == gui::EGUIET_TABLE) {
 			Environment->setFocus(it);
 			return;
 		}
@@ -695,7 +693,9 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 	e->setMax(max);
 	e->setMin(min);
 
-	e->setPos(stoi(value));
+	// Preserve for min/max values defined by `scroll_container[]`.
+	spec.aux_f32 = stoi(value); // scroll position
+	e->setPos(spec.aux_f32);
 
 	e->setSmallStep(data->scrollbar_options.small_step);
 	e->setLargeStep(data->scrollbar_options.large_step);
@@ -949,7 +949,7 @@ void GUIFormSpecMenu::parseItemImage(parserData* data, const std::string &elemen
 	}
 
 	if(!data->explicit_size)
-		warningstream<<"invalid use of item_image without a size[] element"<<std::endl;
+		warningstream << "invalid use of item_image without a size[] element" << std::endl;
 
 	FieldSpec spec(
 		"",
@@ -1008,7 +1008,7 @@ void GUIFormSpecMenu::parseButton(parserData* data, const std::string &element)
 	}
 
 	if(!data->explicit_size)
-		warningstream<<"invalid use of button without a size[] element"<<std::endl;
+		warningstream << "invalid use of button without a size[] element" << std::endl;
 
 	std::wstring wlabel = translate_string(utf8_to_wide(unescape_string(label)));
 
@@ -1024,8 +1024,16 @@ void GUIFormSpecMenu::parseButton(parserData* data, const std::string &element)
 	if (data->type == "button_url" || data->type == "button_url_exit")
 		spec.url = url;
 
-	GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc,
-			data->current_parent, spec.fid, spec.flabel.c_str());
+	GUIButton *e;
+
+	if (data->type == "button_key") {
+		spec.ftype = f_Unknown;
+		e = GUIButtonKey::addButton(Environment, rect, m_tsrc,
+				data->current_parent, spec.fid, spec.flabel.c_str());
+	} else {
+		e = GUIButton::addButton(Environment, rect, m_tsrc,
+				data->current_parent, spec.fid, spec.flabel.c_str());
+	}
 
 	auto style = getStyleForElement(data->type, name, (data->type != "button") ? "button" : "");
 
@@ -1223,9 +1231,13 @@ void GUIFormSpecMenu::parseTable(parserData* data, const std::string &element)
 		item = wide_to_utf8(unescape_translate(utf8_to_wide(unescape_string(item))));
 	}
 
-	//now really show table
 	GUITable *e = new GUITable(Environment, data->current_parent, spec.fid,
 			rect, m_tsrc);
+
+	// Apply styling before calculating the cell sizes
+	auto style = getDefaultStyleForElement("table", name);
+	e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
+	e->setOverrideFont(style.getFont());
 
 	if (spec.fname == m_focused_element) {
 		Environment->setFocus(e);
@@ -1239,10 +1251,6 @@ void GUIFormSpecMenu::parseTable(parserData* data, const std::string &element)
 
 	if (!str_initial_selection.empty() && str_initial_selection != "0")
 		e->setSelected(stoi(str_initial_selection));
-
-	auto style = getDefaultStyleForElement("table", name);
-	e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
-	e->setOverrideFont(style.getFont());
 
 	m_tables.emplace_back(spec, e);
 	m_fields.push_back(spec);
@@ -1491,7 +1499,7 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 	e->setOverrideColor(style.getColor(StyleSpec::TEXTCOLOR, video::SColor(0xFFFFFFFF)));
 	e->setOverrideFont(style.getFont());
 
-	irr::SEvent evt;
+	SEvent evt;
 	evt.EventType            = EET_KEY_INPUT_EVENT;
 	evt.KeyInput.Key         = KEY_END;
 	evt.KeyInput.Char        = 0;
@@ -1546,7 +1554,7 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 			e->setWordWrap(true);
 			e->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_UPPERLEFT);
 		} else {
-			irr::SEvent evt;
+			SEvent evt;
 			evt.EventType            = EET_KEY_INPUT_EVENT;
 			evt.KeyInput.Key         = KEY_END;
 			evt.KeyInput.Char        = 0;
@@ -1662,7 +1670,7 @@ void GUIFormSpecMenu::parseTextArea(parserData* data, std::vector<std::string>& 
 	core::rect<s32> rect = core::rect<s32>(pos.X, pos.Y, pos.X+geom.X, pos.Y+geom.Y);
 
 	if(!data->explicit_size)
-		warningstream<<"invalid use of positioned "<<type<<" without a size[] element"<<std::endl;
+		warningstream << "invalid use of positioned " << type << " without a size[] element" << std::endl;
 
 	if(m_form_src)
 		default_val = m_form_src->resolveText(default_val);
@@ -1758,68 +1766,30 @@ void GUIFormSpecMenu::parseHyperText(parserData *data, const std::string &elemen
 void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 {
 	std::vector<std::string> parts;
-	if (!precheckElement("label", element, 2, 2, parts))
+	if (!precheckElement("label", element, 2, data->real_coordinates ? 3 : 2, parts))
 		return;
 
-	std::vector<std::string> v_pos = split(parts[0],',');
+	std::vector<std::string> v_pos = split(parts[0], ',');
+	MY_CHECKPOS("label", 0);
 
-	MY_CHECKPOS("label",0);
+	bool has_size = parts.size() >= 3;
+	v2s32 geom;
+	if (has_size) {
+		std::vector<std::string> v_geom = split(parts[1], ',');
+		MY_CHECKGEOM("label", 1);
+		geom = getRealCoordinateGeometry(v_geom);
+	}
 
 	if(!data->explicit_size)
-		warningstream<<"invalid use of label without a size[] element"<<std::endl;
+		warningstream << "invalid use of label without a size[] element" << std::endl;
 
 	auto style = getDefaultStyleForElement("label", "");
 	gui::IGUIFont *font = style.getFont();
 	if (!font)
 		font = m_font;
 
-	EnrichedString str(unescape_string(utf8_to_wide(parts[1])));
-	size_t str_pos = 0;
-
-	for (size_t i = 0; str_pos < str.size(); ++i) {
-		EnrichedString line = str.getNextLine(&str_pos);
-
-		core::rect<s32> rect;
-
-		if (data->real_coordinates) {
-			// Lines are spaced at the distance of 1/2 imgsize.
-			// This alows lines that line up with the new elements
-			// easily without sacrificing good line distance.  If
-			// it was one whole imgsize, it would have too much
-			// spacing.
-			v2s32 pos = getRealCoordinateBasePos(v_pos);
-
-			// Labels are positioned by their center, not their top.
-			pos.Y += (((float) imgsize.Y) / -2) + (((float) imgsize.Y) * i / 2);
-
-			rect = core::rect<s32>(
-				pos.X, pos.Y,
-				pos.X + font->getDimension(line.c_str()).Width,
-				pos.Y + imgsize.Y);
-
-		} else {
-			// Lines are spaced at the nominal distance of
-			// 2/5 inventory slot, even if the font doesn't
-			// quite match that.  This provides consistent
-			// form layout, at the expense of sometimes
-			// having sub-optimal spacing for the font.
-			// We multiply by 2 and then divide by 5, rather
-			// than multiply by 0.4, to get exact results
-			// in the integer cases: 0.4 is not exactly
-			// representable in binary floating point.
-
-			v2s32 pos = getElementBasePos(nullptr);
-			pos.X += stof(v_pos[0]) * spacing.X;
-			pos.Y += (stof(v_pos[1]) + 7.0f / 30.0f) * spacing.Y;
-
-			pos.Y += ((float) i) * spacing.Y * 2.0 / 5.0;
-
-			rect = core::rect<s32>(
-				pos.X, pos.Y - m_btn_height,
-				pos.X + font->getDimension(line.c_str()).Width,
-				pos.Y + m_btn_height);
-		}
-
+	auto add_label = [&](core::rect<s32> rect, const EnrichedString &text,
+			EGUI_ALIGNMENT align_h, EGUI_ALIGNMENT align_v, bool word_wrap) {
 		FieldSpec spec(
 			"",
 			L"",
@@ -1828,9 +1798,10 @@ void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 			4
 		);
 		gui::IGUIStaticText *e = gui::StaticText::add(Environment,
-				line, rect, false, false, data->current_parent,
+				text, rect, false, false, data->current_parent,
 				spec.fid);
-		e->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
+		e->setTextAlignment(align_h, align_v);
+		e->setWordWrap(word_wrap);
 
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
 		e->setOverrideColor(style.getColor(StyleSpec::TEXTCOLOR, video::SColor(0xFFFFFFFF)));
@@ -1841,6 +1812,67 @@ void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 		// labels should let events through
 		e->grab();
 		m_clickthrough_elements.push_back(e);
+	};
+
+	EnrichedString str(unescape_string(utf8_to_wide(parts[has_size ? 2 : 1])));
+
+	if (geom == v2s32()) {
+		size_t str_pos = 0;
+
+		for (size_t i = 0; str_pos < str.size(); ++i) {
+			EnrichedString line = str.getNextLine(&str_pos);
+
+			core::rect<s32> rect;
+
+			if (data->real_coordinates) {
+				// Lines are spaced at the distance of 1/2 imgsize.
+				// This alows lines that line up with the new elements
+				// easily without sacrificing good line distance.  If
+				// it was one whole imgsize, it would have too much
+				// spacing.
+				v2s32 pos = getRealCoordinateBasePos(v_pos);
+
+				// Labels are positioned by their center, not their top.
+				pos.Y += (((float) imgsize.Y) / -2) + (((float) imgsize.Y) * i / 2);
+
+				rect = core::rect<s32>(
+					pos.X, pos.Y,
+					pos.X + font->getDimension(line.c_str()).Width,
+					pos.Y + imgsize.Y);
+
+			} else {
+				// Lines are spaced at the nominal distance of
+				// 2/5 inventory slot, even if the font doesn't
+				// quite match that.  This provides consistent
+				// form layout, at the expense of sometimes
+				// having sub-optimal spacing for the font.
+				// We multiply by 2 and then divide by 5, rather
+				// than multiply by 0.4, to get exact results
+				// in the integer cases: 0.4 is not exactly
+				// representable in binary floating point.
+
+				v2s32 pos = getElementBasePos(nullptr);
+				pos.X += stof(v_pos[0]) * spacing.X;
+				pos.Y += (stof(v_pos[1]) + 7.0f / 30.0f) * spacing.Y;
+
+				pos.Y += ((float) i) * spacing.Y * 2.0 / 5.0;
+
+				rect = core::rect<s32>(
+					pos.X, pos.Y - m_btn_height,
+					pos.X + font->getDimension(line.c_str()).Width,
+					pos.Y + m_btn_height);
+			}
+
+			add_label(rect, line, gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER, false);
+		}
+	} else {
+		v2s32 pos = getRealCoordinateBasePos(v_pos);
+		core::rect<s32> rect(
+				pos.X, pos.Y,
+				pos.X + geom.X,
+				pos.Y + geom.Y);
+
+		add_label(rect, str, gui::EGUIA_UPPERLEFT, gui::EGUIA_UPPERLEFT, true);
 	}
 }
 
@@ -1850,11 +1882,21 @@ void GUIFormSpecMenu::parseVertLabel(parserData* data, const std::string &elemen
 	if (!precheckElement("vertlabel", element, 2, 2, parts))
 		return;
 
-	std::vector<std::string> v_pos = split(parts[0],',');
-	std::wstring text = unescape_translate(
-		unescape_string(utf8_to_wide(parts[1])));
+	std::vector<std::string> v_pos = split(parts[0], ',');
 
-	MY_CHECKPOS("vertlabel",1);
+	// Use EnrichedString so color escapes and formatting are preserved
+	EnrichedString etext(unescape_string(utf8_to_wide(parts[1])));
+
+	// Build vertical text (one character per line)
+	EnrichedString vlabel;
+	const size_t char_count = etext.getString().size();
+
+	for (size_t i = 0; i < char_count; i++) {
+		vlabel += etext.substr(i, 1);
+		vlabel.addCharNoColor(L'\n');
+	}
+
+	MY_CHECKPOS("vertlabel", 1);
 
 	auto style = getDefaultStyleForElement("vertlabel", "", "label");
 	gui::IGUIFont *font = style.getFont();
@@ -1870,45 +1912,35 @@ void GUIFormSpecMenu::parseVertLabel(parserData* data, const std::string &elemen
 		// Vertlabels are positioned by center, not left.
 		pos.X -= imgsize.X / 2;
 
-		// We use text.length + 1 because without it, the rect
-		// isn't quite tall enough and cuts off the text.
 		rect = core::rect<s32>(pos.X, pos.Y,
 			pos.X + imgsize.X,
-			pos.Y + font_line_height(font) *
-			(text.length() + 1));
+			pos.Y + font_line_height(font) * char_count);
 
 	} else {
 		pos = getElementBasePos(&v_pos);
 
-		// As above, the length must be one longer. The width of
-		// the rect (15 pixels) seems rather arbitrary, but
-		// changing it might break something.
+		// The width of the rect (15 pixels) seems rather
+		// arbitrary, but changing it might break something.
 		rect = core::rect<s32>(
-			pos.X, pos.Y+((imgsize.Y/2) - m_btn_height),
-			pos.X+15, pos.Y +
-				font_line_height(font) *
-				(text.length() + 1) +
-				((imgsize.Y/2) - m_btn_height));
+			pos.X, pos.Y + ((imgsize.Y / 2) - m_btn_height),
+			pos.X + 15, pos.Y +
+				font_line_height(font) * (char_count + 1) +
+				((imgsize.Y / 2) - m_btn_height));
 	}
 
 	if(!data->explicit_size)
-		warningstream<<"invalid use of label without a size[] element"<<std::endl;
-
-	std::wstring label;
-
-	for (wchar_t i : text) {
-		label += i;
-		label += L"\n";
-	}
+		warningstream << "invalid use of label without a size[] element" << std::endl;
 
 	FieldSpec spec(
 		"",
-		label,
+		L"",
 		L"",
 		258 + m_fields.size()
 	);
-	gui::IGUIStaticText *e = gui::StaticText::add(Environment, spec.flabel.c_str(),
+
+	gui::IGUIStaticText *e = gui::StaticText::add(Environment, vlabel,
 			rect, false, false, data->current_parent, spec.fid);
+
 	e->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_CENTER);
 
 	e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
@@ -1965,7 +1997,7 @@ void GUIFormSpecMenu::parseImageButton(parserData* data, const std::string &elem
 		pos.Y+geom.Y);
 
 	if (!data->explicit_size)
-		warningstream<<"invalid use of image_button without a size[] element"<<std::endl;
+		warningstream << "invalid use of image_button without a size[] element" << std::endl;
 
 	image_name = unescape_string(image_name);
 	pressed_image_name = unescape_string(pressed_image_name);
@@ -2099,8 +2131,8 @@ void GUIFormSpecMenu::parseTabHeader(parserData* data, const std::string &elemen
 
 	gui::IGUITabControl *e = Environment->addTabControl(rect,
 			data->current_parent, show_background, show_border, spec.fid);
-	e->setAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT,
-			irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_LOWERRIGHT);
+	e->setAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_UPPERLEFT,
+			gui::EGUIA_UPPERLEFT, gui::EGUIA_LOWERRIGHT);
 	e->setTabHeight(geom.Y);
 
 	auto style = getDefaultStyleForElement("tabheader", name);
@@ -2162,7 +2194,7 @@ void GUIFormSpecMenu::parseItemImageButton(parserData* data, const std::string &
 	core::rect<s32> rect = core::rect<s32>(pos.X, pos.Y, pos.X+geom.X, pos.Y+geom.Y);
 
 	if(!data->explicit_size)
-		warningstream<<"invalid use of item_image_button without a size[] element"<<std::endl;
+		warningstream << "invalid use of item_image_button without a size[] element" << std::endl;
 
 	IItemDefManager *idef = m_client->idef();
 	ItemStack item;
@@ -2198,7 +2230,6 @@ void GUIFormSpecMenu::parseItemImageButton(parserData* data, const std::string &
 
 	spec_btn.ftype = f_Button;
 	rect += data->basepos-padding;
-	spec_btn.rect = rect;
 	m_fields.push_back(spec_btn);
 }
 
@@ -2814,12 +2845,13 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 	e->enableContinuousRotation(inf_rotation);
 	e->enableMouseControl(mousectrl);
 
-	s32 frame_loop_begin = 0;
-	s32 frame_loop_end = 0x7FFFFFFF;
+	f32 frame_loop_begin = 0;
+	// This will be clamped to the animation duration.
+	f32 frame_loop_end = std::numeric_limits<f32>::infinity();
 
 	if (frame_loop.size() == 2) {
-	    frame_loop_begin = stoi(frame_loop[0]);
-	    frame_loop_end = stoi(frame_loop[1]);
+	    frame_loop_begin = stof(frame_loop[0]);
+	    frame_loop_end = stof(frame_loop[1]);
 	}
 
 	e->setFrameLoop(frame_loop_begin, frame_loop_end);
@@ -2830,6 +2862,11 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 	e->drop();
 
 	m_fields.push_back(spec);
+}
+
+void GUIFormSpecMenu::parseAllowClose(parserData *data, const std::string &element)
+{
+	m_allowclose = is_yes(element);
 }
 
 void GUIFormSpecMenu::removeAll()
@@ -2868,6 +2905,7 @@ const std::unordered_map<std::string, std::function<void(GUIFormSpecMenu*, GUIFo
 		{"button_exit",            &GUIFormSpecMenu::parseButton},
 		{"button_url",             &GUIFormSpecMenu::parseButton},
 		{"button_url_exit",        &GUIFormSpecMenu::parseButton},
+		{"button_key",             &GUIFormSpecMenu::parseButton},
 		{"background",             &GUIFormSpecMenu::parseBackground},
 		{"background9",            &GUIFormSpecMenu::parseBackground},
 		{"tableoptions",           &GUIFormSpecMenu::parseTableOptions},
@@ -2900,6 +2938,7 @@ const std::unordered_map<std::string, std::function<void(GUIFormSpecMenu*, GUIFo
 		{"scroll_container_end",   &GUIFormSpecMenu::parseScrollContainerEnd},
 		{"set_focus",              &GUIFormSpecMenu::parseSetFocus},
 		{"model",                  &GUIFormSpecMenu::parseModel},
+		{"allow_close",            &GUIFormSpecMenu::parseAllowClose},
 };
 
 
@@ -2956,7 +2995,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 		gui::IGUIElement *focused_element = Environment->getFocus();
 		if (focused_element && focused_element->getParent() == this) {
 			s32 focused_id = focused_element->getID();
-			if (focused_id > 257) {
+			if (focused_id > ID_PROCEED_BTN) {
 				for (const GUIFormSpecMenu::FieldSpec &field : m_fields) {
 					if (field.fid == focused_id) {
 						m_focused_element = field.fname;
@@ -3002,6 +3041,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	field_close_on_enter.clear();
 	m_dropdown_index_event.clear();
 
+	m_allowclose = m_default_allowclose;
 	m_bgnonfullscreen = true;
 	m_bgfullscreen = false;
 
@@ -3194,7 +3234,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	pos_offset = v2f32();
 
 	// used for formspec versions < 3
-	std::list<IGUIElement *>::iterator legacy_sort_start = std::prev(Children.end()); // last element
+	auto legacy_sort_start = std::prev(Children.end()); // last element
 
 	if (enable_prepends) {
 		// Backup the coordinates so that prepends can use the coordinates of choice.
@@ -3235,6 +3275,8 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 		for (const std::pair<FieldSpec, GUIScrollBar *> &b : m_scrollbars) {
 			if (c.first == b.first.fname) {
 				c.second->setScrollBar(b.second);
+				b.second->setPos(b.first.aux_f32); // scroll position
+				c.second->updateScrolling();
 				break;
 			}
 		}
@@ -3263,7 +3305,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 					size.X / 2 - 70,       pos.Y,
 					size.X / 2 - 70 + 140, pos.Y + m_btn_height * 2
 			);
-			GUIButton::addButton(Environment, mydata.rect, m_tsrc, this, 257,
+			GUIButton::addButton(Environment, mydata.rect, m_tsrc, this, ID_PROCEED_BTN,
 					wstrgettext("Proceed").c_str());
 		}
 	}
@@ -3308,7 +3350,7 @@ void GUIFormSpecMenu::legacySortElements(std::list<IGUIElement *>::iterator from
 	else
 		++from;
 
-	std::list<IGUIElement *>::iterator to = Children.end();
+	auto to = Children.end();
 	// 1: Copy into a sortable container
 	std::vector<IGUIElement *> elements(from, to);
 
@@ -3318,8 +3360,14 @@ void GUIFormSpecMenu::legacySortElements(std::list<IGUIElement *>::iterator from
 		// TODO: getSpecByID is a linear search. It should made O(1), or cached here.
 		const FieldSpec *spec_a = getSpecByID(a->getID());
 		const FieldSpec *spec_b = getSpecByID(b->getID());
-		return spec_a && spec_b &&
-			spec_a->priority < spec_b->priority;
+		// The comparison has to be compatible with strict weak ordering
+		if (spec_a && spec_b)
+			return spec_a->priority < spec_b->priority;
+
+		if (spec_a && !spec_b)
+			return true;
+
+		return false;
 	});
 
 	// 3: Re-assign the pointers
@@ -3352,7 +3400,7 @@ void GUIFormSpecMenu::getAndroidUIInput()
 			return;
 
 		auto element_type = element->getType();
-		if (dialog_type == porting::TEXT_INPUT && element_type == irr::gui::EGUIET_EDIT_BOX) {
+		if (dialog_type == porting::TEXT_INPUT && element_type == gui::EGUIET_EDIT_BOX) {
 			gui::IGUIEditBox *editbox = (gui::IGUIEditBox *)element;
 			std::string text = porting::getInputDialogMessage();
 			editbox->setText(utf8_to_wide(text).c_str());
@@ -3371,7 +3419,7 @@ void GUIFormSpecMenu::getAndroidUIInput()
 				editbox->getParent()->OnEvent(enter);
 			}
 		} else if (dialog_type == porting::SELECTION_INPUT &&
-				element_type == irr::gui::EGUIET_COMBO_BOX) {
+				element_type == gui::EGUIET_COMBO_BOX) {
 			auto dropdown = (gui::IGUIComboBox *) element;
 			int selected = porting::getInputDialogSelection();
 			dropdown->setAndSendSelected(selected);
@@ -3439,6 +3487,9 @@ void GUIFormSpecMenu::drawMenu()
 	m_hovered_item_tooltips.clear();
 
 	updateSelectedItem();
+
+	// Auto-scroll to center focused element when Tab enables focus tracking
+	autoScroll();
 
 	video::IVideoDriver* driver = Environment->getVideoDriver();
 
@@ -3571,6 +3622,27 @@ void GUIFormSpecMenu::drawMenu()
 			cursor_control->setActiveIcon(ECI_NORMAL);
 	}
 
+	// Draw white outline around keyboard-focused form elements.
+	const gui::IGUIElement *focused = Environment->getFocus();
+	if (focused && m_show_focus && focused->isTabStop() ) {
+		core::rect<s32> rect = focused->getAbsoluteClippingRect();
+		const video::SColor white(255, 255, 255, 255);
+		const s32 border = 2;
+
+		driver->draw2DRectangle(white,
+			core::rect<s32>(rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
+				rect.LowerRightCorner.X, rect.UpperLeftCorner.Y + border), nullptr);
+		driver->draw2DRectangle(white,
+			core::rect<s32>(rect.UpperLeftCorner.X, rect.LowerRightCorner.Y - border,
+				rect.LowerRightCorner.X, rect.LowerRightCorner.Y), nullptr);
+		driver->draw2DRectangle(white,
+			core::rect<s32>(rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
+				rect.UpperLeftCorner.X + border, rect.LowerRightCorner.Y), nullptr);
+		driver->draw2DRectangle(white,
+			core::rect<s32>(rect.LowerRightCorner.X - border, rect.UpperLeftCorner.Y,
+				rect.LowerRightCorner.X, rect.LowerRightCorner.Y), nullptr);
+	}
+
 	m_tooltip_element->draw();
 
 	/*
@@ -3583,7 +3655,7 @@ void GUIFormSpecMenu::drawMenu()
 
 
 void GUIFormSpecMenu::showTooltip(const std::wstring &text,
-	const irr::video::SColor &color, const irr::video::SColor &bgcolor)
+	const video::SColor &color, const video::SColor &bgcolor)
 {
 	EnrichedString ntext(text);
 	ntext.setDefaultColor(color);
@@ -3640,6 +3712,89 @@ void GUIFormSpecMenu::showTooltip(const std::wstring &text,
 	// Display the tooltip
 	m_tooltip_element->setVisible(true);
 	bringToFront(m_tooltip_element);
+}
+
+void GUIFormSpecMenu::autoScroll()
+{
+	gui::IGUIElement *focus = Environment->getFocus();
+	if (!m_show_focus || !focus)
+		return;
+
+	// Only process if focus changed or this is the first focus
+	if (focus == m_last_focused && m_last_focused != nullptr)
+		return;
+
+	bool first_focus = (m_last_focused == nullptr);
+	m_last_focused = focus;
+
+	// Find the scroll container that contains the focused element
+	for (const auto &cont : m_scroll_containers) {
+		if (!cont.second->isMyChild(focus))
+			continue;
+
+		gui::IGUIElement *clipper = cont.second->getParent();
+		if (!clipper)
+			break;
+
+		// Find scrollbars for this container
+		GUIScrollBar *scrollbar_v = nullptr;
+		GUIScrollBar *scrollbar_h = nullptr;
+		for (const auto &sb : m_scrollbars) {
+			if (sb.first.fname == cont.first) {
+				if (sb.second->isHorizontal())
+					scrollbar_h = sb.second;
+				else
+					scrollbar_v = sb.second;
+			}
+		}
+
+		core::rect<s32> clip = clipper->getAbsoluteClippingRect();
+		core::rect<s32> elem = focus->getAbsolutePosition();
+		f32 scrollfactor = cont.second->getScrollFactor();
+
+		if (scrollfactor == 0)
+			break;
+
+		// Handle vertical scrolling
+		if (scrollbar_v) {
+			bool visible = elem.UpperLeftCorner.Y >= clip.UpperLeftCorner.Y &&
+						   elem.LowerRightCorner.Y <= clip.LowerRightCorner.Y;
+			if (first_focus || !visible) {
+				s32 target_y = elem.UpperLeftCorner.Y;
+				if (elem.getHeight() < clip.getHeight())
+					target_y = clip.UpperLeftCorner.Y + (clip.getHeight() - elem.getHeight()) / 2;
+
+				s32 new_pos = scrollbar_v->getPos() + (s32)std::round((target_y - elem.UpperLeftCorner.Y) / scrollfactor);
+				new_pos = rangelim(new_pos, scrollbar_v->getMin(), scrollbar_v->getMax());
+
+				if (new_pos != scrollbar_v->getPos()) {
+					scrollbar_v->setPos(new_pos);
+					cont.second->updateScrolling();
+				}
+			}
+		}
+
+		// Handle horizontal scrolling
+		if (scrollbar_h) {
+			bool visible = elem.UpperLeftCorner.X >= clip.UpperLeftCorner.X &&
+						   elem.LowerRightCorner.X <= clip.LowerRightCorner.X;
+			if (first_focus || !visible) {
+				s32 target_x = elem.UpperLeftCorner.X;
+				if (elem.getWidth() < clip.getWidth())
+					target_x = clip.UpperLeftCorner.X + (clip.getWidth() - elem.getWidth()) / 2;
+
+				s32 new_pos = scrollbar_h->getPos() + (s32)std::round((target_x - elem.UpperLeftCorner.X) / scrollfactor);
+				new_pos = rangelim(new_pos, scrollbar_h->getMin(), scrollbar_h->getMax());
+
+				if (new_pos != scrollbar_h->getPos()) {
+					scrollbar_h->setPos(new_pos);
+					cont.second->updateScrolling();
+				}
+			}
+		}
+
+		break;
+	}
 }
 
 void GUIFormSpecMenu::updateSelectedItem()
@@ -3708,7 +3863,7 @@ void GUIFormSpecMenu::updateSelectedItem()
 
 			} else {
 				// Grab selected item from the crafting result list
-				m_selected_item = new GUIInventoryList::ItemSpec(s);
+				m_selected_item = std::make_unique<GUIInventoryList::ItemSpec>(s);
 				m_selected_amount = item.count;
 				m_selected_dragging = false;
 			}
@@ -3750,8 +3905,7 @@ ItemStack GUIFormSpecMenu::verifySelectedItem()
 		}
 
 		// selection was not valid
-		delete m_selected_item;
-		m_selected_item = nullptr;
+		m_selected_item.reset();
 		m_selected_amount = 0;
 		m_selected_dragging = false;
 	}
@@ -3785,12 +3939,12 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 
 		if (quitmode == quit_mode_accept) {
 			fields["quit"] = "true";
-		}
-
-		if (quitmode == quit_mode_cancel) {
+		} else if (quitmode == quit_mode_cancel) {
 			fields["quit"] = "true";
 			m_text_dst->gotText(fields);
 			return;
+		} else if (quitmode == quit_mode_try) {
+			fields["try_quit"] = "true";
 		}
 
 		if (current_keys_pending.key_down) {
@@ -3813,11 +3967,6 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 			current_field_enter_pending.clear();
 		}
 
-		if (current_keys_pending.key_escape) {
-			fields["key_escape"] = "true";
-			current_keys_pending.key_escape = false;
-		}
-
 		for (const GUIFormSpecMenu::FieldSpec &s : m_fields) {
 			if (s.send) {
 				std::string name = s.fname;
@@ -3829,8 +3978,6 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 						fields[name] = table->checkEvent();
 					}
 				} else if (s.ftype == f_DropDown) {
-					// No dynamic cast possible due to some distributions shipped
-					// without rtti support in Irrlicht
 					IGUIElement *element = getElementFromId(s.fid, true);
 					gui::IGUIComboBox *e = NULL;
 					if ((element) && (element->getType() == gui::EGUIET_COMBO_BOX)) {
@@ -3853,8 +4000,6 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 						}
 					}
 				} else if (s.ftype == f_TabHeader) {
-					// No dynamic cast possible due to some distributions shipped
-					// without rtti support in Irrlicht
 					IGUIElement *element = getElementFromId(s.fid, true);
 					gui::IGUITabControl *e = nullptr;
 					if ((element) && (element->getType() == gui::EGUIET_TAB_CONTROL)) {
@@ -3865,8 +4010,6 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 						fields[name] = itos(e->getActiveTab() + 1);
 					}
 				} else if (s.ftype == f_CheckBox) {
-					// No dynamic cast possible due to some distributions shipped
-					// without rtti support in Irrlicht
 					IGUIElement *element = getElementFromId(s.fid, true);
 					gui::IGUICheckBox *e = nullptr;
 					if ((element) && (element->getType() == gui::EGUIET_CHECK_BOX)) {
@@ -3880,11 +4023,9 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 							fields[name] = "false";
 					}
 				} else if (s.ftype == f_ScrollBar) {
-					// No dynamic cast possible due to some distributions shipped
-					// without rtti support in Irrlicht
 					IGUIElement *element = getElementFromId(s.fid, true);
 					GUIScrollBar *e = nullptr;
-					if (element && element->getType() == gui::EGUIET_ELEMENT)
+					if (element && element->getType() == gui::EGUIET_SCROLL_BAR)
 						e = static_cast<GUIScrollBar *>(element);
 
 					if (e) {
@@ -3894,8 +4035,6 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 							fields[name] = "VAL:" + itos(e->getPos());
 					}
 				} else if (s.ftype == f_AnimatedImage) {
-					// No dynamic cast possible due to some distributions shipped
-					// without rtti support in Irrlicht
 					IGUIElement *element = getElementFromId(s.fid, true);
 					GUIAnimatedImage *e = nullptr;
 					if (element && element->getType() == gui::EGUIET_ELEMENT)
@@ -3921,6 +4060,37 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 	// correctly.
 	if (GUIModalMenu::preprocessEvent(event))
 		return true;
+
+	// Handle keyboard and touch input to show/hide focus outline
+	switch (event.EventType) {
+	case EET_KEY_INPUT_EVENT:
+		if (event.KeyInput.PressedDown && event.KeyInput.Key == KEY_TAB &&
+				!event.KeyInput.Control) {
+			m_show_focus = true;
+			m_last_focused = nullptr;
+		}
+		break;
+	case EET_MOUSE_INPUT_EVENT:
+		switch (event.MouseInput.Event) {
+		case EMIE_LMOUSE_PRESSED_DOWN:
+		case EMIE_RMOUSE_PRESSED_DOWN:
+		case EMIE_MMOUSE_PRESSED_DOWN:
+			m_show_focus = false;
+			m_last_focused = nullptr;
+			break;
+		default:
+			break;
+		}
+		break;
+	case EET_TOUCH_INPUT_EVENT:
+		if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
+			m_show_focus = false;
+			m_last_focused = nullptr;
+		}
+		break;
+	default:
+		break;
+	}
 
 	// The IGUITabControl renders visually using the skin's selected
 	// font, which we override for the duration of form drawing,
@@ -3953,7 +4123,7 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 	if (event.EventType == EET_KEY_INPUT_EVENT) {
 			KeyPress kp(event.KeyInput);
 		if (kp == EscapeKey
-				|| kp == getKeySetting("keymap_inventory")
+				|| keySettingHasMatch("keymap_inventory", kp)
 				|| event.KeyInput.Key==KEY_RETURN) {
 			gui::IGUIElement *focused = Environment->getFocus();
 			if (focused && isMyChild(focused) &&
@@ -3982,7 +4152,7 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 		}
 	}
 
-	if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
+	if (event.EventType == EET_JOYSTICK_INPUT_EVENT) {
 		if (event.JoystickEvent.Joystick != m_joystick->getJoystickId())
 			return false;
 
@@ -3991,10 +4161,7 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 			if (m_joystick->wasKeyDown(KeyType::ESC)) {
 				tryClose();
 			} else if (m_joystick->wasKeyDown(KeyType::JUMP)) {
-				if (m_allowclose) {
-					acceptInput(quit_mode_accept);
-					quitMenu();
-				}
+				trySubmitClose();
 			}
 		}
 		return handled;
@@ -4010,7 +4177,17 @@ void GUIFormSpecMenu::tryClose()
 		acceptInput(quit_mode_cancel);
 		quitMenu();
 	} else {
-		m_text_dst->gotText(L"MenuQuit");
+		acceptInput(quit_mode_try);
+	}
+}
+
+void GUIFormSpecMenu::trySubmitClose()
+{
+	if (m_allowclose) {
+		acceptInput(quit_mode_accept);
+		quitMenu();
+	} else {
+		acceptInput(quit_mode_try);
 	}
 }
 
@@ -4018,19 +4195,48 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 {
 	if (event.EventType==EET_KEY_INPUT_EVENT) {
 		KeyPress kp(event.KeyInput);
+		// Ctrl (+ Shift) + Tab: Select the (previous or) next tab of a TabControl instance.
+		bool shift = event.KeyInput.Shift;
+		bool ctrl = event.KeyInput.Control;
+		if (event.KeyInput.PressedDown && (event.KeyInput.Key == KEY_TAB && ctrl)) {
+			// Try to find a tab control among our elements
+			for (const FieldSpec &s : m_fields) {
+				if (s.ftype != f_TabHeader)
+					continue;
+
+				IGUIElement *element = getElementFromId(s.fid, true);
+				if (!element || element->getType() != gui::EGUIET_TAB_CONTROL)
+					continue;
+
+				gui::IGUITabControl *tabs = static_cast<gui::IGUITabControl *>(element);
+				s32 num_tabs = tabs->getTabCount();
+				if (num_tabs <= 1)
+					continue;
+
+				s32 active = tabs->getActiveTab();
+				// Shift: Previous tab, No shift: Next tab
+				active = (active + (shift ? -1 : 1) + num_tabs) % num_tabs;
+				tabs->setActiveTab(active);
+				return true; // handled
+			}
+		}
 		if (event.KeyInput.PressedDown && (
 				(kp == EscapeKey) ||
-				((m_client != NULL) && (kp == getKeySetting("keymap_inventory"))))) {
+				((m_client != NULL) && (keySettingHasMatch("keymap_inventory", kp))))) {
 			tryClose();
 			return true;
 		}
 
-		if (m_client != NULL && event.KeyInput.PressedDown &&
-				(kp == getKeySetting("keymap_screenshot"))) {
-			m_client->makeScreenshot();
+		if (event.KeyInput.PressedDown &&
+				(keySettingHasMatch("keymap_screenshot", kp))) {
+			if (m_client) {
+				m_client->makeScreenshot();
+			} else if (m_text_dst) { // in main menu
+				m_text_dst->requestScreenshot();
+			}
 		}
 
-		if (event.KeyInput.PressedDown && kp == getKeySetting("keymap_toggle_debug")) {
+		if (event.KeyInput.PressedDown && keySettingHasMatch("keymap_toggle_debug", kp)) {
 			if (!m_client || m_client->checkPrivilege("debug"))
 				m_show_debug = !m_show_debug;
 		}
@@ -4056,9 +4262,8 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 					FATAL_ERROR("Reached a source line that can't ever been reached");
 					break;
 			}
-			if (current_keys_pending.key_enter && m_allowclose) {
-				acceptInput(quit_mode_accept);
-				quitMenu();
+			if (current_keys_pending.key_enter) {
+				trySubmitClose();
 			} else {
 				acceptInput();
 			}
@@ -4258,7 +4463,7 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 					shift_move_amount = button == BET_RIGHT ? 1 : count;
 				} else {
 					// No shift: select item
-					m_selected_item = new GUIInventoryList::ItemSpec(s);
+					m_selected_item = std::make_unique<GUIInventoryList::ItemSpec>(s);
 					m_selected_amount = count;
 					m_selected_dragging = button != BET_WHEEL_DOWN;
 				}
@@ -4453,7 +4658,7 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 
 			} else if (m_held_mouse_button == BET_LEFT) {
 				// Start picking up items
-				m_selected_item = new GUIInventoryList::ItemSpec(s);
+				m_selected_item = std::make_unique<GUIInventoryList::ItemSpec>(s);
 				m_selected_amount = s_count;
 				m_selected_dragging = true;
 			}
@@ -4760,8 +4965,7 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 		// and we are not left-dragging, deselect
 		if (m_selected_amount == 0 && !m_left_dragging) {
 			m_selected_swap.clear();
-			delete m_selected_item;
-			m_selected_item = nullptr;
+			m_selected_item.reset();
 			m_selected_amount = 0;
 			m_selected_dragging = false;
 		}
@@ -4772,12 +4976,18 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 	}
 
 	if (event.EventType == EET_GUI_EVENT) {
-		if (event.GUIEvent.EventType == gui::EGET_TAB_CHANGED
-				&& isVisible()) {
-			// find the element that was clicked
+		const s32 caller_id = event.GUIEvent.Caller->getID();
+		bool close_on_enter;
+
+		switch (event.GUIEvent.EventType) {
+		case gui::EGET_TAB_CHANGED:
+			if (!isVisible())
+				break;
+
+				// find the element that was clicked
 			for (GUIFormSpecMenu::FieldSpec &s : m_fields) {
-				if ((s.ftype == f_TabHeader) &&
-						(s.fid == event.GUIEvent.Caller->getID())) {
+				if (s.ftype == f_TabHeader &&
+						s.fid == caller_id) {
 					if (!s.sound.empty() && m_sound_manager)
 						m_sound_manager->playSound(0, SoundSpec(s.sound, 1.0f));
 					s.send = true;
@@ -4786,31 +4996,26 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 					return true;
 				}
 			}
-		}
-		if (event.GUIEvent.EventType == gui::EGET_ELEMENT_FOCUS_LOST
-				&& isVisible()) {
+			break;
+
+		case gui::EGET_ELEMENT_FOCUS_LOST:
+			if (!isVisible())
+				break;
+
 			if (!canTakeFocus(event.GUIEvent.Element)) {
 				infostream<<"GUIFormSpecMenu: Not allowing focus change."
 						<<std::endl;
 				// Returning true disables focus change
 				return true;
 			}
-		}
-		if ((event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) ||
-				(event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED) ||
-				(event.GUIEvent.EventType == gui::EGET_COMBO_BOX_CHANGED) ||
-				(event.GUIEvent.EventType == gui::EGET_SCROLL_BAR_CHANGED)) {
-			s32 caller_id = event.GUIEvent.Caller->getID();
+			break;
 
-			if (caller_id == 257) {
-				if (m_allowclose) {
-					acceptInput(quit_mode_accept);
-					quitMenu();
-				} else {
-					acceptInput();
-					m_text_dst->gotText(L"ExitButton");
-				}
-				// quitMenu deallocates menu
+		case gui::EGET_BUTTON_CLICKED:
+		case gui::EGET_CHECKBOX_CHANGED:
+		case gui::EGET_COMBO_BOX_CHANGED:
+		case gui::EGET_SCROLL_BAR_CHANGED:
+			if (caller_id == ID_PROCEED_BTN) {
+				trySubmitClose();
 				return true;
 			}
 
@@ -4839,12 +5044,8 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 					}
 
 					if (s.is_exit) {
-						if (m_allowclose) {
-							acceptInput(quit_mode_accept);
-							quitMenu();
-						} else {
-							m_text_dst->gotText(L"ExitButton");
-						}
+						acceptInput(quit_mode_accept);
+						quitMenu();
 						return true;
 					}
 
@@ -4884,58 +5085,57 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 					s.send = false;
 				}
 			}
-		}
 
-		if (event.GUIEvent.EventType == gui::EGET_SCROLL_BAR_CHANGED) {
-			// move scroll_containers
-			for (const std::pair<std::string, GUIScrollContainer *> &c : m_scroll_containers)
-				c.second->onScrollEvent(event.GUIEvent.Caller);
-		}
+			if (event.GUIEvent.EventType == gui::EGET_SCROLL_BAR_CHANGED) {
+				// move scroll_containers
+				for (const std::pair<std::string, GUIScrollContainer *> &c : m_scroll_containers)
+					c.second->onScrollEvent(event.GUIEvent.Caller);
+			}
+			break;
 
-		if (event.GUIEvent.EventType == gui::EGET_EDITBOX_ENTER) {
-			if (event.GUIEvent.Caller->getID() > 257) {
-				bool close_on_enter = true;
-				for (GUIFormSpecMenu::FieldSpec &s : m_fields) {
-					if (s.ftype == f_Unknown &&
-							s.fid == event.GUIEvent.Caller->getID()) {
-						current_field_enter_pending = s.fname;
-						std::unordered_map<std::string, bool>::const_iterator it =
-							field_close_on_enter.find(s.fname);
-						if (it != field_close_on_enter.end())
-							close_on_enter = (*it).second;
+		case gui::EGET_EDITBOX_ENTER:
+			if (caller_id <= ID_PROCEED_BTN)
+				break;
 
-						break;
-					}
+			close_on_enter = true;
+			for (GUIFormSpecMenu::FieldSpec &s : m_fields) {
+				if (s.ftype == f_Unknown &&
+						s.fid == caller_id) {
+					current_field_enter_pending = s.fname;
+					auto it = field_close_on_enter.find(s.fname);
+					if (it != field_close_on_enter.end())
+						close_on_enter = (*it).second;
+
+					break;
 				}
+			}
 
-				if (m_allowclose && close_on_enter) {
-					current_keys_pending.key_enter = true;
-					acceptInput(quit_mode_accept);
-					quitMenu();
-				} else {
-					current_keys_pending.key_enter = true;
+			current_keys_pending.key_enter = true;
+
+			if (close_on_enter)
+				trySubmitClose();
+			else
+				acceptInput();
+			return true;
+
+		case gui::EGET_TABLE_CHANGED:
+			if (caller_id <= ID_PROCEED_BTN)
+				break;
+
+			// find the element that was clicked
+			for (GUIFormSpecMenu::FieldSpec &s : m_fields) {
+				// if it's a table, set the send field
+				// so lua knows which table was changed
+				if (s.ftype == f_Table && s.fid == caller_id) {
+					s.send = true;
 					acceptInput();
+					s.send = false;
 				}
-				// quitMenu deallocates menu
-				return true;
 			}
-		}
+			return true;
 
-		if (event.GUIEvent.EventType == gui::EGET_TABLE_CHANGED) {
-			int current_id = event.GUIEvent.Caller->getID();
-			if (current_id > 257) {
-				// find the element that was clicked
-				for (GUIFormSpecMenu::FieldSpec &s : m_fields) {
-					// if it's a table, set the send field
-					// so lua knows which table was changed
-					if ((s.ftype == f_Table) && (s.fid == current_id)) {
-						s.send = true;
-						acceptInput();
-						s.send=false;
-					}
-				}
-				return true;
-			}
+		default:
+			break;
 		}
 	}
 
@@ -5085,7 +5285,7 @@ double GUIFormSpecMenu::calculateImgsize(const parserData &data)
 				((15.0 / 13.0) * (0.85 + data.invsize.Y));
 	}
 
-	double prefer_imgsize = getImgsize(v2u32(padded_screensize.X, padded_screensize.Y),
+	double prefer_imgsize = getImgsize(v2u32::from(padded_screensize),
 			screen_dpi, gui_scaling);
 
 	// Try to use the preferred imgsize, but if that's bigger than the maximum

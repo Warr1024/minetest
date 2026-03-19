@@ -10,7 +10,7 @@
 #include <IGUIFont.h>
 #include "profiler.h"
 
-namespace irr::video {
+namespace video {
 	class IVideoDriver;
 }
 
@@ -18,9 +18,10 @@ namespace irr::video {
 class ProfilerGraph
 {
 private:
+	// FIXME: this data structure is awfully inefficient
 	struct Piece
 	{
-		Piece(Profiler::GraphValues v) : values(std::move(v)) {}
+		Piece(const Profiler::GraphValues &v) : values(v) {}
 		Profiler::GraphValues values;
 	};
 	struct Meta

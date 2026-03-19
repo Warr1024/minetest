@@ -8,12 +8,13 @@
 	All kinds of stuff that needs to be exposed from main.cpp
 */
 #include "modalMenu.h"
+#include "touchcontrols.h" // g_touchcontrols
 #include <cassert>
 #include <list>
 
-#include "IGUIEnvironment.h"
+#include <IGUIEnvironment.h>
 
-namespace irr::gui {
+namespace gui {
 	class IGUIStaticText;
 }
 
@@ -22,12 +23,10 @@ class IGameCallback
 public:
 	virtual void exitToOS() = 0;
 	virtual void openSettings() = 0;
-	virtual void keyConfig() = 0;
 	virtual void disconnect() = 0;
 	virtual void changePassword() = 0;
 	virtual void changeVolume() = 0;
 	virtual void showOpenURLDialog(const std::string &url) = 0;
-	virtual void signalKeyConfigChange() = 0;
 	virtual void touchscreenLayout() = 0;
 };
 
@@ -53,14 +52,22 @@ public:
 		guienv->setFocus(m_stack.back());
 	}
 
+	/// Note that it may be called multiple times on GUIModalMenu (or GUIFormSpecMenu):
+	///   1x Explicit close request
+	///   1x Destructor
 	virtual void deletingMenu(gui::IGUIElement *menu)
 	{
 		// Remove all entries if there are duplicates
 		m_stack.remove(menu);
 
-		if(!m_stack.empty()) {
+		// Reference count reduction (-1) due to focus loss
+		if (!m_stack.empty()) {
 			m_stack.back()->setVisible(true);
 			guienv->setFocus(m_stack.back());
+		} else {
+			guienv->removeFocus(menu);
+			if (g_touchcontrols)
+				g_touchcontrols->show();
 		}
 	}
 
@@ -78,10 +85,20 @@ public:
 		return m_stack.size();
 	}
 
+	GUIModalMenu *tryGetTopMenu() const
+	{
+		if (m_stack.empty())
+			return nullptr;
+		return dynamic_cast<GUIModalMenu *>(m_stack.back());
+	}
+
 	void deleteFront()
 	{
-		m_stack.front()->setVisible(false);
-		deletingMenu(m_stack.front());
+		assert(!m_stack.empty());
+		gui::IGUIElement *e = m_stack.front();
+		e->setVisible(false);
+		deletingMenu(e);
+		e->remove();
 	}
 
 	bool pausesGame()
@@ -136,16 +153,6 @@ public:
 		changevolume_requested = true;
 	}
 
-	void keyConfig() override
-	{
-		keyconfig_requested = true;
-	}
-
-	void signalKeyConfigChange() override
-	{
-		keyconfig_changed = true;
-	}
-
 	void touchscreenLayout() override
 	{
 		touchscreenlayout_requested = true;
@@ -160,10 +167,8 @@ public:
 	bool settings_requested = false;
 	bool changepassword_requested = false;
 	bool changevolume_requested = false;
-	bool keyconfig_requested = false;
 	bool touchscreenlayout_requested = false;
 	bool shutdown_requested = false;
-	bool keyconfig_changed = false;
 	std::string show_open_url_dialog = "";
 };
 

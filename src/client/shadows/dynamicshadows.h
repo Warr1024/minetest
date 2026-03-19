@@ -6,7 +6,6 @@
 
 #include "irrlichttypes_bloated.h"
 #include <matrix4.h>
-#include "util/basic_macros.h"
 #include "constants.h"
 
 class Camera;
@@ -22,7 +21,6 @@ struct shadowFrustum
 	core::matrix4 ViewMat;
 	v3f position;
 	v3f player;
-	v3s16 camera_offset;
 };
 
 class DirectionalLight
@@ -85,6 +83,7 @@ public:
 		return mapRes;
 	}
 
+	/// If true, shadow map needs to be invalidated due to frustum change
 	bool should_update_map_shadow{true};
 
 	void commitFrustum();
