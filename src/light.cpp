@@ -15,6 +15,15 @@ static u8 light_LUT[LIGHT_SUN + 1];
 // The const ref to light_LUT is what is actually used in the code
 const u8 *light_decode_table = light_LUT;
 
+// Runtime "night vision" toggle. When enabled, the light curve's zero-point is
+// lifted off the floor so that it is possible to see in total darkness. Not
+// persisted; always starts disabled. See set_light_night_vision().
+static bool light_night_vision = false;
+
+// Last gamma passed to set_light_curve(), cached so the LUT can be rebuilt when
+// night vision is toggled at runtime.
+static float light_last_gamma = 1.0f;
+
 namespace {
 
 struct LightCurve {
@@ -44,6 +53,8 @@ float LightCurve::get(float x) const
 
 void set_light_curve(float gamma)
 {
+	light_last_gamma = gamma;
+
 	LightCurve params;
 	// bounding gradients
 	const float alpha = rangelim(g_settings->getFloat("lighting_alpha"), 0.0f, 3.0f);
@@ -75,9 +86,27 @@ void set_light_curve(float gamma)
 		}
 	}
 
-	// Cheat by poisoning light LUT zero level with some ambient glow to make
-	// it possible to see (especially with gamma / auto-exposure) in total dark.
-	light_LUT[0] = light_LUT[1];
+	// When night vision is enabled, poison the light LUT zero level with some
+	// ambient glow to make it possible to see (especially with gamma /
+	// auto-exposure) in total dark.
+	if (light_night_vision)
+		light_LUT[0] = light_LUT[1];
+}
+
+void set_light_night_vision(bool enable)
+{
+	if (enable == light_night_vision)
+		return;
+	light_night_vision = enable;
+	// Rebuild the LUT so the change takes effect. Baked mapblock meshes must be
+	// rebuilt separately by the caller; live consumers (particles, entities)
+	// pick up the new table immediately.
+	set_light_curve(light_last_gamma);
+}
+
+bool get_light_night_vision()
+{
+	return light_night_vision;
 }
 
 float decode_light_f(float light_f)

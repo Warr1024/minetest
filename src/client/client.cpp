@@ -1818,6 +1818,16 @@ void Client::addUpdateMeshTaskForNode(v3s16 nodepos, bool ack_to_server, bool ur
 		addUpdateMeshTask(blockpos + v3s16(0, 0, -1), false, urgent);
 }
 
+void Client::rebuildAllMeshes()
+{
+	std::vector<v3s16> blocks;
+	m_env.getClientMap().listAllLoadedBlocks(blocks);
+	for (v3s16 blockpos : blocks)
+		addUpdateMeshTask(blockpos, false, false);
+	infostream << "Client::rebuildAllMeshes(): queued " << blocks.size()
+			<< " blocks" << std::endl;
+}
+
 ClientEvent *Client::getClientEvent()
 {
 	FATAL_ERROR_IF(m_client_event_queue.empty(),

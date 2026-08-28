@@ -1519,6 +1519,8 @@ void Game::processKeyInput()
 		decreaseViewRange();
 	} else if (wasKeyPressed(KeyType::RANGESELECT)) {
 		toggleFullViewRange();
+	} else if (wasKeyPressed(KeyType::NIGHT_VISION)) {
+		toggleNightVision();
 	} else if (wasKeyDown(KeyType::ZOOM)) {
 		checkZoomEnabled();
 	} else if (wasKeyDown(KeyType::QUICKTUNE_NEXT)) {
@@ -1925,6 +1927,20 @@ void Game::toggleFullViewRange()
 	} else {
 		m_game_ui->showTranslatedStatusText("Unlimited viewing range disabled");
 	}
+}
+
+
+void Game::toggleNightVision()
+{
+	bool enable = !get_light_night_vision();
+	set_light_night_vision(enable);
+	// Lighting is baked into mapblock meshes, so they must be rebuilt for the
+	// change to become visible. The resulting pop-in is expected.
+	client->rebuildAllMeshes();
+	if (enable)
+		m_game_ui->showTranslatedStatusText("Night vision enabled");
+	else
+		m_game_ui->showTranslatedStatusText("Night vision disabled");
 }
 
 

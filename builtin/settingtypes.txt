@@ -208,6 +208,8 @@ keymap_cmd_local (Local command) key SYSTEM_SCANCODE_55
 
 keymap_rangeselect (Toggle unlimited view range) key
 
+keymap_night_vision (Toggle night vision) key
+
 keymap_freemove (Toggle fly) key SYSTEM_SCANCODE_14|GAMEPAD_BUTTON_13
 
 keymap_pitchmove (Toggle pitchmove) key

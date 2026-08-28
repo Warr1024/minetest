@@ -53,6 +53,14 @@ float decode_light_f(float light_f);
 // Update light value table using the specified gamma
 void set_light_curve(float gamma);
 
+// Enable or disable "night vision", which lifts the light curve's zero-point so
+// that it is possible to see in total darkness. Rebuilds the light table; the
+// caller is responsible for rebuilding baked mapblock meshes. Not persisted.
+void set_light_night_vision(bool enable);
+
+// Whether night vision (see set_light_night_vision()) is currently enabled.
+bool get_light_night_vision();
+
 #endif
 
 // 0 <= daylight_factor <= 1000

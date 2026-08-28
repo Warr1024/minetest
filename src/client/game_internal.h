@@ -176,6 +176,7 @@ protected:
 	void increaseViewRange();
 	void decreaseViewRange();
 	void toggleFullViewRange();
+	void toggleNightVision();
 	void checkZoomEnabled();
 
 	void updateCameraDirection(CameraOrientation *cam, float dtime);

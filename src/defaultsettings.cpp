@@ -154,6 +154,8 @@ void set_default_settings()
 	// see <https://github.com/luanti-org/luanti/issues/12792>
 	settings->setDefault("keymap_rangeselect", has_touch ? "SYSTEM_SCANCODE_21" : ""); // KEY_KEY_R
 
+	settings->setDefault("keymap_night_vision", "");
+
 	settings->setDefault("keymap_freemove", "SYSTEM_SCANCODE_14|GAMEPAD_BUTTON_13"); // KEY_KEY_K|D-Pad Left
 	settings->setDefault("keymap_pitchmove", "");
 	settings->setDefault("keymap_fastmove", "SYSTEM_SCANCODE_13"); // KEY_KEY_J

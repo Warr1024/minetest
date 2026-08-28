@@ -312,6 +312,17 @@ void ClientMap::getBlocksInViewRange(v3s16 cam_pos_nodes,
 			p_nodes_max.Z / MAP_BLOCKSIZE + 1);
 }
 
+void ClientMap::listAllLoadedBlocks(std::vector<v3s16> &dst) const
+{
+	for (const auto &sector_it : m_sectors) {
+		const MapSector *sector = sector_it.second;
+		if (!sector)
+			continue;
+		for (const auto &entry : sector->getBlocks())
+			dst.push_back(entry.second->getPos());
+	}
+}
+
 class MapBlockFlags
 {
 public:

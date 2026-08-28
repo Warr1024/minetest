@@ -92,6 +92,9 @@ public:
 	void getBlocksInViewRange(v3s16 cam_pos_nodes,
 		v3s16 *p_blocks_min, v3s16 *p_blocks_max, float range=-1.0f);
 
+	// Append the positions of all currently loaded blocks to dst.
+	void listAllLoadedBlocks(std::vector<v3s16> &dst) const;
+
 	void updateDrawList();
 	/// @brief clears m_drawlist and m_keeplist
 	void clearDrawList();
