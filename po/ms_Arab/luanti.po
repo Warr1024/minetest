@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: minetest\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 23:13+0100\n"
+"POT-Creation-Date: 2026-08-10 17:35+0200\n"
 "PO-Revision-Date: 2025-10-23 18:16+0000\n"
 "Last-Translator: bgo-eiu <huyaqoob+toolforge@gmail.com>\n"
 "Language-Team: Malay (Jawi) <https://hosted.weblate.org/projects/minetest/"
@@ -67,6 +67,7 @@ msgstr "ڤرينته تيدق ترسديا: "
 msgid "Get help for commands (-t: output in chat)"
 msgstr "داڤتکن بنتوان اونتوق ڤرينته"
 
+#. TRANSLATORS: 'help' and 'all' mustn't be translated. cmd = command
 #: builtin/common/chatcommands.lua
 msgid ""
 "Use '.help <cmd>' to get more information, or '.help all' to list everything."
@@ -74,6 +75,7 @@ msgstr ""
 "ݢوناکن '.help <ڤرينته>' اونتوق داڤتکن معلومت لنجوت⹁ اتاو '.help all' اونتوق "
 "سنارايکن کسمواڽ."
 
+#. TRANSLATORS: Syntax of 'help' command. Don't translate anything except 'cmd' (=command)
 #: builtin/common/chatcommands.lua
 #, fuzzy
 msgid "[all | <cmd>] [-t]"
@@ -244,6 +246,7 @@ msgstr ""
 msgid "Scales the noise in the $1 axis by this value."
 msgstr ""
 
+#. TRANSLATORS: Value for randomness
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Seed"
@@ -284,7 +287,7 @@ msgstr ""
 msgid "This results in spiky noise."
 msgstr ""
 
-#. ~ "absvalue" is a noise parameter flag.
+#. TRANSLATORS: "absvalue" is a noise parameter flag.
 #. It is short for "absolute value".
 #. It can be enabled in noise settings in
 #. the settings menu.
@@ -292,14 +295,14 @@ msgstr ""
 msgid "absvalue"
 msgstr "نيلاي مطلق"
 
-#. ~ "defaults" is a noise parameter flag.
+#. TRANSLATORS: "defaults" is a noise parameter flag.
 #. It describes the default processing options
 #. for noise settings in the settings menu.
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "defaults"
 msgstr "لالاي"
 
-#. ~ "eased" is a noise parameter flag.
+#. TRANSLATORS: "eased" is a noise parameter flag.
 #. It is used to make the map smoother and
 #. can be enabled in noise settings in
 #. the settings menu.
@@ -307,6 +310,8 @@ msgstr "لالاي"
 msgid "eased"
 msgstr "تومڤول"
 
+#. TRANSLATORS: "automatic exposure" refers to light. This note
+#. will be displayed for the graphics setting 'enable_auto_exposure'
 #: builtin/common/settings/dlg_settings.lua
 msgid "(The game will need to enable automatic exposure as well)"
 msgstr ""
@@ -323,20 +328,28 @@ msgstr ""
 msgid "(Use system language)"
 msgstr ""
 
+#. TRANSLATORS: Shown when a default setting is the empty string
+#: builtin/common/settings/dlg_settings.lua
+msgid "<empty>"
+msgstr ""
+
 #: builtin/common/settings/dlg_settings.lua
 msgid "Accessibility"
 msgstr ""
 
+#. TRANSLATORS: Automatic
 #: builtin/common/settings/dlg_settings.lua
 msgid "Auto"
 msgstr ""
 
+#. TRANSLATORS: Button text to go back
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 #: builtin/mainmenu/content/dlg_package.lua src/gui/guiVolumeChange.cpp
 msgid "Back"
 msgstr "کمبالي"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Buttons with crosshair"
 msgstr ""
@@ -346,6 +359,7 @@ msgstr ""
 msgid "Chat"
 msgstr "سيمبڠ"
 
+#. TRANSLATORS: Tooltip of a button that clears input
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Clear"
 msgstr "ڤادم"
@@ -353,6 +367,11 @@ msgstr "ڤادم"
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "Controls"
 msgstr "کاولن"
+
+#: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage"
+msgstr "بوليه چدرا"
 
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/common/settings/shadows_component.lua
@@ -363,10 +382,12 @@ msgstr "دلومڤوهکن"
 msgid "Enabled"
 msgstr "دبوليهکن"
 
+#. TRANSLATORS: Category for general settings
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "General"
 msgstr ""
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Long tap"
 msgstr ""
@@ -376,12 +397,13 @@ msgstr ""
 msgid "Movement"
 msgstr "ڤرݢرقن ڤنتس"
 
+#. TRANSLATORS: No search results
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "No results"
 msgstr "تياد حاصيل"
 
-#. ~ Indicates that the action does not have a corresponding keybinding.
+#. TRANSLATORS: Indicates that the action does not have a corresponding keybinding.
 #: builtin/common/settings/dlg_settings.lua
 #, fuzzy
 msgid "Not bound"
@@ -392,14 +414,17 @@ msgstr "تيدق دجومڤاٴي"
 msgid "Reset setting to default"
 msgstr "ڤوليهکن تتڤن اصل"
 
+#. TRANSLATORS: $1 will be replaced with a default setting value
 #: builtin/common/settings/dlg_settings.lua
-msgid "Reset setting to default ($1)"
-msgstr ""
+#, fuzzy
+msgid "Reset setting to default: $1"
+msgstr "ڤوليهکن تتڤن اصل"
 
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Search"
 msgstr "چاري"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Short tap"
 msgstr ""
@@ -408,15 +433,18 @@ msgstr ""
 msgid "Show advanced settings"
 msgstr ""
 
+#. TRANSLATORS: Checkbox that toggles displaying the technical setting names
 #: builtin/common/settings/dlg_settings.lua
 msgid "Show technical names"
 msgstr "تونجوق نام تيکنيکل"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 #, fuzzy
 msgid "Tap"
 msgstr "Tab"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap with crosshair"
 msgstr ""
@@ -495,6 +523,10 @@ msgstr "برلاکوڽ رالت دالم سکريڤ Lua:"
 #: builtin/fstk/ui.lua
 msgid "An error occurred:"
 msgstr "تله برلاکوڽ رالت:"
+
+#: builtin/fstk/ui.lua
+msgid "Copy to clipboard"
+msgstr ""
 
 #: builtin/fstk/ui.lua
 msgid "Main menu"
@@ -576,6 +608,8 @@ msgstr "ContentDB تيدق ترسديا اڤابيلا ماٴينتيس‌ت د�
 msgid "Downloading..."
 msgstr "مموات تورون..."
 
+#. TRANSLATORS: A 'featured' package in ContentDB is a package that is
+#. more prominently displayed than other packages
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Featured"
 msgstr "دکتڠهکن"
@@ -603,6 +637,7 @@ msgstr "تياد ڤاکيج يڠ بوليه دأمبيل"
 msgid "No updates"
 msgstr "تياد کمس کيني"
 
+#. TRANSLATORS: A download is queued
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Queued"
 msgstr "منوڠݢو ݢيليرن"
@@ -616,14 +651,17 @@ msgstr "ڤيک تيکستور"
 msgid "The package $1 was not found."
 msgstr "ڤاکيج $1 تيدق دجومڤاٴي."
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Update All [$1]"
 msgstr "کمس کيني سموا [$1]"
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 and $2 dependencies will be installed."
 msgstr "کبرݢنتوڠن $1 دان $2 اکن دڤاسڠکن."
 
+#. TRANSLATORS: Package (mod, texture pack, etc.) info: $1 = package name, $2 = package author
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 by $2"
 msgstr "$1 اوليه $2"
@@ -632,6 +670,7 @@ msgstr "$1 اوليه $2"
 msgid "$1 required dependencies could not be found."
 msgstr "$1 ممرلوکن کبرݢنتوڠن يڠ تيدق دجومڤاٴي."
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 will be installed, and $2 dependencies will be skipped."
 msgstr "$1 اکن دڤاسڠکن⹁ دان $2 کبرݢنتوڠن اکن دلڠکاو."
@@ -644,6 +683,7 @@ msgstr "سوده دڤاسڠ"
 msgid "Base Game:"
 msgstr "ڤرماٴينن اساس:"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/content/dlg_install.lua
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Dependencies:"
@@ -717,11 +757,13 @@ msgstr ""
 msgid "Information"
 msgstr "معلومت:"
 
+#. TRANSLATORS: $1 = download size
 #: builtin/mainmenu/content/dlg_package.lua
 #, fuzzy
 msgid "Install [$1]"
 msgstr "ڤاسڠ $1"
 
+#. TRANSLATORS: Also known as 'bug tracker'
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Issue Tracker"
 msgstr ""
@@ -730,6 +772,7 @@ msgstr ""
 msgid "Reviews"
 msgstr ""
 
+#. TRANSLATORS: Link to source code repository
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Source"
 msgstr ""
@@ -755,6 +798,10 @@ msgstr ""
 msgid "by $1"
 msgstr "$1 اوليه $2"
 
+#. TRANSLATORS: Info line for a ContentDB package:
+#. $1 = author,
+#. $2 = number of downloads,
+#. $3, $4, $5 = number of positive/neutral/negative reviews
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "by $1  —  $2 downloads  —  +$3 / $4 / -$5"
 msgstr ""
@@ -792,16 +839,19 @@ msgstr "تيدق ممڤو مماسڠ $1 سباݢاي ڤيک تيکستور"
 msgid "World mods"
 msgstr "نام دنيا"
 
+#. TRANSLATORS: $1 = server name
 #: builtin/mainmenu/dlg_clients_list.lua
 msgid ""
 "Players connected to\n"
 "$1"
 msgstr ""
 
+#. TRANSLATORS: Message in the mod list when a mod is enabled with error
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Enabled, has error)"
 msgstr "(دبوليهکن⹁ اد رالت)"
 
+#. TRANSLATORS: Displayed when a mod dependency is unsatisfied
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Unsatisfied)"
 msgstr "(تيدق دڤنوهي)"
@@ -842,6 +892,7 @@ msgstr "مودس:"
 msgid "Mods located inside the world folder."
 msgstr ""
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No (optional) dependencies"
 msgstr "تياد کبرݢنتوڠن (ڤيليهن)"
@@ -850,6 +901,7 @@ msgstr "تياد کبرݢنتوڠن (ڤيليهن)"
 msgid "No game description provided."
 msgstr "تياد ڤريحل ڤرماٴينن ترسديا."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No hard dependencies"
 msgstr "تياد کبرݢنتوڠن واجب"
@@ -858,10 +910,12 @@ msgstr "تياد کبرݢنتوڠن واجب"
 msgid "No modpack description provided."
 msgstr "تياد ڤريحل ڤيک مودس ترسديا."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No optional dependencies"
 msgstr "تياد کبرݢنتوڠن ڤيليهن"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Optional dependencies:"
 msgstr "کبرݢنتوڠن ڤيليهن:"
@@ -903,6 +957,7 @@ msgstr "کديڠينن التيتود"
 msgid "Altitude dry"
 msgstr "ککريڠن التيتود"
 
+#. TRANSLATORS: Smooth transition between biomes
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Biome blending"
 msgstr "ڤڽباتين بيوم"
@@ -923,6 +978,7 @@ msgstr "ݢوا"
 msgid "Create"
 msgstr "چيڤتا"
 
+#. TRANSLATORS: Map generator decorations (used for structures, trees, plants, and more)
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Decorations"
 msgstr "هياسن"
@@ -1127,6 +1183,7 @@ msgstr ""
 msgid "Confirm Password"
 msgstr "صحکن کات لالوان"
 
+#. TRANSLATORS: Message when joining a server
 #: builtin/mainmenu/dlg_register.lua
 msgid "Joining $1"
 msgstr ""
@@ -1151,11 +1208,13 @@ msgstr "کات لالوان لام"
 msgid "Passwords do not match"
 msgstr "کات لالوان تيدق ڤادن!"
 
+#. TRANSLATORS: Register an account on a server
 #: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid "Register"
 msgstr "دفتر دان سرتاٴي"
 
+#. TRANSLATORS: Dismiss a dialog window/message
 #: builtin/mainmenu/dlg_reinstall_mtg.lua
 msgid "Dismiss"
 msgstr ""
@@ -1196,11 +1255,13 @@ msgstr ""
 "ڤيک مودس اين ممڤوڽاٴي نام خصوص دبريکن دالم فاٴيل modpack.conf ميليقڽ يڠ اکن "
 "مڠاتسي سبارڠ ڤناماٴن سمولا دسيني."
 
+#. TRANSLATORS: Expand all entries in a tree view
 #: builtin/mainmenu/dlg_server_list_mods.lua
 #, fuzzy
 msgid "Expand all"
 msgstr "ممبوليهکن سموا"
 
+#. TRANSLATORS: A checkbox; if enabled, it will group mods by their prefix
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Group by prefix"
 msgstr ""
@@ -1213,10 +1274,12 @@ msgstr ""
 msgid "The $1 server uses the following mods:"
 msgstr ""
 
+#. TRANSLATORS: $1 = name of the engine
 #: builtin/mainmenu/dlg_version_info.lua
 msgid "A new $1 version is available"
 msgstr ""
 
+#. TRANSLATORS: $1 and $2 are version numbers, $3 is a URL
 #: builtin/mainmenu/dlg_version_info.lua
 msgid ""
 "Installed version: $1\n"
@@ -1241,6 +1304,7 @@ msgstr ""
 msgid "Debug build, expect worse performance"
 msgstr ""
 
+#. TRANSLATORS: Try to keep the translation short
 #: builtin/mainmenu/init.lua src/client/game_formspec.cpp
 msgid "Settings"
 msgstr "تتڤن"
@@ -1303,6 +1367,7 @@ msgstr "تونجوقکن معلومت ڽهڤڤيجت"
 msgid "Browse online content"
 msgstr "لايري کاندوڠن دالم تالين"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 #, fuzzy
 msgid "Browse online content [$1]"
@@ -1312,6 +1377,7 @@ msgstr "لايري کندوڠن دالم تالين"
 msgid "Content"
 msgstr "کاندوڠن"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 #, fuzzy
 msgid "Content [$1]"
@@ -1396,6 +1462,7 @@ msgstr "بوات بارو"
 msgid "Play Game"
 msgstr "مولا ماٴين"
 
+#. TRANSLATORS: Network port
 #: builtin/mainmenu/tab_local.lua builtin/mainmenu/tab_online.lua
 msgid "Port"
 msgstr "ڤورت"
@@ -1427,6 +1494,7 @@ msgstr "اندا ڤرلو ڤاسڠ ڤرماٴينن سبلوم اندا بولي
 msgid "Add favorite"
 msgstr "ڤورت جارق جاٴوه"
 
+#. TRANSLATORS: Network address
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid "Address"
@@ -1436,7 +1504,7 @@ msgstr "- علامت: "
 msgid "Creative mode"
 msgstr "مود کرياتيف"
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid "Damage / PvP"
@@ -1460,6 +1528,7 @@ msgstr ""
 msgid "Join Game"
 msgstr "سرتاٴي ڤرماٴينن"
 
+#. TRANSLATORS: Login to server
 #: builtin/mainmenu/tab_online.lua
 msgid "Login"
 msgstr ""
@@ -1472,10 +1541,12 @@ msgstr ""
 msgid "Open server website"
 msgstr ""
 
+#. TRANSLATORS: Also known as "latency"
 #: builtin/mainmenu/tab_online.lua
 msgid "Ping"
 msgstr "ڤيڠ"
 
+#. TRANSLATORS: $1 is a list of players
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid ""
@@ -1484,18 +1555,16 @@ msgid ""
 msgstr "کليئن"
 
 #: builtin/mainmenu/tab_online.lua
-msgid ""
-"Possible filters\n"
-"game:<name>\n"
-"mod:<name>\n"
-"player:<name>"
-msgstr ""
+#, fuzzy
+msgid "Possible filters"
+msgstr "ڤناڤيسن بيلينيار"
 
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid "Public Servers"
 msgstr "اومومکن ڤلاين"
 
+#. TRANSLATORS: As in 'reload'/'check again'
 #: builtin/mainmenu/tab_online.lua
 msgid "Refresh"
 msgstr ""
@@ -1509,6 +1578,11 @@ msgstr "ڤورت جارق جاٴوه"
 #, fuzzy
 msgid "Server Description"
 msgstr "ڤريهل ڤلاين ڤرماٴينن"
+
+#: src/chat.cpp
+#, fuzzy
+msgid "Player names: "
+msgstr "مولا ماٴين"
 
 #: src/client/client.cpp
 #, fuzzy
@@ -1539,7 +1613,7 @@ msgstr "سدڠ ممواتکن تيکستور..."
 msgid "Rebuilding shaders..."
 msgstr "سدڠ ممبينا سمولا ڤمبايڠ..."
 
-#: src/client/client.cpp src/util/screenshot.cpp
+#: src/client/client.cpp src/gui/guiEngine.cpp src/util/screenshot.cpp
 #, fuzzy, c-format
 msgid "Saved screenshot to \"%s\""
 msgstr "تڠکڤ لاير"
@@ -1576,6 +1650,11 @@ msgstr ""
 #: src/client/clientmedia.cpp src/client/game.cpp
 msgid "Media..."
 msgstr "سدڠ ممواتکن ميديا..."
+
+#: src/client/fontengine.cpp
+#, fuzzy
+msgid "Failed to find a valid font"
+msgstr "ݢاݢل ممبوک لامن سساوڠ"
 
 #: src/client/game.cpp src/client/render/pipeline.cpp src/client/shader.cpp
 #: src/server.cpp
@@ -1702,6 +1781,11 @@ msgid "Fast mode enabled (note: no 'fast' privilege)"
 msgstr "مود ڤرݢرقن ڤنتس دبوليهکن (نوت: تيادا کأيستيميواٴن 'ڤرݢرقن ڤنتس')"
 
 #: src/client/game.cpp
+#, c-format
+msgid "Files: %d / %d"
+msgstr ""
+
+#: src/client/game.cpp
 msgid "Fly mode disabled"
 msgstr "مود تربڠ دلومڤوهکن"
 
@@ -1731,11 +1815,13 @@ msgid "Item definitions..."
 msgstr "سدڠ منتعريفکن ايتم..."
 
 #: src/client/game.cpp
-msgid "KiB/s"
+#, fuzzy
+msgid "KiB"
 msgstr "KiB/s"
 
 #: src/client/game.cpp
-msgid "MiB/s"
+#, fuzzy
+msgid "MiB"
 msgstr "MiB/s"
 
 #: src/client/game.cpp
@@ -1786,6 +1872,11 @@ msgstr "سدڠ منوتوڤ..."
 #: src/client/game.cpp src/client/game_formspec.cpp
 msgid "Singleplayer"
 msgstr "ڤماٴين ڤرسأورڠن"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Size: %.2f %s"
+msgstr ""
 
 #: src/client/game.cpp
 msgid "Sound muted"
@@ -1876,6 +1967,7 @@ msgstr "رڠک داواي دتونجوقکن"
 msgid "Zoom currently disabled by game or mod"
 msgstr "زوم سدڠ دلومڤوهکن اوليه ڤرماٴينن اتاو مودس"
 
+#. TRANSLATORS: Game mode (server or singleplayer)
 #: src/client/game_formspec.cpp
 msgid "- Mode: "
 msgstr "- مود: "
@@ -1884,7 +1976,7 @@ msgstr "- مود: "
 msgid "- Public: "
 msgstr "- عوام: "
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: src/client/game_formspec.cpp
 msgid "- PvP: "
 msgstr "- PvP: "
@@ -1893,10 +1985,12 @@ msgstr "- PvP: "
 msgid "- Server Name: "
 msgstr "- نام ڤلاين: "
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Change Password"
 msgstr "توکر کات لالوان"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Continue"
 msgstr "تروسکن"
@@ -1930,10 +2024,12 @@ msgstr ""
 "- سنتوه دان تاريق⹁ تکن سکرين ڤاکاي جاري کدوا\n"
 " --> لتق ساتو ايتم دري تيندنن کدالم سلوت\n"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Exit to Menu"
 msgstr "کلوار کمينو"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short (OS = Operating System)
 #: src/client/game_formspec.cpp
 msgid "Exit to OS"
 msgstr "کلوار تروس ڤرماٴينن"
@@ -1966,6 +2062,7 @@ msgstr "ڤلاين جارق جاٴوه"
 msgid "Respawn"
 msgstr "جلما سمولا"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Sound Volume"
 msgstr "ککواتن بوڽي"
@@ -2005,10 +2102,29 @@ msgid "Profiler shown (page %d of %d)"
 msgstr "ڤمبوکه دتونجوقکن (هلامن %d دري %d)"
 
 #: src/client/keycode.cpp
+#, fuzzy
+msgid "A (Gamepad)"
+msgstr "ڤرماٴينن"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "B (Gamepad)"
+msgstr "ڤرماٴينن"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Back (Gamepad)"
+msgstr "ڤرماٴينن"
+
+#: src/client/keycode.cpp
 msgid "Backspace"
 msgstr "Backspace"
 
-#. ~ Usually paired with the Pause key
+#: src/client/keycode.cpp
+msgid "Bottom Face Button (Gamepad)"
+msgstr ""
+
+#. TRANSLATORS: Usually paired with the Pause key
 #: src/client/keycode.cpp
 #, fuzzy
 msgid "Break Key"
@@ -2019,6 +2135,10 @@ msgid "Caps Lock"
 msgstr "کونچي حروف بسر"
 
 #: src/client/keycode.cpp
+msgid "Circle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 #, fuzzy
 msgid "Clear Key"
 msgstr "ڤادم"
@@ -2027,6 +2147,28 @@ msgstr "ڤادم"
 #, fuzzy
 msgid "Control Key"
 msgstr "Ctrl"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Cross (Gamepad)"
+msgstr "ڤرماٴينن"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "D-Pad Down"
+msgstr "Page down"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Left"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Up"
+msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2041,6 +2183,26 @@ msgstr ""
 #, fuzzy
 msgid "End Key"
 msgstr "Menu"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d +"
+msgstr "ڤرماٴينن"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d -"
+msgstr "ڤرماٴينن"
+
+#: src/client/keycode.cpp
+#, c-format
+msgid "Gamepad Button %d"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Guide (Gamepad)"
+msgstr "ڤرماٴينن"
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2071,6 +2233,35 @@ msgid "Left Control"
 msgstr "Ctrl کيري"
 
 #: src/client/keycode.cpp
+msgid "Left Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Button"
+msgstr "جنيس کايو بديق"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Down"
+msgstr "ID کايو بديق"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Left"
+msgstr "جنيس کايو بديق"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Right"
+msgstr "جنيس کايو بديق"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Up"
+msgstr "جنيس کايو بديق"
+
+#: src/client/keycode.cpp
 msgid "Left Menu"
 msgstr "مينو کيري"
 
@@ -2078,7 +2269,17 @@ msgstr "مينو کيري"
 msgid "Left Shift"
 msgstr "Shift کيري"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Shoulder"
+msgstr "Shift کيري"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Trigger"
+msgstr "Ctrl کيري"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Left Windows"
 msgstr "Windows کيري"
@@ -2092,10 +2293,18 @@ msgstr "Menu"
 msgid "Middle Click"
 msgstr ""
 
+#. TRANSLATORS: This is for mouse buttons without an intuitive description. %d is the number of the button.
+#: src/client/keycode.cpp
+#, c-format
+msgid "Mouse Button %d"
+msgstr ""
+
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X1"
 msgstr ""
 
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X2"
 msgstr ""
@@ -2174,7 +2383,7 @@ msgstr "Page down"
 msgid "Page Up"
 msgstr "Page up"
 
-#. ~ Usually paired with the Break key
+#. TRANSLATORS: Usually paired with the Break key
 #: src/client/keycode.cpp
 #, fuzzy
 msgid "Pause Key"
@@ -2184,7 +2393,15 @@ msgstr "Pause"
 msgid "Play"
 msgstr "مولا ماٴين"
 
-#. ~ "Print screen" key
+#: src/client/keycode.cpp
+msgid "Primary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Primary Right Paddle"
+msgstr ""
+
+#. TRANSLATORS: "Print screen" key
 #: src/client/keycode.cpp
 msgid "Print"
 msgstr "Print Screen"
@@ -2209,6 +2426,34 @@ msgid "Right Control"
 msgstr "Ctrl کانن"
 
 #: src/client/keycode.cpp
+msgid "Right Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Button"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Down"
+msgstr "ID کايو بديق"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Left"
+msgstr "جنيس کايو بديق"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Right"
+msgstr "جنيس کايو بديق"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Up"
+msgstr "جنيس کايو بديق"
+
+#: src/client/keycode.cpp
 msgid "Right Menu"
 msgstr "مينو کانن"
 
@@ -2216,7 +2461,17 @@ msgstr "مينو کانن"
 msgid "Right Shift"
 msgstr "Shift کانن"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Shoulder"
+msgstr "Shift کانن"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Trigger"
+msgstr "Ctrl کانن"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Right Windows"
 msgstr "Windows کانن"
@@ -2229,6 +2484,14 @@ msgstr ""
 #: src/client/keycode.cpp
 msgid "Scroll Lock"
 msgstr "کونچي تاتل"
+
+#: src/client/keycode.cpp
+msgid "Secondary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Secondary Right Paddle"
+msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2246,12 +2509,44 @@ msgstr "سلاڠ"
 
 #: src/client/keycode.cpp
 #, fuzzy
+msgid "Square (Gamepad)"
+msgstr "نام ڤلاين ڤرماٴينن"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Start (Gamepad)"
+msgstr "مولاکن ڤرماٴينن"
+
+#: src/client/keycode.cpp
+#, fuzzy
 msgid "Tab Key"
 msgstr "ککونچي سلينڤ"
 
 #: src/client/keycode.cpp
+msgid "Top Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Touchpad Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Triangle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Up Arrow"
 msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "X (Gamepad)"
+msgstr "ڤرماٴينن"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Y (Gamepad)"
+msgstr "ڤرماٴينن"
 
 #: src/client/minimap.cpp
 msgid "Minimap hidden"
@@ -2276,6 +2571,10 @@ msgstr "ڤتا ميني دالم مود تيکستور"
 msgid "Failed to create the texture \"%s\" for the rendering pipeline."
 msgstr ""
 
+#: src/client/renderingengine.cpp
+msgid "Could not initialize any supported video driver!"
+msgstr ""
+
 #: src/client/shader.cpp
 #, fuzzy, c-format
 msgid "Failed to compile the \"%s\" shader."
@@ -2286,12 +2585,14 @@ msgstr "ݢاݢل ممبوک لامن سساوڠ"
 msgid "Failed to find \"%s\" shader files."
 msgstr "ݢاݢل ممبوک لامن سساوڠ"
 
+#. TRANSLATORS: GLSL = OpenGL Shading Language
 #: src/client/shader.cpp
 #, fuzzy
 msgid "GLSL is not supported by the driver"
 msgstr "سيستم بوڽي تيدق دسوکوڠ دبيناٴن اين"
 
-#. ~ Error when a mod is missing dependencies. Ex: "Mod Title is missing: mod1, mod2, mod3"
+#. TRANSLATORS: Error when a mod is missing dependencies.
+#. Example: "Mod Title is missing: mod1, mod2, mod3"
 #: src/content/mod_configuration.cpp
 #, c-format
 msgid "%s is missing:"
@@ -2324,6 +2625,10 @@ msgstr "ݢاݢل ممبوک لامن سساوڠ"
 
 #: src/gui/guiChatConsole.cpp
 msgid "Opening webpage"
+msgstr ""
+
+#: src/gui/guiEngine.cpp
+msgid "Failed to load main menu script!"
 msgstr ""
 
 #: src/gui/guiFormSpecMenu.cpp
@@ -2497,7 +2802,7 @@ msgstr ""
 msgid "Invalid password"
 msgstr "کات لالوان لام"
 
-#. ~ DO NOT TRANSLATE THIS LITERALLY!
+#. TRANSLATORS: DO NOT TRANSLATE THIS LITERALLY!
 #. This is a special string which needs to contain the translation's
 #. language code (e.g. "de" for German).
 #: src/network/clientpackethandler.cpp src/script/lua_api/l_client.cpp
@@ -2556,6 +2861,10 @@ msgstr ""
 msgid ""
 "Your client's version is not supported.\n"
 "Please contact the server administrator."
+msgstr ""
+
+#: src/script/lua_api/l_mainmenu.cpp
+msgid "Copied to clipboard!"
 msgstr ""
 
 #: src/server.cpp
@@ -2731,6 +3040,11 @@ msgid "Acceleration of gravity, in nodes per second per second."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Actions and Keybindings"
+msgstr "ميديا جارق جاٴوه"
+
+#: src/settings_translation_file.cpp
 msgid "Active Block Modifiers"
 msgstr ""
 
@@ -2854,11 +3168,13 @@ msgid "Anticheat movement tolerance"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Append item name"
-msgstr "تمبه نام ايتم"
+#, fuzzy
+msgid "Append item name to tooltips"
+msgstr "تمبه نام ايتم کتيڤ التن."
 
 #: src/settings_translation_file.cpp
-msgid "Append item name to tooltip."
+#, fuzzy
+msgid "Append the full item name to the tooltip of item stacks."
 msgstr "تمبه نام ايتم کتيڤ التن."
 
 #: src/settings_translation_file.cpp
@@ -2919,11 +3235,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"At this distance the server will perform a simpler and cheaper occlusion "
-"check.\n"
-"Smaller values potentially improve performance, at the expense of "
-"temporarily visible\n"
-"rendering glitches (missing blocks).\n"
+"At this distance the server will consider blocks as \"far away\".\n"
+"It will perform simpler and cheaper occlusion checks, update\n"
+"low priority block updates lazily, and limit the blocks sent to the\n"
+"client in one roundtrip.\n"
 "This is especially useful for very large viewing range (upwards of 500).\n"
 "Stated in MapBlocks (16 nodes)."
 msgstr ""
@@ -3386,6 +3701,11 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage flash"
+msgstr "بنديرا جان ڤتا"
+
+#: src/settings_translation_file.cpp
 msgid "Debug log file size threshold"
 msgstr ""
 
@@ -3712,6 +4032,11 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
+msgid "Enable SSCSM"
+msgstr "ممبوليهکن سموا"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
 msgid "Enable a confirmation dialog before closing."
 msgstr "ممبوليهکن انيماسي ايتم دالم اينۏينتوري."
 
@@ -3737,14 +4062,6 @@ msgstr "ممبوليهکن تتيڠکڤ کونسول"
 #, fuzzy
 msgid "Enable dynamic shadows"
 msgstr "بايڠ فون"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks"
-msgstr "ممبوليهکن کايو بديق"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks. Requires a restart to take effect"
-msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Enable mod channels support."
@@ -3976,6 +4293,10 @@ msgstr ""
 "سنتوهن ڤرتام."
 
 #: src/settings_translation_file.cpp
+msgid "Flashing of the screen when taking damage."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Floatland density"
 msgstr ""
 
@@ -4156,9 +4477,12 @@ msgid "GUI scaling filter"
 msgstr "ڤناڤيس سکال GUI"
 
 #: src/settings_translation_file.cpp
-#, fuzzy
-msgid "Gamepads"
-msgstr "ڤرماٴينن"
+msgid "Gamepads and Joysticks"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Gamma"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Global callbacks"
@@ -4774,24 +5098,21 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Joystick ID"
-msgstr "ID کايو بديق"
-
-#: src/settings_translation_file.cpp
 msgid "Joystick button repetition interval"
 msgstr "سلڠ ماس ڤڠاولڠن بوتڠ کايو بديق"
-
-#: src/settings_translation_file.cpp
-#, fuzzy
-msgid "Joystick dead zone"
-msgstr "جنيس کايو بديق"
 
 #: src/settings_translation_file.cpp
 msgid "Joystick frustum sensitivity"
 msgstr "کڤيکاٴن فروستوم کايو بديق"
 
 #: src/settings_translation_file.cpp
-msgid "Joystick type"
+#, fuzzy
+msgid "Joystick inner dead zone"
+msgstr "جنيس کايو بديق"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Joystick outer dead zone"
 msgstr "جنيس کايو بديق"
 
 #: src/settings_translation_file.cpp
@@ -4875,6 +5196,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for opening the pause menu in-game.\n"
+"Pressing the escape key always opens the pause menu."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for placing an item/block or for using something.\n"
 "(Note: The actual meaning might vary on a per-game basis.)"
 msgstr ""
@@ -4900,11 +5227,15 @@ msgid "Key for toggling the display of the profiler. Used for development."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Keybindings"
+msgid "Keyboard and Mouse"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Keyboard and Mouse"
+msgid "Keyboard camera speed"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Keyboard-controlled camera rotation speed, in degrees per second."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5096,6 +5427,23 @@ msgid "Local command"
 msgstr "ارهن تمڤتن"
 
 #: src/settings_translation_file.cpp
+msgid "Look down"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Look left"
+msgstr "ڤرݢرقن ڤنتس"
+
+#: src/settings_translation_file.cpp
+msgid "Look right"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Look up"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Lower Y limit of dungeons."
 msgstr ""
 
@@ -5112,6 +5460,16 @@ msgid ""
 "Make fog and sky colors depend on daytime (dawn/sunset) and view direction."
 msgstr ""
 "بواتکن ورنا کابوت دان لاڠيت برݢنتوڠ کڤد وقتو (فجر\\ماتاهاري) دان اره ڤندڠ."
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Make volumetrics weaker against closer objects to emulate physical "
+"volumetrics."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Makes the color of light fog more saturated."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Map Compression Level for Disk Storage"
@@ -5690,6 +6048,10 @@ msgid "Open inventory"
 msgstr "اينۏينتوري"
 
 #: src/settings_translation_file.cpp
+msgid "Open pause menu"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Open the pause menu when the window's focus is lost. Does not pause if a "
 "formspec is\n"
@@ -6235,6 +6597,13 @@ msgstr "فاٴيل سناراي ڤلاين"
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Set proxy to use by cURL. This is an URI just like the *_proxy environment "
+"variables.\n"
+"Note that this will not apply to Luanti's in-game protocol."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Set the default tilt of Sun/Moon orbit in degrees.\n"
 "Games may change orbit tilt via API.\n"
 "Value of 0 means no tilt / vertical orbit."
@@ -6243,8 +6612,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Set the exposure compensation in EV units.\n"
-"Value of 0.0 (default) means no exposure compensation.\n"
-"Range: from -1 to 1.0"
+"Value of 0.0 (default) means no exposure compensation."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6258,6 +6626,12 @@ msgstr ""
 msgid ""
 "Set the maximum length of a chat message (in characters) sent by clients."
 msgstr "تتڤکن ڤنجڠ اکسارا مکسيموم ميسيج سيمبڠ دهنتر اوليه کليئن."
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Set the post processing gamma value.\n"
+"Higher values give lower contrast and vice versa."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6392,7 +6766,9 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Simulate translucency when looking at foliage in the sunlight."
+msgid ""
+"Simulate translucency when looking at foliage in the sunlight.\n"
+"It is recommended to use this with setting \"leaves_style\" set to \"fancy\"."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6650,11 +7026,6 @@ msgid "The URL for the content repository"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-#, fuzzy
-msgid "The dead zone of the joystick"
-msgstr "ڤڠنل ڤستي کايو بديق يڠ دݢوناکن"
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The default format in which profiles are being saved,\n"
 "when calling `/profiler save [format]` without format."
@@ -6683,10 +7054,6 @@ msgid ""
 "Known from the classic Luanti mobile controls.\n"
 "Combat is more or less impossible."
 msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "The identifier of the joystick to use"
-msgstr "ڤڠنل ڤستي کايو بديق يڠ دݢوناکن"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6827,10 +7194,6 @@ msgstr ""
 "ڤماٴين منکن بوتڠ تتيکوس کانن تنڤ ملڤسکنڽ."
 
 #: src/settings_translation_file.cpp
-msgid "The type of joystick"
-msgstr "جنيس کايو بديق"
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The vertical distance over which heat drops by 20 if 'altitude_chill' is\n"
 "enabled. Also, the vertical distance over which humidity drops by 10 if\n"
@@ -6865,6 +7228,19 @@ msgstr "کلاجوان ماس"
 #, fuzzy
 msgid "Timeout for client to remove unused map data from memory, in seconds."
 msgstr "حد ماس اونتوق کليئن ممبواڠ ڤتا يڠ تيدق دݢوناکن دري ميموري."
+
+#: src/settings_translation_file.cpp
+msgid "Tint sunlight during sunrise/sunset."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Tinted fog"
+msgstr "توݢول کابوت"
+
+#: src/settings_translation_file.cpp
+msgid "Tinted sunlight"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
@@ -7257,7 +7633,12 @@ msgstr "بيڠکاي ڤر ساٴت (FPS) مکسيما اڤابيلا ڤرماٴ�
 
 #: src/settings_translation_file.cpp
 #, fuzzy
-msgid "Volumetric lighting"
+msgid "Volumetric Depth Attenuation"
+msgstr "ڤنچهاياٴن لمبوت"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Volumetric Lighting"
 msgstr "ڤنچهاياٴن لمبوت"
 
 #: src/settings_translation_file.cpp
@@ -7323,7 +7704,9 @@ msgid "Weblink color"
 msgstr "ورنا کوتق ڤميليهن"
 
 #: src/settings_translation_file.cpp
-msgid "When enabled, liquid reflections are simulated."
+msgid ""
+"When enabled, crude liquid reflections are simulated.\n"
+"Wave height, length and speed will affect these reflections."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -7362,6 +7745,12 @@ msgstr ""
 "تتڤن اين هاڽ دݢوناکن جک ڤناڤيسن بيلينيار\\تريلينيار\\انيسوتروڤيک دبوليهکن.\n"
 "تتڤن اين جوݢ دݢوناکن سباݢاي ساٴيز تيکستور نود اساس اونتوق\n"
 "ڤڽسوان اٴوتوماتيک باݢي تيکستور جاجرن دنيا."
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Where to enable server-sent client-side modding (SSCSM).\n"
+"Warning: Experimental."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7538,16 +7927,24 @@ msgstr ""
 msgid "cURL parallel limit"
 msgstr ""
 
+#: src/settings_translation_file.cpp
+msgid "cURL proxy address"
+msgstr ""
+
 #: src/util/screenshot.cpp
 #, c-format
 msgid "Failed to save screenshot to \"%s\""
 msgstr ""
 
-#~ msgid "Provided world path doesn't exist: "
-#~ msgstr "لالوان دنيا دبري تيدق وجود: "
+#~ msgid "Enable joysticks"
+#~ msgstr "ممبوليهکن کايو بديق"
 
-#~ msgid "Y spread"
-#~ msgstr "سيبرن Y"
+#, fuzzy
+#~ msgid "The dead zone of the joystick"
+#~ msgstr "ڤڠنل ڤستي کايو بديق يڠ دݢوناکن"
 
-#~ msgid "Z spread"
-#~ msgstr "سيبرن Z"
+#~ msgid "The identifier of the joystick to use"
+#~ msgstr "ڤڠنل ڤستي کايو بديق يڠ دݢوناکن"
+
+#~ msgid "The type of joystick"
+#~ msgstr "جنيس کايو بديق"

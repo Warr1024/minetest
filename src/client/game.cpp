@@ -10,7 +10,6 @@
 #include "client/inputhandler.h"
 #include "client/texturepaths.h"
 #include "client/keys.h"
-#include "client/joystick_controller.h"
 #include "client/mapblock_mesh.h"
 #include "client/sound.h"
 #include "clientmap.h"
@@ -381,7 +380,7 @@ Game::Game() :
 
 	const char *settings[] = {
 		"chat_log_level", "doubletap_jump", "toggle_sneak_key", "toggle_aux1_key",
-		"enable_joysticks", "enable_fog", "mouse_sensitivity", "joystick_frustum_sensitivity",
+		"enable_fog", "mouse_sensitivity",
 		"repeat_place_time", "repeat_dig_time", "noclip", "free_move", "fog_start",
 		"cinematic", "cinematic_camera_smoothing", "camera_smoothing", "invert_mouse",
 		"enable_hotbar_mouse_wheel", "invert_hotbar_mouse_wheel", "pause_on_lost_focus",
@@ -423,8 +422,7 @@ bool Game::startup(volatile std::sig_atomic_t *kill,
 		InputHandler *input,
 		RenderingEngine *rendering_engine,
 		const GameStartData &start_data,
-		std::string &error_message,
-		bool *reconnect,
+		GameErrorData &errordata,
 		ChatBackend *chat_backend)
 {
 
@@ -432,8 +430,7 @@ bool Game::startup(volatile std::sig_atomic_t *kill,
 	m_rendering_engine        = rendering_engine;
 	device                    = m_rendering_engine->get_raw_device();
 	this->kill                = kill;
-	this->error_message       = &error_message;
-	reconnect_requested       = reconnect;
+	this->errordata           = &errordata;
 	this->input               = input;
 	this->chat_backend        = chat_backend;
 	simple_singleplayer_mode  = start_data.isSinglePlayer();
@@ -493,7 +490,7 @@ void Game::run()
 
 	draw_times.reset();
 
-	set_light_table(g_settings->getFloat("display_gamma"));
+	set_light_curve(g_settings->getFloat("display_gamma"));
 
 	m_touch_simulate_aux1 = g_settings->getBool("fast_move")
 			&& client->checkPrivilege("fast");
@@ -622,6 +619,13 @@ void Game::shutdown()
 
 	if (g_touchcontrols)
 		g_touchcontrols->hide();
+
+	// Restore normal mouse cursor
+	auto *cur_control = device->getCursorControl();
+	if (cur_control) {
+		cur_control->setVisible(true);
+		cur_control->setRelativeMode(false);
+	}
 
 	clouds.reset();
 
@@ -766,14 +770,13 @@ bool Game::createServer(const std::string &map_dir,
 			<< " -- Listening on all addresses." << std::endl;
 	}
 	if (bind_addr.isIPv6() && !g_settings->getBool("enable_ipv6")) {
-		*error_message = fmtgettext("Unable to listen on %s because IPv6 is disabled",
-			bind_addr.serializeString().c_str());
-		errorstream << *error_message << std::endl;
+		errordata->setError(fmtgettext("Unable to listen on %s because IPv6 is disabled",
+			bind_addr.serializeString().c_str()));
 		return false;
 	}
 
 	server = new Server(map_dir, gamespec, simple_singleplayer_mode, bind_addr,
-			false, nullptr, error_message);
+			false, nullptr, &(errordata->message));
 
 	auto start_thread = runInThread([=] {
 		server->start();
@@ -825,6 +828,8 @@ void Game::copyServerClientCache()
 
 bool Game::createClient(const GameStartData &start_data)
 {
+	std::string *error_message = &(errordata->message);
+
 	showOverlayMessage(N_("Creating client..."), 0, 10);
 
 	draw_control = new MapDrawControl();
@@ -838,8 +843,7 @@ bool Game::createClient(const GameStartData &start_data)
 	if (!could_connect) {
 		if (error_message->empty() && !connect_aborted) {
 			// Should not happen if error messages are set properly
-			*error_message = gettext("Connection failed for unknown reason");
-			errorstream << *error_message << std::endl;
+			errordata->setError(gettext("Connection failed for unknown reason"));
 		}
 		return false;
 	}
@@ -847,8 +851,7 @@ bool Game::createClient(const GameStartData &start_data)
 	if (!getServerContent(&connect_aborted)) {
 		if (error_message->empty() && !connect_aborted) {
 			// Should not happen if error messages are set properly
-			*error_message = gettext("Connection failed for unknown reason");
-			errorstream << *error_message << std::endl;
+			errordata->setError(gettext("Connection failed for unknown reason"));
 		}
 		return false;
 	}
@@ -876,6 +879,8 @@ bool Game::createClient(const GameStartData &start_data)
 
 	// Update cached textures, meshes and materials
 	client->afterContentReceived();
+	// Load received SSCSMs
+	client->loadSSCSM();
 
 	/* Camera
 	 */
@@ -957,6 +962,8 @@ bool Game::initGui()
 bool Game::connectToServer(const GameStartData &start_data,
 		bool *connect_ok, bool *connection_aborted)
 {
+	std::string *error_message = &(errordata->message);
+
 	*connect_ok = false;	// Let's not be overly optimistic
 	*connection_aborted = false;
 	const auto &address_name = start_data.address;
@@ -1063,12 +1070,8 @@ bool Game::connectToServer(const GameStartData &start_data,
 			if (*connection_aborted)
 				break;
 
-			if (client->accessDenied()) {
-				*error_message = fmtgettext("Access denied. Reason: %s", client->accessDeniedReason().c_str());
-				*reconnect_requested = client->reconnectRequested();
-				errorstream << *error_message << std::endl;
+			if (!checkConnection())
 				break;
-			}
 
 			if (input->cancelPressed()) {
 				*connection_aborted = true;
@@ -1131,8 +1134,8 @@ bool Game::getServerContent(bool *aborted)
 			return false;
 
 		if (client->getState() < LC_Init) {
-			*error_message = gettext("Client disconnected");
-			errorstream << *error_message << std::endl;
+			errordata->message = gettext("Client disconnected");
+			errorstream << errordata->message << std::endl;
 			return false;
 		}
 
@@ -1141,6 +1144,13 @@ bool Game::getServerContent(bool *aborted)
 			infostream << "Connect aborted [Escape]" << std::endl;
 			return false;
 		}
+
+		const char* units[] = {gettext("KiB"), gettext("MiB")};
+		auto adjust_unit = [&units](float &v) -> const char* {
+			int i = (v > 900) ? 1 : 0;
+			v /= (i == 1) ? 1024.0f : 1.0f;
+			return units[i];
+		};
 
 		// Display status
 		int progress = 25;
@@ -1156,30 +1166,28 @@ bool Game::getServerContent(bool *aborted)
 		} else {
 			std::ostringstream message;
 			std::fixed(message);
-			message.precision(0);
-			float receive = client->mediaReceiveProgress() * 100;
+			std::string sub_message;
 			message << gettext("Media...");
-			if (receive > 0)
-				message << " " << receive << "%";
-			message.precision(2);
+			float received_ratio = 0.f;
+			s32 received = 0, total = 0;
+			size_t received_size = 0;
+			if (client->mediaReceiveProgress(received, total, received_size)) {
+				if (total > 0)
+					received_ratio = ((float) received) / total;
 
-			if ((USE_CURL == 0) ||
-					(!g_settings->getBool("enable_remote_media_server"))) {
-				float cur = client->getCurRate();
-				std::string cur_unit = gettext("KiB/s");
+				message.precision(0);
+				message << " " << received_ratio * 100.f << "%";
 
-				if (cur > 900) {
-					cur /= 1024.0;
-					cur_unit = gettext("MiB/s");
-				}
-
-				message << " (" << cur << ' ' << cur_unit << ")";
+				float adjusted_size = ((float) received_size) / 1024.0f;
+				auto unit = adjust_unit(adjusted_size);
+				sub_message = fmtgettext("Files: %d / %d", received, total) + "\n"
+							+ fmtgettext("Size: %.2f %s", adjusted_size, unit);
 			}
 
 			// 30% -> 65%
-			progress = 30 + std::ceil(client->mediaReceiveProgress() * 35 + 0.5f);
+			progress = 30 + std::ceil(received_ratio * 35 + 0.5f);
 			m_rendering_engine->draw_load_screen(utf8_to_wide(message.str()), guienv,
-				texture_src, dtime, progress);
+					texture_src, dtime, progress, nullptr, utf8_to_wide(sub_message));
 		}
 	}
 	framemarker.end();
@@ -1210,12 +1218,17 @@ inline void Game::updateInteractTimers(f32 dtime)
 
 /* returns false if game should exit, otherwise true
  */
-inline bool Game::checkConnection()
+bool Game::checkConnection()
 {
 	if (client->accessDenied()) {
-		*error_message = fmtgettext("Access denied. Reason: %s", client->accessDeniedReason().c_str());
-		*reconnect_requested = client->reconnectRequested();
-		errorstream << *error_message << std::endl;
+		// May be mod-provided, thus may contain color and translation
+		const std::string reason = wide_to_utf8(
+			unescape_translate(utf8_to_wide(client->accessDeniedReason())));
+
+		errordata->setError(
+			fmtgettext("Access denied. Reason: %s", reason.c_str()),
+			client->reconnectRequested()
+		);
 		return false;
 	}
 
@@ -1391,7 +1404,7 @@ void Game::processUserInput(f32 dtime)
 	}
 
 	if (!guienv->hasFocus(gui_chat_console.get()) && gui_chat_console->isOpen()
-		&& !gui_chat_console->isMyChild(guienv->getFocus()))
+		&& !gui_chat_console->isMyDescendant(guienv->getFocus()))
 	{
 		gui_chat_console->closeConsoleAtOnce();
 	}
@@ -1984,9 +1997,10 @@ bool Game::isTouchShootlineUsed() const
 
 void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 {
+	f32 sens_scale = getSensitivityScaleFactor();
+
 	if (g_touchcontrols) {
 		// User setting is already applied by TouchControls.
-		f32 sens_scale = getSensitivityScaleFactor();
 		cam->camera_yaw   += g_touchcontrols->getYawChange()   * sens_scale;
 		cam->camera_pitch += g_touchcontrols->getPitchChange() * sens_scale;
 	} else {
@@ -1997,7 +2011,6 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 			dist.Y = -dist.Y;
 		}
 
-		f32 sens_scale = getSensitivityScaleFactor();
 		cam->camera_yaw   -= dist.X * m_cache_mouse_sensitivity * sens_scale;
 		cam->camera_pitch += dist.Y * m_cache_mouse_sensitivity * sens_scale;
 
@@ -2005,12 +2018,17 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 			input->setMousePos(center.X, center.Y);
 	}
 
-	if (m_cache_enable_joysticks) {
-		f32 sens_scale = getSensitivityScaleFactor();
-		f32 c = m_cache_joystick_frustum_sensitivity * dtime * sens_scale;
-		cam->camera_yaw -= input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL) * c;
-		cam->camera_pitch += input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL) * c;
-	}
+	// Keyboard look
+	const f32 rate = dtime * sens_scale;
+
+	if (input->isKeyDown(KeyType::CAMERA_YAW_LEFT))
+		cam->camera_yaw += input->getAxisValue(KeyType::CAMERA_YAW_LEFT) * rate;
+	if (input->isKeyDown(KeyType::CAMERA_YAW_RIGHT))
+		cam->camera_yaw -= input->getAxisValue(KeyType::CAMERA_YAW_RIGHT) * rate;
+	if (input->isKeyDown(KeyType::CAMERA_PITCH_UP))
+		cam->camera_pitch -= input->getAxisValue(KeyType::CAMERA_PITCH_UP) * rate;
+	if (input->isKeyDown(KeyType::CAMERA_PITCH_DOWN))
+		cam->camera_pitch += input->getAxisValue(KeyType::CAMERA_PITCH_DOWN) * rate;
 
 	cam->camera_pitch = rangelim(cam->camera_pitch, -90, 90);
 }
@@ -2037,11 +2055,18 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 
 	//TimeTaker tt("update player control", NULL, PRECISION_NANO);
 
+	float forward_value = getAxisValue(KeyType::FORWARD);
+	if (player->getPlayerSettings().continuous_forward &&
+			client->activeObjectsReceived() && !player->isDead()) {
+		// autoforward if set: move at maximum speed
+		forward_value = 1.0f;
+	}
+
 	PlayerControl control(
-		isKeyDown(KeyType::FORWARD),
-		isKeyDown(KeyType::BACKWARD),
-		isKeyDown(KeyType::LEFT),
-		isKeyDown(KeyType::RIGHT),
+		forward_value,
+		getAxisValue(KeyType::BACKWARD),
+		getAxisValue(KeyType::LEFT),
+		getAxisValue(KeyType::RIGHT),
 		isKeyDown(KeyType::JUMP) || player->getAutojump(),
 		getTogglableKeyState(KeyType::AUX1,  m_cache_toggle_aux1_key, player->control.aux1),
 		getTogglableKeyState(KeyType::SNEAK, allow_sneak_toggle,      player->control.sneak),
@@ -2049,20 +2074,9 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		isKeyDown(KeyType::DIG),
 		isKeyDown(KeyType::PLACE),
 		cam.camera_pitch,
-		cam.camera_yaw,
-		input->getJoystickSpeed(),
-		input->getJoystickDirection()
+		cam.camera_yaw
 	);
 	control.setMovementFromKeys();
-
-	// autoforward if set: move at maximum speed
-	if (player->getPlayerSettings().continuous_forward &&
-			client->activeObjectsReceived() && !player->isDead()) {
-		control.movement_speed = 1.0f;
-		// sideways movement only
-		float dx = std::sin(control.movement_direction);
-		control.movement_direction = std::atan2(dx, 1.0f);
-	}
 
 	/* For touch, simulate holding down AUX1 (fast move) if the user has
 	 * the fast_move setting toggled on. If there is an aux1 key defined for
@@ -2130,11 +2144,12 @@ static void pauseNodeAnimation(PausedNodesList &paused, scene::ISceneNode *node)
 	if (node->getType() != scene::ESNT_ANIMATED_MESH)
 		return;
 	auto animated_node = static_cast<scene::AnimatedMeshSceneNode *>(node);
-	float speed = animated_node->getAnimationSpeed();
-	if (!speed)
-		return;
-	paused.emplace_back(grab(animated_node), speed);
-	animated_node->setAnimationSpeed(0.0f);
+	std::vector<PausedNode::Track> tracks;
+	for (auto &[track, spec] : animated_node->getAnimation().tracks) {
+		tracks.emplace_back(PausedNode::Track{track, spec.fps});
+		spec.fps = 0.0f;
+	}
+	paused.emplace_back(PausedNode{grab(animated_node), tracks});
 }
 
 void Game::pauseAnimation()
@@ -2144,8 +2159,12 @@ void Game::pauseAnimation()
 
 void Game::resumeAnimation()
 {
-	for (auto &&pair: paused_animated_nodes)
-		pair.first->setAnimationSpeed(pair.second);
+	for (const auto &paused: paused_animated_nodes) {
+		for (const PausedNode::Track &track: paused.tracks) {
+			auto &spec = paused.node->getAnimation().tracks[track.id];
+			spec.fps = track.fps;
+		}
+	}
 	paused_animated_nodes.clear();
 }
 
@@ -2269,7 +2288,7 @@ void Game::handleClientEvent_HudAdd(ClientEvent *event, CameraOrientation *cam)
 		return;
 	}
 
-	HudElement *e = new HudElement;
+	auto e = std::make_unique<HudElement>();
 	e->type   = static_cast<HudElementType>(event->hudadd->type);
 	e->pos    = event->hudadd->pos;
 	e->name   = event->hudadd->name;
@@ -2285,7 +2304,8 @@ void Game::handleClientEvent_HudAdd(ClientEvent *event, CameraOrientation *cam)
 	e->z_index   = event->hudadd->z_index;
 	e->text2     = event->hudadd->text2;
 	e->style     = event->hudadd->style;
-	m_hud_server_to_client[server_id] = player->addHud(e);
+	e->hideable  = event->hudadd->hideable;
+	m_hud_server_to_client[server_id] = player->hud.add(std::move(e));
 
 	delete event->hudadd;
 }
@@ -2296,8 +2316,7 @@ void Game::handleClientEvent_HudRemove(ClientEvent *event, CameraOrientation *ca
 
 	auto i = m_hud_server_to_client.find(event->hudrm.id);
 	if (i != m_hud_server_to_client.end()) {
-		HudElement *e = player->removeHud(i->second);
-		delete e;
+		player->hud.remove(i->second);
 		m_hud_server_to_client.erase(i);
 	}
 
@@ -2311,7 +2330,7 @@ void Game::handleClientEvent_HudChange(ClientEvent *event, CameraOrientation *ca
 
 	auto i = m_hud_server_to_client.find(event->hudchange->id);
 	if (i != m_hud_server_to_client.end()) {
-		e = player->getHud(i->second);
+		e = player->hud.get(i->second);
 	}
 
 	if (e == nullptr) {
@@ -2352,6 +2371,8 @@ void Game::handleClientEvent_HudChange(ClientEvent *event, CameraOrientation *ca
 		CASE_SET(HUD_STAT_TEXT2, text2, sdata);
 
 		CASE_SET(HUD_STAT_STYLE, style, data);
+
+		CASE_SET(HUD_STAT_HIDEABLE, hideable, data);
 
 		case HudElementStat_END:
 			break;
@@ -2664,6 +2685,7 @@ void Game::processPlayerInteraction(f32 dtime, bool show_hud)
 
 	switch (camera->getCameraMode()) {
 	case CAMERA_MODE_ANY:
+	case CameraMode_END:
 		assert(false);
 		break;
 	case CAMERA_MODE_FIRST:
@@ -2797,12 +2819,6 @@ void Game::processPlayerInteraction(f32 dtime, bool show_hud)
 	// Ensure DIG & PLACE are marked as handled
 	wasKeyDown(KeyType::DIG);
 	wasKeyDown(KeyType::PLACE);
-
-	input->joystick.clearWasKeyPressed(KeyType::DIG);
-	input->joystick.clearWasKeyPressed(KeyType::PLACE);
-
-	input->joystick.clearWasKeyReleased(KeyType::DIG);
-	input->joystick.clearWasKeyReleased(KeyType::PLACE);
 }
 
 
@@ -3402,7 +3418,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		Calculate general brightness
 	*/
 	u32 daynight_ratio = client->getEnv().getDayNightRatio();
-	float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
+	float time_brightness = decode_light_f((float)daynight_ratio / 1000.0f);
 	float direct_brightness;
 	bool sunlight_seen;
 
@@ -3491,7 +3507,9 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		// Update wielded tool
 		ItemStack selected_item, hand_item;
 		ItemStack &tool_item = player->getWieldedItem(&selected_item, &hand_item);
-		camera->wield(tool_item);
+
+		bool skip_anim = client->consumeSkipNextWieldAnimation();
+		camera->wield(tool_item, !skip_anim);
 	}
 
 	/*
@@ -3723,10 +3741,8 @@ void Game::readSettings()
 	m_cache_doubletap_jump               = g_settings->getBool("doubletap_jump");
 	m_cache_toggle_sneak_key             = g_settings->getBool("toggle_sneak_key");
 	m_cache_toggle_aux1_key              = g_settings->getBool("toggle_aux1_key");
-	m_cache_enable_joysticks             = g_settings->getBool("enable_joysticks");
 	m_cache_enable_fog                   = g_settings->getBool("enable_fog");
 	m_cache_mouse_sensitivity            = g_settings->getFloat("mouse_sensitivity", 0.001f, 10.0f);
-	m_cache_joystick_frustum_sensitivity = std::max(g_settings->getFloat("joystick_frustum_sensitivity"), 0.001f);
 	m_repeat_place_time                  = g_settings->getFloat("repeat_place_time", 0.16f, 2.0f);
 	m_repeat_dig_time                    = g_settings->getFloat("repeat_dig_time", 0.0f, 2.0f);
 
@@ -3759,16 +3775,16 @@ void the_game(volatile std::sig_atomic_t *kill,
 		InputHandler *input,
 		RenderingEngine *rendering_engine,
 		const GameStartData &start_data,
-		std::string &error_message,
-		ChatBackend &chat_backend,
-		bool *reconnect_requested) // Used for local game
+		GameErrorData &errordata,
+		ChatBackend &chat_backend)
 {
 	Game game;
+	std::string &error_message = errordata.message;
 
 	try {
 
 		if (game.startup(kill, input, rendering_engine, start_data,
-				error_message, reconnect_requested, &chat_backend)) {
+				errordata, &chat_backend)) {
 			game.run();
 		}
 

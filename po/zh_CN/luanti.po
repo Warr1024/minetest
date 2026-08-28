@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Chinese (Simplified) (Minetest)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 23:13+0100\n"
-"PO-Revision-Date: 2026-01-20 16:27+0000\n"
-"Last-Translator: 玄枵 <ipmlosion@users.noreply.hosted.weblate.org>\n"
+"POT-Creation-Date: 2026-08-10 17:35+0200\n"
+"PO-Revision-Date: 2026-07-18 23:01+0000\n"
+"Last-Translator: y5nw <y5nw@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
 "projects/minetest/minetest/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.16-dev\n"
+"X-Generator: Weblate 2026.8.dev0\n"
 
 #: builtin/client/chatcommands.lua
 msgid "Clear the out chat queue"
@@ -66,12 +66,14 @@ msgstr "命令不可用： "
 msgid "Get help for commands (-t: output in chat)"
 msgstr "获取命令帮助 (-t: 在聊天栏输出)"
 
+#. TRANSLATORS: 'help' and 'all' mustn't be translated. cmd = command
 #: builtin/common/chatcommands.lua
 msgid ""
 "Use '.help <cmd>' to get more information, or '.help all' to list everything."
 msgstr ""
 "使用 '.help <cmd>' 获取该命令的更多信息，或使用 '.help all' 列出所有内容。"
 
+#. TRANSLATORS: Syntax of 'help' command. Don't translate anything except 'cmd' (=command)
 #: builtin/common/chatcommands.lua
 msgid "[all | <cmd>] [-t]"
 msgstr "[all | <命令>] [-t]"
@@ -125,11 +127,13 @@ msgid ""
 "2D noise: flag on.\n"
 "3D noise: flag off."
 msgstr ""
+"2D 噪声：标记已开启。\n"
+"3D 噪声：标记已关闭。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
 "Amplifies every octave by (amplitude of the previous octave * Persistence)."
-msgstr ""
+msgstr "按（前一八度的振幅 × 持续度）来放大每个八度（层）。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/content/dlg_install.lua
@@ -145,23 +149,23 @@ msgstr "取消"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Controls how many octaves (layers) the noise will have."
-msgstr ""
+msgstr "控制噪声的八度（层）数量。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
 "Each octave is a simple noise generator. Each one also adds more detail to "
 "the noise."
-msgstr ""
+msgstr "每个八度（层）都是一个简单的噪声发生器。每一层还会为噪声增加更多细节。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Finally, all of the octaves will be combined to generate the noise."
-msgstr ""
+msgstr "最后，所有八度（层）将组合在一起生成噪声。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
 "Having lots of octaves is not recommended because it increases terrain "
 "generation time."
-msgstr ""
+msgstr "不建议使用过多八度（层），因为这会增加地形生成时间。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Lacunarity"
@@ -171,35 +175,35 @@ msgstr "空白"
 msgid ""
 "Lower values make the terrain simple and higher values make the terrain "
 "rough."
-msgstr ""
+msgstr "值越低地形越简单，值越高地形越粗糙。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
 "Lower values make the terrain smooth and higher values make the terrain have "
 "fine detail."
-msgstr ""
+msgstr "值越低地形越平滑，值越高地形细节越精细。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
 "Lower values will result in smoother noise and higher values will result in "
 "rougher noise."
-msgstr ""
+msgstr "值越低噪声越平滑，值越高噪声越粗糙。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
 "Making 3D noise eased is not recommended because it significantly increases "
 "the load."
-msgstr ""
+msgstr "不建议平滑 3D 噪声，因为这会显著增加负载。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
 "Maps noise gradient values onto a quintic S-curve before performing "
 "interpolation."
-msgstr ""
+msgstr "在执行插值之前，先将噪声梯度值映射到五次 S 曲线上。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Octaves"
-msgstr "八音"
+msgstr "八度"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: src/settings_translation_file.cpp
@@ -208,11 +212,11 @@ msgstr "补偿"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Offsets the final noise by this value."
-msgstr ""
+msgstr "按此值偏移最终噪声。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Overrides the 'eased' flag based on the noise type."
-msgstr ""
+msgstr "根据噪声类型覆写“eased”（平滑）标志。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Persistence"
@@ -230,12 +234,13 @@ msgstr "比例"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Scales every octave by (scale of the previous octave / Lacunarity)."
-msgstr ""
+msgstr "按（前一八度的缩放值 ÷ 间隙度）来缩放每个八度（层）。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Scales the noise in the $1 axis by this value."
-msgstr ""
+msgstr "按此值缩放 $1 轴上的噪声。"
 
+#. TRANSLATORS: Value for randomness
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Seed"
@@ -243,40 +248,39 @@ msgstr "种子"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Takes the absolute value of each octave while adding them together."
-msgstr ""
+msgstr "在叠加各八度（层）的同时，取每一层的绝对值。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "The first octave is amplified by 1."
-msgstr ""
+msgstr "第一个八度（层）的振幅为 1。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
-#, fuzzy
 msgid "The first octave is scaled by 1."
-msgstr "服务器已禁用该命令."
+msgstr "第一个八度（层）的缩放值为 1。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "The multiplier for the noise before the offset is added."
-msgstr ""
+msgstr "在添加偏移之前，对噪声施加的倍数。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "The random seed for the noise. The same seed results in the same noise."
-msgstr ""
+msgstr "噪声的随机种子。相同的种子会产生相同的噪声。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
 "This is also the scale of the largest structures in the $1 direction of the "
 "noise."
-msgstr ""
+msgstr "这也是噪声在 $1 方向上最大结构的尺度。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "This results in smooth noise instead of gridlike noise."
-msgstr ""
+msgstr "这会产生平滑的噪声，而不是网格状噪声。"
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "This results in spiky noise."
-msgstr ""
+msgstr "这会导致噪声出现尖刺。"
 
-#. ~ "absvalue" is a noise parameter flag.
+#. TRANSLATORS: "absvalue" is a noise parameter flag.
 #. It is short for "absolute value".
 #. It can be enabled in noise settings in
 #. the settings menu.
@@ -284,14 +288,14 @@ msgstr ""
 msgid "absvalue"
 msgstr "绝对值"
 
-#. ~ "defaults" is a noise parameter flag.
+#. TRANSLATORS: "defaults" is a noise parameter flag.
 #. It describes the default processing options
 #. for noise settings in the settings menu.
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "defaults"
 msgstr "默认值"
 
-#. ~ "eased" is a noise parameter flag.
+#. TRANSLATORS: "eased" is a noise parameter flag.
 #. It is used to make the map smoother and
 #. can be enabled in noise settings in
 #. the settings menu.
@@ -299,6 +303,8 @@ msgstr "默认值"
 msgid "eased"
 msgstr "缓解"
 
+#. TRANSLATORS: "automatic exposure" refers to light. This note
+#. will be displayed for the graphics setting 'enable_auto_exposure'
 #: builtin/common/settings/dlg_settings.lua
 msgid "(The game will need to enable automatic exposure as well)"
 msgstr "（子游戏也需要支持自动曝光才能生效）"
@@ -315,20 +321,28 @@ msgstr "（子游戏也需要支持体积光效才能生效）"
 msgid "(Use system language)"
 msgstr "（使用系统语言）"
 
+#. TRANSLATORS: Shown when a default setting is the empty string
+#: builtin/common/settings/dlg_settings.lua
+msgid "<empty>"
+msgstr "< 无 >"
+
 #: builtin/common/settings/dlg_settings.lua
 msgid "Accessibility"
 msgstr "辅助功能"
 
+#. TRANSLATORS: Automatic
 #: builtin/common/settings/dlg_settings.lua
 msgid "Auto"
 msgstr "自动"
 
+#. TRANSLATORS: Button text to go back
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 #: builtin/mainmenu/content/dlg_package.lua src/gui/guiVolumeChange.cpp
 msgid "Back"
 msgstr "返回"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Buttons with crosshair"
 msgstr "按钮和准星"
@@ -338,6 +352,7 @@ msgstr "按钮和准星"
 msgid "Chat"
 msgstr "聊天"
 
+#. TRANSLATORS: Tooltip of a button that clears input
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Clear"
 msgstr "Clear键"
@@ -345,6 +360,10 @@ msgstr "Clear键"
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "Controls"
 msgstr "控制"
+
+#: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
+msgid "Damage"
+msgstr "伤害"
 
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/common/settings/shadows_component.lua
@@ -355,10 +374,12 @@ msgstr "禁用"
 msgid "Enabled"
 msgstr "启用"
 
+#. TRANSLATORS: Category for general settings
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "General"
 msgstr "通用"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Long tap"
 msgstr "长按"
@@ -367,12 +388,13 @@ msgstr "长按"
 msgid "Movement"
 msgstr "移动"
 
+#. TRANSLATORS: No search results
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "No results"
 msgstr "无结果"
 
-#. ~ Indicates that the action does not have a corresponding keybinding.
+#. TRANSLATORS: Indicates that the action does not have a corresponding keybinding.
 #: builtin/common/settings/dlg_settings.lua
 msgid "Not bound"
 msgstr "无按键绑定"
@@ -381,14 +403,16 @@ msgstr "无按键绑定"
 msgid "Reset setting to default"
 msgstr "恢复默认设置"
 
+#. TRANSLATORS: $1 will be replaced with a default setting value
 #: builtin/common/settings/dlg_settings.lua
-msgid "Reset setting to default ($1)"
-msgstr "恢复默认设置 ($1)"
+msgid "Reset setting to default: $1"
+msgstr "恢复默认设置：$1"
 
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Search"
 msgstr "搜索"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Short tap"
 msgstr "短按"
@@ -397,14 +421,17 @@ msgstr "短按"
 msgid "Show advanced settings"
 msgstr "显示高级设置"
 
+#. TRANSLATORS: Checkbox that toggles displaying the technical setting names
 #: builtin/common/settings/dlg_settings.lua
 msgid "Show technical names"
 msgstr "显示高级名称"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap"
 msgstr "点按"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap with crosshair"
 msgstr "点按和准星"
@@ -420,9 +447,8 @@ msgid "Touchscreen layout"
 msgstr "触摸屏布局"
 
 #: builtin/common/settings/dlg_settings.lua
-#, fuzzy
 msgid "Unavailable"
-msgstr "<无可用命令>"
+msgstr "不可用"
 
 #: builtin/common/settings/settingtypes.lua
 msgid "Client Mods"
@@ -479,6 +505,10 @@ msgstr "Lua 脚本发生错误："
 #: builtin/fstk/ui.lua
 msgid "An error occurred:"
 msgstr "发生了错误："
+
+#: builtin/fstk/ui.lua
+msgid "Copy to clipboard"
+msgstr ""
 
 #: builtin/fstk/ui.lua
 msgid "Main menu"
@@ -558,6 +588,8 @@ msgstr "在没有cURL的情况下编译Luanti时，ContentDB不可用"
 msgid "Downloading..."
 msgstr "下载中..."
 
+#. TRANSLATORS: A 'featured' package in ContentDB is a package that is
+#. more prominently displayed than other packages
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Featured"
 msgstr "特性"
@@ -585,6 +617,7 @@ msgstr "无法检索任何包"
 msgid "No updates"
 msgstr "没有更新"
 
+#. TRANSLATORS: A download is queued
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Queued"
 msgstr "已加入队列"
@@ -597,14 +630,17 @@ msgstr "材质包"
 msgid "The package $1 was not found."
 msgstr "找不到包 “$1”。"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Update All [$1]"
 msgstr "更新所有 [$1]"
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 and $2 dependencies will be installed."
 msgstr "$1 和 $2 依赖项将被安装."
 
+#. TRANSLATORS: Package (mod, texture pack, etc.) info: $1 = package name, $2 = package author
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 by $2"
 msgstr "$1 作者： $2"
@@ -613,6 +649,7 @@ msgstr "$1 作者： $2"
 msgid "$1 required dependencies could not be found."
 msgstr "有 $1 个依赖项没有找到。"
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 will be installed, and $2 dependencies will be skipped."
 msgstr "$1 将被安装, $2 依赖项将被跳过."
@@ -625,6 +662,7 @@ msgstr "已安装"
 msgid "Base Game:"
 msgstr "基础游戏："
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/content/dlg_install.lua
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Dependencies:"
@@ -695,10 +733,12 @@ msgstr "论坛主题"
 msgid "Information"
 msgstr "信息"
 
+#. TRANSLATORS: $1 = download size
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Install [$1]"
 msgstr "安装 [$1]"
 
+#. TRANSLATORS: Also known as 'bug tracker'
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Issue Tracker"
 msgstr "问题跟踪器"
@@ -707,6 +747,7 @@ msgstr "问题跟踪器"
 msgid "Reviews"
 msgstr "评价"
 
+#. TRANSLATORS: Link to source code repository
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Source"
 msgstr "源代码"
@@ -731,6 +772,10 @@ msgstr "网站"
 msgid "by $1"
 msgstr "作者：$1"
 
+#. TRANSLATORS: Info line for a ContentDB package:
+#. $1 = author,
+#. $2 = number of downloads,
+#. $3, $4, $5 = number of positive/neutral/negative reviews
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "by $1  —  $2 downloads  —  +$3 / $4 / -$5"
 msgstr "由 $1 — $2 次下载 — +$3 / $4 / -$5"
@@ -766,18 +811,21 @@ msgstr "无法将$1安装为材质包"
 #: builtin/mainmenu/content/pkgmgr.lua
 #, fuzzy
 msgid "World mods"
-msgstr "世界名称"
+msgstr "世界专用mod"
 
+#. TRANSLATORS: $1 = server name
 #: builtin/mainmenu/dlg_clients_list.lua
 msgid ""
 "Players connected to\n"
 "$1"
 msgstr "连接到$1的玩家"
 
+#. TRANSLATORS: Message in the mod list when a mod is enabled with error
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Enabled, has error)"
 msgstr "（已启用，出错）"
 
+#. TRANSLATORS: Displayed when a mod dependency is unsatisfied
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Unsatisfied)"
 msgstr "（不满足）"
@@ -814,8 +862,9 @@ msgstr "Mod："
 
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "Mods located inside the world folder."
-msgstr ""
+msgstr "世界文件夹内的mod"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No (optional) dependencies"
 msgstr "无(可选)依赖项"
@@ -824,6 +873,7 @@ msgstr "无(可选)依赖项"
 msgid "No game description provided."
 msgstr "未提供游戏描述。"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No hard dependencies"
 msgstr "无硬性依赖"
@@ -832,10 +882,12 @@ msgstr "无硬性依赖"
 msgid "No modpack description provided."
 msgstr "未提供整合包描述。"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No optional dependencies"
 msgstr "无可选依赖项"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Optional dependencies:"
 msgstr "可选依赖项："
@@ -876,6 +928,7 @@ msgstr "高地寒冷"
 msgid "Altitude dry"
 msgstr "高地干燥"
 
+#. TRANSLATORS: Smooth transition between biomes
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Biome blending"
 msgstr "生物群系融合"
@@ -896,6 +949,7 @@ msgstr "洞穴"
 msgid "Create"
 msgstr "创建"
 
+#. TRANSLATORS: Map generator decorations (used for structures, trees, plants, and more)
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Decorations"
 msgstr "装饰"
@@ -1097,6 +1151,7 @@ msgstr "Luanti 5.12.0 对输入处理系统进行了重新设计。"
 msgid "Confirm Password"
 msgstr "确认密码"
 
+#. TRANSLATORS: Message when joining a server
 #: builtin/mainmenu/dlg_register.lua
 msgid "Joining $1"
 msgstr "加入 $1"
@@ -1119,10 +1174,12 @@ msgstr "密码"
 msgid "Passwords do not match"
 msgstr "密码不匹配"
 
+#. TRANSLATORS: Register an account on a server
 #: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_online.lua
 msgid "Register"
 msgstr "注册"
 
+#. TRANSLATORS: Dismiss a dialog window/message
 #: builtin/mainmenu/dlg_reinstall_mtg.lua
 msgid "Dismiss"
 msgstr "忽略"
@@ -1166,10 +1223,12 @@ msgid ""
 msgstr ""
 "此整合包在它的 modpack.conf 中有一个明确的名称，它将覆盖这里的任何重命名。"
 
+#. TRANSLATORS: Expand all entries in a tree view
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Expand all"
 msgstr "全部展开"
 
+#. TRANSLATORS: A checkbox; if enabled, it will group mods by their prefix
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Group by prefix"
 msgstr "按照前缀分组"
@@ -1182,10 +1241,12 @@ msgstr "$1 服务器使用了子游戏 $2，以及以下的 Mod:"
 msgid "The $1 server uses the following mods:"
 msgstr "$1 服务器使用了以下的 Mod:"
 
+#. TRANSLATORS: $1 = name of the engine
 #: builtin/mainmenu/dlg_version_info.lua
 msgid "A new $1 version is available"
 msgstr "有新的 $1 版本可用"
 
+#. TRANSLATORS: $1 and $2 are version numbers, $3 is a URL
 #: builtin/mainmenu/dlg_version_info.lua
 msgid ""
 "Installed version: $1\n"
@@ -1213,6 +1274,7 @@ msgstr "访问网站"
 msgid "Debug build, expect worse performance"
 msgstr ""
 
+#. TRANSLATORS: Try to keep the translation short
 #: builtin/mainmenu/init.lua src/client/game_formspec.cpp
 msgid "Settings"
 msgstr "设置"
@@ -1273,6 +1335,7 @@ msgstr "分享调试日志"
 msgid "Browse online content"
 msgstr "浏览在线内容"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 msgid "Browse online content [$1]"
 msgstr "浏览在线内容 [$1]"
@@ -1281,6 +1344,7 @@ msgstr "浏览在线内容 [$1]"
 msgid "Content"
 msgstr "内容"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 msgid "Content [$1]"
 msgstr "内容 [$1]"
@@ -1363,6 +1427,7 @@ msgstr "新建"
 msgid "Play Game"
 msgstr "开始游戏"
 
+#. TRANSLATORS: Network port
 #: builtin/mainmenu/tab_local.lua builtin/mainmenu/tab_online.lua
 msgid "Port"
 msgstr "端口"
@@ -1391,6 +1456,7 @@ msgstr "您需要先安装一个子游戏才能创建新的世界。"
 msgid "Add favorite"
 msgstr "添加收藏"
 
+#. TRANSLATORS: Network address
 #: builtin/mainmenu/tab_online.lua
 msgid "Address"
 msgstr "地址"
@@ -1399,7 +1465,7 @@ msgstr "地址"
 msgid "Creative mode"
 msgstr "创造模式"
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: builtin/mainmenu/tab_online.lua
 msgid "Damage / PvP"
 msgstr "伤害 / PvP"
@@ -1420,6 +1486,7 @@ msgstr "不兼容的服务器"
 msgid "Join Game"
 msgstr "加入游戏"
 
+#. TRANSLATORS: Login to server
 #: builtin/mainmenu/tab_online.lua
 msgid "Login"
 msgstr "登录"
@@ -1432,10 +1499,12 @@ msgstr "Mod 数量: $1"
 msgid "Open server website"
 msgstr "打开服务器网站"
 
+#. TRANSLATORS: Also known as "latency"
 #: builtin/mainmenu/tab_online.lua
 msgid "Ping"
 msgstr "ping值"
 
+#. TRANSLATORS: $1 is a list of players
 #: builtin/mainmenu/tab_online.lua
 msgid ""
 "Players:\n"
@@ -1445,21 +1514,15 @@ msgstr ""
 "$1"
 
 #: builtin/mainmenu/tab_online.lua
-msgid ""
-"Possible filters\n"
-"game:<name>\n"
-"mod:<name>\n"
-"player:<name>"
-msgstr ""
-"可选的过滤器\n"
-"game:<名称>\n"
-"mod:<名称>\n"
-"player:<名称>"
+#, fuzzy
+msgid "Possible filters"
+msgstr "双线性过滤"
 
 #: builtin/mainmenu/tab_online.lua
 msgid "Public Servers"
 msgstr "公开服务器"
 
+#. TRANSLATORS: As in 'reload'/'check again'
 #: builtin/mainmenu/tab_online.lua
 msgid "Refresh"
 msgstr "刷新"
@@ -1471,6 +1534,11 @@ msgstr "移除收藏"
 #: builtin/mainmenu/tab_online.lua
 msgid "Server Description"
 msgstr "服务器描述"
+
+#: src/chat.cpp
+#, fuzzy
+msgid "Player names: "
+msgstr "开始游戏"
 
 #: src/client/client.cpp
 msgid "Connection aborted (protocol error?)."
@@ -1500,7 +1568,7 @@ msgstr "载入材质..."
 msgid "Rebuilding shaders..."
 msgstr "重建着色器..."
 
-#: src/client/client.cpp src/util/screenshot.cpp
+#: src/client/client.cpp src/gui/guiEngine.cpp src/util/screenshot.cpp
 #, c-format
 msgid "Saved screenshot to \"%s\""
 msgstr "已将屏幕截图保存到“%s”"
@@ -1536,6 +1604,11 @@ msgstr ""
 #: src/client/clientmedia.cpp src/client/game.cpp
 msgid "Media..."
 msgstr "媒体..."
+
+#: src/client/fontengine.cpp
+#, fuzzy
+msgid "Failed to find a valid font"
+msgstr "无法找到可用字体"
 
 #: src/client/game.cpp src/client/render/pipeline.cpp src/client/shader.cpp
 #: src/server.cpp
@@ -1658,6 +1731,11 @@ msgid "Fast mode enabled (note: no 'fast' privilege)"
 msgstr "快速模式已启用（注：无 'fast' 权限）"
 
 #: src/client/game.cpp
+#, c-format
+msgid "Files: %d / %d"
+msgstr ""
+
+#: src/client/game.cpp
 msgid "Fly mode disabled"
 msgstr "飞行模式已禁用"
 
@@ -1686,11 +1764,13 @@ msgid "Item definitions..."
 msgstr "物品定义..."
 
 #: src/client/game.cpp
-msgid "KiB/s"
+#, fuzzy
+msgid "KiB"
 msgstr "KiB/s"
 
 #: src/client/game.cpp
-msgid "MiB/s"
+#, fuzzy
+msgid "MiB"
 msgstr "MiB/s"
 
 #: src/client/game.cpp
@@ -1740,6 +1820,11 @@ msgstr "关闭中..."
 #: src/client/game.cpp src/client/game_formspec.cpp
 msgid "Singleplayer"
 msgstr "单人游戏"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Size: %.2f %s"
+msgstr ""
 
 #: src/client/game.cpp
 msgid "Sound muted"
@@ -1828,6 +1913,7 @@ msgstr "线框已显示"
 msgid "Zoom currently disabled by game or mod"
 msgstr "缩放被当前子游戏或 mod 禁用"
 
+#. TRANSLATORS: Game mode (server or singleplayer)
 #: src/client/game_formspec.cpp
 msgid "- Mode: "
 msgstr "- 模式: "
@@ -1836,7 +1922,7 @@ msgstr "- 模式: "
 msgid "- Public: "
 msgstr "- 公共服务器: "
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: src/client/game_formspec.cpp
 msgid "- PvP: "
 msgstr "- 玩家对战: "
@@ -1845,10 +1931,12 @@ msgstr "- 玩家对战: "
 msgid "- Server Name: "
 msgstr "- 服务器名称: "
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Change Password"
 msgstr "更改密码"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Continue"
 msgstr "继续"
@@ -1881,10 +1969,12 @@ msgstr ""
 "- 点击物品并拖动, 然后另一手指点击\n"
 " --> 移动一个物品\n"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Exit to Menu"
 msgstr "退出至菜单"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short (OS = Operating System)
 #: src/client/game_formspec.cpp
 msgid "Exit to OS"
 msgstr "退出至操作系统"
@@ -1917,6 +2007,7 @@ msgstr "远程服务器"
 msgid "Respawn"
 msgstr "重生"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Sound Volume"
 msgstr "音量"
@@ -1955,10 +2046,29 @@ msgid "Profiler shown (page %d of %d)"
 msgstr "性能分析图已显示 (第 %d 页 共 %d 页)"
 
 #: src/client/keycode.cpp
+#, fuzzy
+msgid "A (Gamepad)"
+msgstr "游戏手柄"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "B (Gamepad)"
+msgstr "游戏手柄"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Back (Gamepad)"
+msgstr "游戏手柄"
+
+#: src/client/keycode.cpp
 msgid "Backspace"
 msgstr "退格键"
 
-#. ~ Usually paired with the Pause key
+#: src/client/keycode.cpp
+msgid "Bottom Face Button (Gamepad)"
+msgstr ""
+
+#. TRANSLATORS: Usually paired with the Pause key
 #: src/client/keycode.cpp
 msgid "Break Key"
 msgstr "Break键"
@@ -1968,12 +2078,38 @@ msgid "Caps Lock"
 msgstr "大写锁定键"
 
 #: src/client/keycode.cpp
+msgid "Circle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Clear Key"
 msgstr "清除键"
 
 #: src/client/keycode.cpp
 msgid "Control Key"
 msgstr "Control键"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Cross (Gamepad)"
+msgstr "游戏手柄"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "D-Pad Down"
+msgstr "下一页"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Left"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Up"
+msgstr ""
 
 #: src/client/keycode.cpp
 msgid "Delete Key"
@@ -1986,6 +2122,26 @@ msgstr "⇩"
 #: src/client/keycode.cpp
 msgid "End Key"
 msgstr "End键"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d +"
+msgstr "游戏手柄"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d -"
+msgstr "游戏手柄"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Button %d"
+msgstr "第%d个鼠标按键"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Guide (Gamepad)"
+msgstr "游戏手柄"
 
 #: src/client/keycode.cpp
 msgid "Help Key"
@@ -2012,6 +2168,35 @@ msgid "Left Control"
 msgstr "左Control键"
 
 #: src/client/keycode.cpp
+msgid "Left Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Button"
+msgstr "摇杆类型"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Down"
+msgstr "摇杆 ID"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Left"
+msgstr "摇杆类型"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Right"
+msgstr "摇杆类型"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Up"
+msgstr "摇杆类型"
+
+#: src/client/keycode.cpp
 msgid "Left Menu"
 msgstr "左菜单键"
 
@@ -2019,7 +2204,17 @@ msgstr "左菜单键"
 msgid "Left Shift"
 msgstr "左Shift键"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Shoulder"
+msgstr "左Shift键"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Trigger"
+msgstr "⇦"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Left Windows"
 msgstr "左Windows键"
@@ -2032,10 +2227,18 @@ msgstr "菜单键"
 msgid "Middle Click"
 msgstr "鼠标中键"
 
+#. TRANSLATORS: This is for mouse buttons without an intuitive description. %d is the number of the button.
+#: src/client/keycode.cpp
+#, c-format
+msgid "Mouse Button %d"
+msgstr "第%d个鼠标按键"
+
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X1"
 msgstr "鼠标X1键"
 
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X2"
 msgstr "鼠标X2键"
@@ -2112,7 +2315,7 @@ msgstr "下一页"
 msgid "Page Up"
 msgstr "上一页"
 
-#. ~ Usually paired with the Break key
+#. TRANSLATORS: Usually paired with the Break key
 #: src/client/keycode.cpp
 msgid "Pause Key"
 msgstr "Pause键"
@@ -2121,7 +2324,15 @@ msgstr "Pause键"
 msgid "Play"
 msgstr "开始游戏"
 
-#. ~ "Print screen" key
+#: src/client/keycode.cpp
+msgid "Primary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Primary Right Paddle"
+msgstr ""
+
+#. TRANSLATORS: "Print screen" key
 #: src/client/keycode.cpp
 msgid "Print"
 msgstr "PrintScreen键"
@@ -2143,6 +2354,34 @@ msgid "Right Control"
 msgstr "右Control键"
 
 #: src/client/keycode.cpp
+msgid "Right Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Button"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Down"
+msgstr "摇杆 ID"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Left"
+msgstr "摇杆类型"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Right"
+msgstr "摇杆类型"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Up"
+msgstr "摇杆类型"
+
+#: src/client/keycode.cpp
 msgid "Right Menu"
 msgstr "右菜单键"
 
@@ -2150,7 +2389,17 @@ msgstr "右菜单键"
 msgid "Right Shift"
 msgstr "右Shift键"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Shoulder"
+msgstr "右Shift键"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Trigger"
+msgstr "⇨"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Right Windows"
 msgstr "右Windows键"
@@ -2163,6 +2412,14 @@ msgstr "键盘扫描码：%d"
 #: src/client/keycode.cpp
 msgid "Scroll Lock"
 msgstr "Scroll Lock键"
+
+#: src/client/keycode.cpp
+msgid "Secondary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Secondary Right Paddle"
+msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2178,13 +2435,45 @@ msgid "Space"
 msgstr "空格"
 
 #: src/client/keycode.cpp
+#, fuzzy
+msgid "Square (Gamepad)"
+msgstr "服务器名称"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Start (Gamepad)"
+msgstr "启动游戏"
+
+#: src/client/keycode.cpp
 msgid "Tab Key"
 msgstr "Tab键"
+
+#: src/client/keycode.cpp
+msgid "Top Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Touchpad Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Triangle (Gamepad)"
+msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
 msgid "Up Arrow"
 msgstr "上方向键"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "X (Gamepad)"
+msgstr "游戏手柄"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Y (Gamepad)"
+msgstr "游戏手柄"
 
 #: src/client/minimap.cpp
 msgid "Minimap hidden"
@@ -2209,21 +2498,27 @@ msgstr "材质模式小地图"
 msgid "Failed to create the texture \"%s\" for the rendering pipeline."
 msgstr ""
 
+#: src/client/renderingengine.cpp
+msgid "Could not initialize any supported video driver!"
+msgstr "无法初始化任何可用的显卡驱动程序！"
+
 #: src/client/shader.cpp
 #, c-format
 msgid "Failed to compile the \"%s\" shader."
 msgstr "“%s”着色器编译失败。"
 
 #: src/client/shader.cpp
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to find \"%s\" shader files."
-msgstr "“%s”着色器编译失败。"
+msgstr "无法找到“%s”着色器。"
 
+#. TRANSLATORS: GLSL = OpenGL Shading Language
 #: src/client/shader.cpp
 msgid "GLSL is not supported by the driver"
 msgstr "驱动程序不支持 GLSL"
 
-#. ~ Error when a mod is missing dependencies. Ex: "Mod Title is missing: mod1, mod2, mod3"
+#. TRANSLATORS: Error when a mod is missing dependencies.
+#. Example: "Mod Title is missing: mod1, mod2, mod3"
 #: src/content/mod_configuration.cpp
 #, c-format
 msgid "%s is missing:"
@@ -2255,6 +2550,10 @@ msgstr "网页打不开"
 #: src/gui/guiChatConsole.cpp
 msgid "Opening webpage"
 msgstr "正在打开网页"
+
+#: src/gui/guiEngine.cpp
+msgid "Failed to load main menu script!"
+msgstr "无法加载主菜单脚本！"
 
 #: src/gui/guiFormSpecMenu.cpp
 msgid "Proceed"
@@ -2419,7 +2718,7 @@ msgstr "内部服务器错误"
 msgid "Invalid password"
 msgstr "密码错误"
 
-#. ~ DO NOT TRANSLATE THIS LITERALLY!
+#. TRANSLATORS: DO NOT TRANSLATE THIS LITERALLY!
 #. This is a special string which needs to contain the translation's
 #. language code (e.g. "de" for German).
 #: src/network/clientpackethandler.cpp src/script/lua_api/l_client.cpp
@@ -2478,6 +2777,10 @@ msgid ""
 msgstr ""
 "服务器不支持这个客户端版本。\n"
 "请联系管理员。"
+
+#: src/script/lua_api/l_mainmenu.cpp
+msgid "Copied to clipboard!"
+msgstr ""
 
 #: src/server.cpp
 #, c-format
@@ -2661,6 +2964,11 @@ msgid "Acceleration of gravity, in nodes per second per second."
 msgstr "重力加速度，单位为方块每秒二次方。"
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Actions and Keybindings"
+msgstr "添加按键绑定"
+
+#: src/settings_translation_file.cpp
 msgid "Active Block Modifiers"
 msgstr "活动方块修改器"
 
@@ -2780,11 +3088,13 @@ msgid "Anticheat movement tolerance"
 msgstr "反作弊移动容忍度"
 
 #: src/settings_translation_file.cpp
-msgid "Append item name"
-msgstr "添加物品名称"
+#, fuzzy
+msgid "Append item name to tooltips"
+msgstr "添加物品名称至工具栏。"
 
 #: src/settings_translation_file.cpp
-msgid "Append item name to tooltip."
+#, fuzzy
+msgid "Append the full item name to the tooltip of item stacks."
 msgstr "添加物品名称至工具栏。"
 
 #: src/settings_translation_file.cpp
@@ -2856,12 +3166,12 @@ msgstr ""
 "以 MapBlocks（16 个方块）为单位。"
 
 #: src/settings_translation_file.cpp
+#, fuzzy
 msgid ""
-"At this distance the server will perform a simpler and cheaper occlusion "
-"check.\n"
-"Smaller values potentially improve performance, at the expense of "
-"temporarily visible\n"
-"rendering glitches (missing blocks).\n"
+"At this distance the server will consider blocks as \"far away\".\n"
+"It will perform simpler and cheaper occlusion checks, update\n"
+"low priority block updates lazily, and limit the blocks sent to the\n"
+"client in one roundtrip.\n"
 "This is especially useful for very large viewing range (upwards of 500).\n"
 "Stated in MapBlocks (16 nodes)."
 msgstr ""
@@ -3241,8 +3551,9 @@ msgstr ""
 "9 - 最佳压缩，最慢"
 
 #: src/settings_translation_file.cpp
+#, fuzzy
 msgid "Confirmation dialog before closing"
-msgstr ""
+msgstr "关闭前显示确认对话框"
 
 #: src/settings_translation_file.cpp
 msgid "Connect glass"
@@ -3347,6 +3658,11 @@ msgid ""
 msgstr ""
 "准星颜色(R,G,B).\n"
 "还控制对象准星颜色"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage flash"
+msgstr "地图生成器标志"
 
 #: src/settings_translation_file.cpp
 msgid "Debug log file size threshold"
@@ -3685,9 +4001,12 @@ msgid "Enable Raytraced Culling"
 msgstr "启用光线追踪剔除"
 
 #: src/settings_translation_file.cpp
-#, fuzzy
+msgid "Enable SSCSM"
+msgstr "启用SSCSM"
+
+#: src/settings_translation_file.cpp
 msgid "Enable a confirmation dialog before closing."
-msgstr "启用物品栏动画。"
+msgstr "关闭前显示确认对话框。"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -3714,17 +4033,8 @@ msgid "Enable console window"
 msgstr "启用控制台窗口"
 
 #: src/settings_translation_file.cpp
-#, fuzzy
 msgid "Enable dynamic shadows"
-msgstr "动态阴影"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks"
-msgstr "启用摇杆"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks. Requires a restart to take effect"
-msgstr "启用操纵杆。 需要重启才能生效"
+msgstr "启用动态阴影"
 
 #: src/settings_translation_file.cpp
 msgid "Enable mod channels support."
@@ -3955,6 +4265,10 @@ msgstr ""
 "如果禁用，虚拟摇杆将以第一次触摸时的位置为中心。"
 
 #: src/settings_translation_file.cpp
+msgid "Flashing of the screen when taking damage."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Floatland density"
 msgstr "悬空岛密度"
 
@@ -4136,8 +4450,12 @@ msgid "GUI scaling filter"
 msgstr "GUI缩放过滤器"
 
 #: src/settings_translation_file.cpp
-msgid "Gamepads"
-msgstr "游戏手柄"
+msgid "Gamepads and Joysticks"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Gamma"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Global callbacks"
@@ -4744,24 +5062,22 @@ msgstr ""
 "在迭代数=20时地图生成器有与地图生成器v4相似的负荷。"
 
 #: src/settings_translation_file.cpp
-msgid "Joystick ID"
-msgstr "摇杆 ID"
-
-#: src/settings_translation_file.cpp
 msgid "Joystick button repetition interval"
 msgstr "摇杆按钮重复间隔"
-
-#: src/settings_translation_file.cpp
-msgid "Joystick dead zone"
-msgstr "摇杆死区"
 
 #: src/settings_translation_file.cpp
 msgid "Joystick frustum sensitivity"
 msgstr "摇杆头灵敏度"
 
 #: src/settings_translation_file.cpp
-msgid "Joystick type"
-msgstr "摇杆类型"
+#, fuzzy
+msgid "Joystick inner dead zone"
+msgstr "摇杆死区"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Joystick outer dead zone"
+msgstr "摇杆死区"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -4863,6 +5179,12 @@ msgstr "打开聊天窗口输入本地命令的按键。"
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for opening the pause menu in-game.\n"
+"Pressing the escape key always opens the pause menu."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for placing an item/block or for using something.\n"
 "(Note: The actual meaning might vary on a per-game basis.)"
 msgstr ""
@@ -4890,12 +5212,18 @@ msgid "Key for toggling the display of the profiler. Used for development."
 msgstr "显示/隐藏性能分析信息的按键。用于开发。"
 
 #: src/settings_translation_file.cpp
-msgid "Keybindings"
-msgstr "按键绑定"
-
-#: src/settings_translation_file.cpp
 msgid "Keyboard and Mouse"
 msgstr "键盘和鼠标"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Keyboard camera speed"
+msgstr "键盘和鼠标"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Keyboard-controlled camera rotation speed, in degrees per second."
+msgstr "垂直爬升速度（方块/秒）."
 
 #: src/settings_translation_file.cpp
 msgid "Kick players who sent more than X messages per 10 seconds."
@@ -5108,6 +5436,24 @@ msgid "Local command"
 msgstr "本地命令"
 
 #: src/settings_translation_file.cpp
+msgid "Look down"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Look left"
+msgstr "往左移动"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Look right"
+msgstr "往右移动"
+
+#: src/settings_translation_file.cpp
+msgid "Look up"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Lower Y limit of dungeons."
 msgstr "地牢的Y值下限。"
 
@@ -5123,6 +5469,16 @@ msgstr "主菜单脚本"
 msgid ""
 "Make fog and sky colors depend on daytime (dawn/sunset) and view direction."
 msgstr "使雾和天空颜色依赖于一天中的时间（黎明/傍晚）和视线方向。"
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Make volumetrics weaker against closer objects to emulate physical "
+"volumetrics."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Makes the color of light fog more saturated."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Map Compression Level for Disk Storage"
@@ -5736,6 +6092,10 @@ msgid "Open inventory"
 msgstr "打开物品栏"
 
 #: src/settings_translation_file.cpp
+msgid "Open pause menu"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Open the pause menu when the window's focus is lost. Does not pause if a "
 "formspec is\n"
@@ -6305,6 +6665,13 @@ msgstr "服务器列表文件"
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Set proxy to use by cURL. This is an URI just like the *_proxy environment "
+"variables.\n"
+"Note that this will not apply to Luanti's in-game protocol."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Set the default tilt of Sun/Moon orbit in degrees.\n"
 "Games may change orbit tilt via API.\n"
 "Value of 0 means no tilt / vertical orbit."
@@ -6314,10 +6681,10 @@ msgstr ""
 "值设为 0 表示没有倾斜（即垂直轨道）。"
 
 #: src/settings_translation_file.cpp
+#, fuzzy
 msgid ""
 "Set the exposure compensation in EV units.\n"
-"Value of 0.0 (default) means no exposure compensation.\n"
-"Range: from -1 to 1.0"
+"Value of 0.0 (default) means no exposure compensation."
 msgstr ""
 "以 EV 为单位设置曝光补偿。\n"
 "0.0（默认值）表示无曝光补偿。\n"
@@ -6335,6 +6702,12 @@ msgstr ""
 msgid ""
 "Set the maximum length of a chat message (in characters) sent by clients."
 msgstr "设定客户端传送的聊天讯息的最大字符长度。"
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Set the post processing gamma value.\n"
+"Higher values give lower contrast and vice versa."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6476,7 +6849,10 @@ msgstr ""
 "使用低端 GPU（或无 GPU）的系统则可从较小的数值中获益。"
 
 #: src/settings_translation_file.cpp
-msgid "Simulate translucency when looking at foliage in the sunlight."
+#, fuzzy
+msgid ""
+"Simulate translucency when looking at foliage in the sunlight.\n"
+"It is recommended to use this with setting \"leaves_style\" set to \"fancy\"."
 msgstr "在阳光下观看树叶时模拟半透明效果。"
 
 #: src/settings_translation_file.cpp
@@ -6755,10 +7131,6 @@ msgid "The URL for the content repository"
 msgstr "内容存储库的 URL"
 
 #: src/settings_translation_file.cpp
-msgid "The dead zone of the joystick"
-msgstr "摇杆的无效区"
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The default format in which profiles are being saved,\n"
 "when calling `/profiler save [format]` without format."
@@ -6798,10 +7170,6 @@ msgstr ""
 "* 长按\n"
 "来自经典的Luanti移动控制。\n"
 "战斗几乎是不可能的。"
-
-#: src/settings_translation_file.cpp
-msgid "The identifier of the joystick to use"
-msgstr "使用手柄的标识符"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6952,10 +7320,6 @@ msgstr ""
 "重复放置方块所需的时间（秒）。"
 
 #: src/settings_translation_file.cpp
-msgid "The type of joystick"
-msgstr "摇杆类型"
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The vertical distance over which heat drops by 20 if 'altitude_chill' is\n"
 "enabled. Also, the vertical distance over which humidity drops by 10 if\n"
@@ -6992,6 +7356,19 @@ msgstr "速度时间"
 #: src/settings_translation_file.cpp
 msgid "Timeout for client to remove unused map data from memory, in seconds."
 msgstr "客户端从内存中移除未用地图数据的超时。"
+
+#: src/settings_translation_file.cpp
+msgid "Tint sunlight during sunrise/sunset."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Tinted fog"
+msgstr "启用/禁用雾"
+
+#: src/settings_translation_file.cpp
+msgid "Tinted sunlight"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
@@ -7382,7 +7759,13 @@ msgid "Volume when unfocused"
 msgstr "窗口未聚焦时音量"
 
 #: src/settings_translation_file.cpp
-msgid "Volumetric lighting"
+#, fuzzy
+msgid "Volumetric Depth Attenuation"
+msgstr "体积光"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Volumetric Lighting"
 msgstr "体积光"
 
 #: src/settings_translation_file.cpp
@@ -7452,8 +7835,10 @@ msgid "Weblink color"
 msgstr "网页链接颜色"
 
 #: src/settings_translation_file.cpp
-msgid "When enabled, liquid reflections are simulated."
-msgstr "启用时，会模拟液体反射。"
+msgid ""
+"When enabled, crude liquid reflections are simulated.\n"
+"Wave height, length and speed will affect these reflections."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7491,6 +7876,12 @@ msgstr ""
 "只有在启用双线性/三线性过滤时，\n"
 "才会应用此设置。\n"
 "这也是世界对齐的材质自动缩放的基本方块材质尺寸。"
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Where to enable server-sent client-side modding (SSCSM).\n"
+"Warning: Experimental."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7662,42 +8053,32 @@ msgstr "cURL 超时"
 msgid "cURL parallel limit"
 msgstr "cURL 并发限制"
 
+#: src/settings_translation_file.cpp
+msgid "cURL proxy address"
+msgstr ""
+
 #: src/util/screenshot.cpp
 #, c-format
 msgid "Failed to save screenshot to \"%s\""
 msgstr "无法将屏幕截图保存到“%s”"
 
-#~ msgid ""
-#~ "Number of emerge threads to use.\n"
-#~ "Value 0:\n"
-#~ "-    Automatic selection. The number of emerge threads will be\n"
-#~ "-    'number of processors - 2', with a lower limit of 1.\n"
-#~ "Any other value:\n"
-#~ "-    Specifies the number of emerge threads, with a lower limit of 1.\n"
-#~ "WARNING: Increasing the number of emerge threads increases engine mapgen\n"
-#~ "speed, but this may harm game performance by interfering with other\n"
-#~ "processes, especially in singleplayer and/or when running Lua code in\n"
-#~ "'on_generated'. For many users the optimum setting may be '1'."
-#~ msgstr ""
-#~ "使用的生产线程数。\n"
-#~ "值0：\n"
-#~ "-    自动选择。生产线程数会是‘处理器数-2’，\n"
-#~ "-    下限为1。\n"
-#~ "任何其他值：\n"
-#~ "-    指定生产线程数，下限为1。\n"
-#~ "警告：增大此值会提高引擎地图生成器速度，但会由于\n"
-#~ "干扰其他进程而影响游戏体验，尤其是单人模式或运行\n"
-#~ "‘on_generated’中的Lua代码。对于大部分用户来说，最\n"
-#~ "佳值为'1'。"
+#~ msgid "Enable joysticks"
+#~ msgstr "启用摇杆"
 
-#~ msgid "Provided world path doesn't exist: "
-#~ msgstr "提供的世界路径不存在: "
+#~ msgid "Enable joysticks. Requires a restart to take effect"
+#~ msgstr "启用操纵杆。 需要重启才能生效"
 
-#~ msgid "Shadow map max distance in nodes to render shadows"
-#~ msgstr "渲染阴影的节点中的阴影贴图最大距离"
+#~ msgid "Keybindings"
+#~ msgstr "按键绑定"
 
-#~ msgid "Y spread"
-#~ msgstr "y 点差"
+#~ msgid "The dead zone of the joystick"
+#~ msgstr "摇杆的无效区"
 
-#~ msgid "Z spread"
-#~ msgstr "z 点差"
+#~ msgid "The identifier of the joystick to use"
+#~ msgstr "使用手柄的标识符"
+
+#~ msgid "The type of joystick"
+#~ msgstr "摇杆类型"
+
+#~ msgid "When enabled, liquid reflections are simulated."
+#~ msgstr "启用时，会模拟液体反射。"

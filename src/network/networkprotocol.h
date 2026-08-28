@@ -87,7 +87,8 @@ enum ToClientCommand : u16
 
 	TOCLIENT_INVENTORY = 0x27,
 	/*
-		serialized inventory
+		<long string> serialized inventory
+		bool skip_wield_anim
 	*/
 
 	TOCLIENT_TIME_OF_DAY = 0x29,
@@ -559,10 +560,11 @@ enum ToClientCommand : u16
 
 	TOCLIENT_LOCAL_PLAYER_ANIMATIONS = 0x51,
 	/*
-		v2s32 stand/idle
-		v2s32 walk
-		v2s32 dig
-		v2s32 walk+dig
+		typedef v2x = v2f if protocol version >= 46, else v2s16
+		v2x stand/idle
+		v2x walk
+		v2x dig
+		v2x walk+dig
 		f1000 frame_speed
 	*/
 

@@ -28,6 +28,7 @@ public:
 	// A GUIModalMenu calls these when this class is passed as a parameter
 	virtual void createdMenu(gui::IGUIElement *menu) = 0;
 	virtual void deletingMenu(gui::IGUIElement *menu) = 0;
+	virtual void inhibitKeyEvent(EKEY_CODE key) = 0;
 };
 
 // Remember to drop() the menu after creating, so that it can
@@ -80,15 +81,17 @@ protected:
 	// This is set to true if the menu is currently processing a second-touch event.
 	bool m_second_touch = false;
 
+	virtual bool remapClickOutside(const SEvent &event);
+
 private:
 	IMenuManager *m_menumgr;
+	bool m_is_window_focused = false;
 	/* If true, remap a click outside the formspec to ESC. This is so that, for
 	 * example, touchscreen users can close formspecs.
 	 * The default for this setting is true. Currently, it's set to false for
 	 * the mainmenu to prevent Minetest from closing unexpectedly.
 	 */
 	bool m_remap_click_outside;
-	bool remapClickOutside(const SEvent &event);
 	PointerAction m_last_click_outside{};
 
 	// This might be necessary to expose to the implementation if it

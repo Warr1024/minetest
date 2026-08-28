@@ -4,9 +4,6 @@
 
 #include "test.h"
 
-#include <algorithm>
-#include <numeric>
-
 #include "gamedef.h"
 #include "inventory.h" // ItemStack
 #include "dummygamedef.h"
@@ -14,6 +11,7 @@
 #include "client/mapblock_mesh.h"
 #include "client/meshgen/collector.h"
 #include "client/node_visuals.h"
+#include <memory>
 #include "mesh_compare.h"
 
 namespace {
@@ -28,17 +26,13 @@ public:
 		return const_cast<NodeDefManager *>(m_nodedef);
 	}
 
-	// ContentFeatures that doesn't destroy the visuals
-	// Needed because nodedef.set(feature) creates a copy of the ContentFeatures and since
-	// the NodeDefManager destructs its ContentFeatures, this prevents double free.
-	// Should only be used if the visuals get freed somewhere else.
-	struct CContentFeatures : public ContentFeatures {
-		~CContentFeatures() { visuals = nullptr; }
-	};
-
-	content_t registerNode(ItemDefinition itemdef, const CContentFeatures &nodedef) {
+	content_t registerNode(const ItemDefinition &itemdef, ContentFeatures &&nodedef) {
 		item_mgr()->registerItem(itemdef);
-		return node_mgr()->set(nodedef.name, nodedef);
+
+		NodeDefManager *mgr = node_mgr();
+		content_t id = mgr->set(nodedef.name, std::move(nodedef));
+
+		return id;
 	}
 
 	void finalize() {
@@ -47,7 +41,7 @@ public:
 		// Need to fill node visuals for predefined nodes
 		node_mgr()->applyFunction([] (ContentFeatures &f) {
 			if (!f.visuals)
-				f.visuals = constructNodeVisuals(&f);
+				f.visuals = std::make_unique<NodeVisuals>();
 		});
 	}
 
@@ -58,9 +52,10 @@ public:
 		data.m_smooth_lighting = smooth_lighting;
 		data.m_enable_water_reflections = false;
 		data.m_blockpos = {0, 0, 0};
-		for (s16 x = -1; x <= 1; x++)
-		for (s16 y = -1; y <= 1; y++)
-		for (s16 z = -1; z <= 1; z++)
+		// MapblockMeshGenerator needs a margin of at least 3
+		for (s16 x = -3; x <= 3; x++)
+		for (s16 y = -3; y <= 3; y++)
+		for (s16 z = -3; z <= 3; z++)
 			data.m_vmanip.setNode({x, y, z}, {CONTENT_AIR, 0, 0});
 		return data;
 	}
@@ -72,8 +67,8 @@ public:
 		itemdef.name = "test:" + name;
 		itemdef.description = name;
 
-		CContentFeatures f;
-		f.visuals = constructNodeVisuals(&f);
+		ContentFeatures f;
+		f.visuals = std::make_unique<NodeVisuals>();
 		f.name = itemdef.name;
 		f.drawtype = NDT_NORMAL;
 		f.visuals->solidness = 2;
@@ -83,7 +78,7 @@ public:
 		for (TileSpec &tile : f.visuals->tiles)
 			tile.layers[0].texture_id = texture;
 
-		return registerNode(itemdef, f);
+		return registerNode(itemdef, std::move(f));
 	}
 
 	content_t addLiquidSource(std::string name, u32 texture)
@@ -93,8 +88,8 @@ public:
 		itemdef.name = "test:" + name + "_source";
 		itemdef.description = name;
 
-		CContentFeatures f;
-		f.visuals = constructNodeVisuals(&f);
+		ContentFeatures f;
+		f.visuals = std::make_unique<NodeVisuals>();
 		f.name = itemdef.name;
 		f.drawtype = NDT_LIQUID;
 		f.visuals->solidness = 1;
@@ -111,7 +106,7 @@ public:
 		for (TileSpec &tile : f.visuals->tiles)
 			tile.layers[0].texture_id = texture;
 
-		return registerNode(itemdef, f);
+		return registerNode(itemdef, std::move(f));
 	}
 
 	content_t addLiquidFlowing(std::string name, u32 texture_top, u32 texture_side)
@@ -121,8 +116,8 @@ public:
 		itemdef.name = "test:" + name + "_flowing";
 		itemdef.description = name;
 
-		CContentFeatures f;
-		f.visuals = constructNodeVisuals(&f);
+		ContentFeatures f;
+		f.visuals = std::make_unique<NodeVisuals>();
 		f.name = itemdef.name;
 		f.drawtype = NDT_FLOWINGLIQUID;
 		f.visuals->solidness = 0;
@@ -139,7 +134,7 @@ public:
 		f.visuals->special_tiles[0].layers[0].texture_id = texture_top;
 		f.visuals->special_tiles[1].layers[0].texture_id = texture_side;
 
-		return registerNode(itemdef, f);
+		return registerNode(itemdef, std::move(f));
 	}
 };
 

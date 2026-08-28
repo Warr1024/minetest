@@ -2,8 +2,9 @@
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
-#include "COpenGLDriver.h"
 #include <cassert>
+
+#include "COpenGLDriver.h"
 #include "CNullDriver.h"
 #include "EHardwareBufferFlags.h"
 #include "HWBuffer.h"
@@ -374,6 +375,7 @@ bool COpenGLDriver::updateHardwareBuffer(SHWBufferLink *_link)
 
 	auto *link = IRR_DOWN_CAST<SHWBufferLink_opengl *>(_link);
 	auto *buf = link->Buffer;
+	link->UnusedCounter = 0;
 	if (link->vbo_ID && link->ChangedID == buf->getChangedID())
 		return true;
 
@@ -1826,8 +1828,7 @@ void COpenGLDriver::setBasicRenderStates(const SMaterial &material, const SMater
 	}
 
 	// Blend Factor
-	if (IR(material.BlendFactor) & 0xFFFFFFFF // TODO: why the & 0xFFFFFFFF?
-			&& material.MaterialType != EMT_ONETEXTURE_BLEND) {
+	if (material.BlendFactor != 0.0f && material.MaterialType != EMT_ONETEXTURE_BLEND) {
 		E_BLEND_FACTOR srcRGBFact = EBF_ZERO;
 		E_BLEND_FACTOR dstRGBFact = EBF_ZERO;
 		E_BLEND_FACTOR srcAlphaFact = EBF_ZERO;

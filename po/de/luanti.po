@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German (Minetest)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 23:13+0100\n"
-"PO-Revision-Date: 2026-01-16 15:02+0000\n"
+"POT-Creation-Date: 2026-08-10 17:35+0200\n"
+"PO-Revision-Date: 2026-08-15 12:51+0000\n"
 "Last-Translator: Wuzzy <Wuzzy@disroot.org>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/minetest/minetest/"
 "de/>\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.15.2\n"
+"X-Generator: Weblate 2026.9.dev0\n"
 
 #: builtin/client/chatcommands.lua
 msgid "Clear the out chat queue"
@@ -66,6 +66,7 @@ msgstr "Befehl nicht verfügbar: "
 msgid "Get help for commands (-t: output in chat)"
 msgstr "Hilfe für Befehle erhalten (-t: Ausgabe im Chat)"
 
+#. TRANSLATORS: 'help' and 'all' mustn't be translated. cmd = command
 #: builtin/common/chatcommands.lua
 msgid ""
 "Use '.help <cmd>' to get more information, or '.help all' to list everything."
@@ -73,6 +74,7 @@ msgstr ""
 "„.help <Befehl>“ benutzen, um mehr Informationen zu erhalten, oder „.help "
 "all“ benutzen, um alles aufzulisten."
 
+#. TRANSLATORS: Syntax of 'help' command. Don't translate anything except 'cmd' (=command)
 #: builtin/common/chatcommands.lua
 msgid "[all | <cmd>] [-t]"
 msgstr "[all | <Befehl>] [-t]"
@@ -161,7 +163,8 @@ msgstr ""
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "Finally, all of the octaves will be combined to generate the noise."
-msgstr "Am Schluss werden alle Oktaven kombiniert, um das Rauschen zu erzeugen."
+msgstr ""
+"Am Schluss werden alle Oktaven kombiniert, um das Rauschen zu erzeugen."
 
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid ""
@@ -256,6 +259,7 @@ msgstr ""
 msgid "Scales the noise in the $1 axis by this value."
 msgstr "Skaliert das Rauschen in der $1-Achse um diesen Wert."
 
+#. TRANSLATORS: Value for randomness
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Seed"
@@ -300,7 +304,7 @@ msgstr ""
 msgid "This results in spiky noise."
 msgstr "Das wird das Rauschen stachelig machen."
 
-#. ~ "absvalue" is a noise parameter flag.
+#. TRANSLATORS: "absvalue" is a noise parameter flag.
 #. It is short for "absolute value".
 #. It can be enabled in noise settings in
 #. the settings menu.
@@ -308,14 +312,14 @@ msgstr "Das wird das Rauschen stachelig machen."
 msgid "absvalue"
 msgstr "Absolutwert"
 
-#. ~ "defaults" is a noise parameter flag.
+#. TRANSLATORS: "defaults" is a noise parameter flag.
 #. It describes the default processing options
 #. for noise settings in the settings menu.
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "defaults"
 msgstr "Standardwerte"
 
-#. ~ "eased" is a noise parameter flag.
+#. TRANSLATORS: "eased" is a noise parameter flag.
 #. It is used to make the map smoother and
 #. can be enabled in noise settings in
 #. the settings menu.
@@ -323,6 +327,8 @@ msgstr "Standardwerte"
 msgid "eased"
 msgstr "weich (eased)"
 
+#. TRANSLATORS: "automatic exposure" refers to light. This note
+#. will be displayed for the graphics setting 'enable_auto_exposure'
 #: builtin/common/settings/dlg_settings.lua
 msgid "(The game will need to enable automatic exposure as well)"
 msgstr "(Das Spiel muss ebenfalls automatische Belichtung aktivieren)"
@@ -339,20 +345,28 @@ msgstr "(Das Spiel muss ebenfalls volumetrisches Licht aktivieren)"
 msgid "(Use system language)"
 msgstr "(Systemsprache verwenden)"
 
+#. TRANSLATORS: Shown when a default setting is the empty string
+#: builtin/common/settings/dlg_settings.lua
+msgid "<empty>"
+msgstr "<leer>"
+
 #: builtin/common/settings/dlg_settings.lua
 msgid "Accessibility"
 msgstr "Barrierefreiheit"
 
+#. TRANSLATORS: Automatic
 #: builtin/common/settings/dlg_settings.lua
 msgid "Auto"
 msgstr "Automatisch"
 
+#. TRANSLATORS: Button text to go back
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 #: builtin/mainmenu/content/dlg_package.lua src/gui/guiVolumeChange.cpp
 msgid "Back"
 msgstr "Zurück"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Buttons with crosshair"
 msgstr "Knöpfe mit Fadenkreuz"
@@ -362,6 +376,7 @@ msgstr "Knöpfe mit Fadenkreuz"
 msgid "Chat"
 msgstr "Chat"
 
+#. TRANSLATORS: Tooltip of a button that clears input
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Clear"
 msgstr "Leeren"
@@ -369,6 +384,10 @@ msgstr "Leeren"
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "Controls"
 msgstr "Steuerung"
+
+#: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
+msgid "Damage"
+msgstr "Schaden"
 
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/common/settings/shadows_component.lua
@@ -379,10 +398,12 @@ msgstr "Deaktiviert"
 msgid "Enabled"
 msgstr "Aktiviert"
 
+#. TRANSLATORS: Category for general settings
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "General"
 msgstr "Allgemein"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Long tap"
 msgstr "Langes Antippen"
@@ -391,12 +412,13 @@ msgstr "Langes Antippen"
 msgid "Movement"
 msgstr "Bewegung"
 
+#. TRANSLATORS: No search results
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "No results"
 msgstr "Keine Ergebnisse"
 
-#. ~ Indicates that the action does not have a corresponding keybinding.
+#. TRANSLATORS: Indicates that the action does not have a corresponding keybinding.
 #: builtin/common/settings/dlg_settings.lua
 msgid "Not bound"
 msgstr "Nicht zugewiesen"
@@ -405,14 +427,16 @@ msgstr "Nicht zugewiesen"
 msgid "Reset setting to default"
 msgstr "Auf Standard zurücksetzen"
 
+#. TRANSLATORS: $1 will be replaced with a default setting value
 #: builtin/common/settings/dlg_settings.lua
-msgid "Reset setting to default ($1)"
-msgstr "Auf Standard zurücksetzen ($1)"
+msgid "Reset setting to default: $1"
+msgstr "Auf Standard zurücksetzen: $1"
 
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Search"
 msgstr "Suchen"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Short tap"
 msgstr "Kurzes Antippen"
@@ -421,14 +445,17 @@ msgstr "Kurzes Antippen"
 msgid "Show advanced settings"
 msgstr "Erweiterte Einstellungen zeigen"
 
+#. TRANSLATORS: Checkbox that toggles displaying the technical setting names
 #: builtin/common/settings/dlg_settings.lua
 msgid "Show technical names"
 msgstr "Technische Namen zeigen"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap"
 msgstr "Antippen"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap with crosshair"
 msgstr "Antippen mit Fadenkreuz"
@@ -505,6 +532,10 @@ msgstr "In einem Lua-Skript ist ein Fehler aufgetreten:"
 #: builtin/fstk/ui.lua
 msgid "An error occurred:"
 msgstr "Ein Fehler ist aufgetreten:"
+
+#: builtin/fstk/ui.lua
+msgid "Copy to clipboard"
+msgstr "In Zwischenablage kopieren"
 
 #: builtin/fstk/ui.lua
 msgid "Main menu"
@@ -586,6 +617,8 @@ msgstr "ContentDB ist nicht verfügbar, wenn Luanti ohne cURL kompiliert wurde"
 msgid "Downloading..."
 msgstr "Herunterladen …"
 
+#. TRANSLATORS: A 'featured' package in ContentDB is a package that is
+#. more prominently displayed than other packages
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Featured"
 msgstr "Vorgestellt"
@@ -613,6 +646,7 @@ msgstr "Es konnten keine Pakete empfangen werden"
 msgid "No updates"
 msgstr "Keine Updates"
 
+#. TRANSLATORS: A download is queued
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Queued"
 msgstr "Eingereiht"
@@ -625,14 +659,17 @@ msgstr "Texturenpakete"
 msgid "The package $1 was not found."
 msgstr "Das Paket $1 wurde nicht gefunden."
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Update All [$1]"
 msgstr "Alle aktualisieren [$1]"
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 and $2 dependencies will be installed."
 msgstr "$1 und $2 Abhängigkeiten werden installiert."
 
+#. TRANSLATORS: Package (mod, texture pack, etc.) info: $1 = package name, $2 = package author
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 by $2"
 msgstr "$1 von $2"
@@ -641,6 +678,7 @@ msgstr "$1 von $2"
 msgid "$1 required dependencies could not be found."
 msgstr "$1 benötigte Abhängigkeiten konnten nicht gefunden werden."
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 will be installed, and $2 dependencies will be skipped."
 msgstr "$1 wird installiert und $2 Abhängigkeiten werden übersprungen."
@@ -653,6 +691,7 @@ msgstr "Bereits installiert"
 msgid "Base Game:"
 msgstr "Basis-Spiel:"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/content/dlg_install.lua
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Dependencies:"
@@ -724,10 +763,12 @@ msgstr "Forumthema"
 msgid "Information"
 msgstr "Informationen"
 
+#. TRANSLATORS: $1 = download size
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Install [$1]"
 msgstr "Installieren [$1]"
 
+#. TRANSLATORS: Also known as 'bug tracker'
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Issue Tracker"
 msgstr "Issue-Tracker"
@@ -736,6 +777,7 @@ msgstr "Issue-Tracker"
 msgid "Reviews"
 msgstr "Rezensionen"
 
+#. TRANSLATORS: Link to source code repository
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Source"
 msgstr "Quellcode"
@@ -760,6 +802,10 @@ msgstr "Webseite"
 msgid "by $1"
 msgstr "von $1"
 
+#. TRANSLATORS: Info line for a ContentDB package:
+#. $1 = author,
+#. $2 = number of downloads,
+#. $3, $4, $5 = number of positive/neutral/negative reviews
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "by $1  —  $2 downloads  —  +$3 / $4 / -$5"
 msgstr "von $1  —  $2 Downloads  —  +$3 / $4 / -$5"
@@ -797,6 +843,7 @@ msgstr "Fehler bei der Texturenpaket-Installation von $1"
 msgid "World mods"
 msgstr "Weltmods"
 
+#. TRANSLATORS: $1 = server name
 #: builtin/mainmenu/dlg_clients_list.lua
 msgid ""
 "Players connected to\n"
@@ -805,10 +852,12 @@ msgstr ""
 "Spieler verbunden zu\n"
 "$1"
 
+#. TRANSLATORS: Message in the mod list when a mod is enabled with error
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Enabled, has error)"
 msgstr "(Aktiviert, hat Fehler)"
 
+#. TRANSLATORS: Displayed when a mod dependency is unsatisfied
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Unsatisfied)"
 msgstr "(Nicht erfüllt)"
@@ -849,6 +898,7 @@ msgstr "Mod:"
 msgid "Mods located inside the world folder."
 msgstr "Mods im Weltverzeichnis."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No (optional) dependencies"
 msgstr "Keine (optionalen) Abhängigkeiten"
@@ -857,6 +907,7 @@ msgstr "Keine (optionalen) Abhängigkeiten"
 msgid "No game description provided."
 msgstr "Keine Spielbeschreibung verfügbar."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No hard dependencies"
 msgstr "Keine notwendigen Abhängigkeiten"
@@ -865,10 +916,12 @@ msgstr "Keine notwendigen Abhängigkeiten"
 msgid "No modpack description provided."
 msgstr "Keine Beschreibung für das Modpack verfügbar."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No optional dependencies"
 msgstr "Keine optionalen Abhängigkeiten"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Optional dependencies:"
 msgstr "Optionale Abhängigkeiten:"
@@ -909,6 +962,7 @@ msgstr "Höhenabkühlung"
 msgid "Altitude dry"
 msgstr "Höhenabtrocknung"
 
+#. TRANSLATORS: Smooth transition between biomes
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Biome blending"
 msgstr "Biomübergänge"
@@ -929,6 +983,7 @@ msgstr "Höhlen"
 msgid "Create"
 msgstr "Erstellen"
 
+#. TRANSLATORS: Map generator decorations (used for structures, trees, plants, and more)
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Decorations"
 msgstr "Dekorationen"
@@ -1137,6 +1192,7 @@ msgstr "Das Steuerungssystem wurde in Luanti 5.12.0 überarbeitet."
 msgid "Confirm Password"
 msgstr "Passw. bestätigen"
 
+#. TRANSLATORS: Message when joining a server
 #: builtin/mainmenu/dlg_register.lua
 msgid "Joining $1"
 msgstr "$1 beitreten"
@@ -1159,10 +1215,12 @@ msgstr "Passwort"
 msgid "Passwords do not match"
 msgstr "Passwörter stimmen nicht überein"
 
+#. TRANSLATORS: Register an account on a server
 #: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_online.lua
 msgid "Register"
 msgstr "Registrieren"
 
+#. TRANSLATORS: Dismiss a dialog window/message
 #: builtin/mainmenu/dlg_reinstall_mtg.lua
 msgid "Dismiss"
 msgstr "Ablehnen"
@@ -1208,10 +1266,12 @@ msgstr ""
 "Diesem Modpaket wurde in seiner modpack.conf ein expliziter Name vergeben, "
 "der jede Umbennenung hier überschreiben wird."
 
+#. TRANSLATORS: Expand all entries in a tree view
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Expand all"
 msgstr "Alle ausklappen"
 
+#. TRANSLATORS: A checkbox; if enabled, it will group mods by their prefix
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Group by prefix"
 msgstr "Nach Präfix gruppieren"
@@ -1224,10 +1284,12 @@ msgstr "Der Server $1 nutzt ein Spiel namens $2 und die folgenden Mods:"
 msgid "The $1 server uses the following mods:"
 msgstr "Der Server $1 nutzt folgende Mods:"
 
+#. TRANSLATORS: $1 = name of the engine
 #: builtin/mainmenu/dlg_version_info.lua
 msgid "A new $1 version is available"
 msgstr "Eine neue Version von $1 ist verfügbar"
 
+#. TRANSLATORS: $1 and $2 are version numbers, $3 is a URL
 #: builtin/mainmenu/dlg_version_info.lua
 msgid ""
 "Installed version: $1\n"
@@ -1256,6 +1318,7 @@ msgstr "Webseite besuchen"
 msgid "Debug build, expect worse performance"
 msgstr "Debug-Build, rechnen sie mit einer schlechteren Performanz"
 
+#. TRANSLATORS: Try to keep the translation short
 #: builtin/mainmenu/init.lua src/client/game_formspec.cpp
 msgid "Settings"
 msgstr "Einstellungen"
@@ -1318,6 +1381,7 @@ msgstr "Debug-Log teilen"
 msgid "Browse online content"
 msgstr "Onlineinhalte durchsuchen"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 msgid "Browse online content [$1]"
 msgstr "Onlineinhalte durchsuchen [$1]"
@@ -1326,6 +1390,7 @@ msgstr "Onlineinhalte durchsuchen [$1]"
 msgid "Content"
 msgstr "Inhalt"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 msgid "Content [$1]"
 msgstr "Inhalt [$1]"
@@ -1410,6 +1475,7 @@ msgstr "Neu"
 msgid "Play Game"
 msgstr "Spiel starten"
 
+#. TRANSLATORS: Network port
 #: builtin/mainmenu/tab_local.lua builtin/mainmenu/tab_online.lua
 msgid "Port"
 msgstr "Port"
@@ -1439,6 +1505,7 @@ msgstr ""
 msgid "Add favorite"
 msgstr "Favorit hinzufügen"
 
+#. TRANSLATORS: Network address
 #: builtin/mainmenu/tab_online.lua
 msgid "Address"
 msgstr "Adresse"
@@ -1447,7 +1514,7 @@ msgstr "Adresse"
 msgid "Creative mode"
 msgstr "Kreativmodus"
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: builtin/mainmenu/tab_online.lua
 msgid "Damage / PvP"
 msgstr "Schaden / PvP"
@@ -1468,6 +1535,7 @@ msgstr "Inkompatible Server"
 msgid "Join Game"
 msgstr "Spiel beitreten"
 
+#. TRANSLATORS: Login to server
 #: builtin/mainmenu/tab_online.lua
 msgid "Login"
 msgstr "Einloggen"
@@ -1480,10 +1548,12 @@ msgstr "Anzahl der Mods: $1"
 msgid "Open server website"
 msgstr "Server-Webseite besuchen"
 
+#. TRANSLATORS: Also known as "latency"
 #: builtin/mainmenu/tab_online.lua
 msgid "Ping"
 msgstr "Latenz"
 
+#. TRANSLATORS: $1 is a list of players
 #: builtin/mainmenu/tab_online.lua
 msgid ""
 "Players:\n"
@@ -1493,21 +1563,14 @@ msgstr ""
 "$1"
 
 #: builtin/mainmenu/tab_online.lua
-msgid ""
-"Possible filters\n"
-"game:<name>\n"
-"mod:<name>\n"
-"player:<name>"
-msgstr ""
-"Mögliche Filter\n"
-"game:<Name>\n"
-"mod:<Name>\n"
-"player:<Name>"
+msgid "Possible filters"
+msgstr "Mögliche Filter"
 
 #: builtin/mainmenu/tab_online.lua
 msgid "Public Servers"
 msgstr "Öffentliche Server"
 
+#. TRANSLATORS: As in 'reload'/'check again'
 #: builtin/mainmenu/tab_online.lua
 msgid "Refresh"
 msgstr "Neu laden"
@@ -1519,6 +1582,10 @@ msgstr "Favorit entfernen"
 #: builtin/mainmenu/tab_online.lua
 msgid "Server Description"
 msgstr "Serverbeschreibung"
+
+#: src/chat.cpp
+msgid "Player names: "
+msgstr "Spielernamen: "
 
 #: src/client/client.cpp
 msgid "Connection aborted (protocol error?)."
@@ -1548,7 +1615,7 @@ msgstr "Lade Texturen …"
 msgid "Rebuilding shaders..."
 msgstr "Shader erneuern …"
 
-#: src/client/client.cpp src/util/screenshot.cpp
+#: src/client/client.cpp src/gui/guiEngine.cpp src/util/screenshot.cpp
 #, c-format
 msgid "Saved screenshot to \"%s\""
 msgstr "Bildschirmfoto nach „%s“ gespeichert"
@@ -1586,6 +1653,10 @@ msgstr ""
 #: src/client/clientmedia.cpp src/client/game.cpp
 msgid "Media..."
 msgstr "Medien …"
+
+#: src/client/fontengine.cpp
+msgid "Failed to find a valid font"
+msgstr "Es konnte keine gültige Schrift gefunden werden"
 
 #: src/client/game.cpp src/client/render/pipeline.cpp src/client/shader.cpp
 #: src/server.cpp
@@ -1709,6 +1780,11 @@ msgid "Fast mode enabled (note: no 'fast' privilege)"
 msgstr "Schnellmodus aktiviert (Hinweis: Kein „fast“-Privileg)"
 
 #: src/client/game.cpp
+#, c-format
+msgid "Files: %d / %d"
+msgstr "Dateien: %d / %d"
+
+#: src/client/game.cpp
 msgid "Fly mode disabled"
 msgstr "Flugmodus deaktiviert"
 
@@ -1737,12 +1813,12 @@ msgid "Item definitions..."
 msgstr "Gegenstandsdefinitionen …"
 
 #: src/client/game.cpp
-msgid "KiB/s"
-msgstr "KiB/s"
+msgid "KiB"
+msgstr "KiB"
 
 #: src/client/game.cpp
-msgid "MiB/s"
-msgstr "MiB/s"
+msgid "MiB"
+msgstr "MiB"
 
 #: src/client/game.cpp
 msgid "Minimap currently disabled by game or mod"
@@ -1791,6 +1867,11 @@ msgstr "Herunterfahren …"
 #: src/client/game.cpp src/client/game_formspec.cpp
 msgid "Singleplayer"
 msgstr "Einzelspieler"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Size: %.2f %s"
+msgstr "Größe: %.2f %s"
 
 #: src/client/game.cpp
 msgid "Sound muted"
@@ -1884,6 +1965,7 @@ msgstr "Drahtmodell aktiv"
 msgid "Zoom currently disabled by game or mod"
 msgstr "Zoom ist momentan von Spiel oder Mod deaktiviert"
 
+#. TRANSLATORS: Game mode (server or singleplayer)
 #: src/client/game_formspec.cpp
 msgid "- Mode: "
 msgstr "- Modus: "
@@ -1892,7 +1974,7 @@ msgstr "- Modus: "
 msgid "- Public: "
 msgstr "- Öffentlich: "
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: src/client/game_formspec.cpp
 msgid "- PvP: "
 msgstr "- Spielerkampf: "
@@ -1901,10 +1983,12 @@ msgstr "- Spielerkampf: "
 msgid "- Server Name: "
 msgstr "- Servername: "
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Change Password"
 msgstr "Passwort ändern"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Continue"
 msgstr "Weiter"
@@ -1937,10 +2021,12 @@ msgstr ""
 "- Berühren u. ziehen, mit 2. Finger antippen\n"
 " --> 1 Gegenstand ins Feld platzieren\n"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Exit to Menu"
 msgstr "Hauptmenü"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short (OS = Operating System)
 #: src/client/game_formspec.cpp
 msgid "Exit to OS"
 msgstr "Programm beenden"
@@ -1973,6 +2059,7 @@ msgstr "Entfernter Server"
 msgid "Respawn"
 msgstr "Wiederbeleben"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Sound Volume"
 msgstr "Tonlautstärke"
@@ -2011,10 +2098,26 @@ msgid "Profiler shown (page %d of %d)"
 msgstr "Profiler angezeigt (Seite %d von %d)"
 
 #: src/client/keycode.cpp
+msgid "A (Gamepad)"
+msgstr "A (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "B (Gamepad)"
+msgstr "B (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "Back (Gamepad)"
+msgstr "Zurück (Gamepad)"
+
+#: src/client/keycode.cpp
 msgid "Backspace"
 msgstr "Rücktaste"
 
-#. ~ Usually paired with the Pause key
+#: src/client/keycode.cpp
+msgid "Bottom Face Button (Gamepad)"
+msgstr "Unterer Face-Button (Gamepad)"
+
+#. TRANSLATORS: Usually paired with the Pause key
 #: src/client/keycode.cpp
 msgid "Break Key"
 msgstr "Untbr-Taste"
@@ -2024,12 +2127,36 @@ msgid "Caps Lock"
 msgstr "Feststell"
 
 #: src/client/keycode.cpp
+msgid "Circle (Gamepad)"
+msgstr "Kreis (Gamepad)"
+
+#: src/client/keycode.cpp
 msgid "Clear Key"
 msgstr "Clear-Taste"
 
 #: src/client/keycode.cpp
 msgid "Control Key"
 msgstr "Strg-Taste"
+
+#: src/client/keycode.cpp
+msgid "Cross (Gamepad)"
+msgstr "Kreuz (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Down"
+msgstr "D-Pad runter"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Left"
+msgstr "D-Pad links"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Right"
+msgstr "D-Pad rechts"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Up"
+msgstr "D-Pad rauf"
 
 #: src/client/keycode.cpp
 msgid "Delete Key"
@@ -2042,6 +2169,25 @@ msgstr "Pfeil runter"
 #: src/client/keycode.cpp
 msgid "End Key"
 msgstr "Ende-Taste"
+
+#: src/client/keycode.cpp
+#, c-format
+msgid "Gamepad Axis %d +"
+msgstr "Gamepad-Achse %d +"
+
+#: src/client/keycode.cpp
+#, c-format
+msgid "Gamepad Axis %d -"
+msgstr "Gamepad-Achse %d -"
+
+#: src/client/keycode.cpp
+#, c-format
+msgid "Gamepad Button %d"
+msgstr "Gamepad-Knopf %d"
+
+#: src/client/keycode.cpp
+msgid "Guide (Gamepad)"
+msgstr "Guide (Gamepad)"
 
 #: src/client/keycode.cpp
 msgid "Help Key"
@@ -2068,6 +2214,30 @@ msgid "Left Control"
 msgstr "Strg links"
 
 #: src/client/keycode.cpp
+msgid "Left Face Button (Gamepad)"
+msgstr "Linker Face-Button (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Button"
+msgstr "Linker Joystick-Knopf"
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Down"
+msgstr "Linker Joystick runter"
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Left"
+msgstr "Linker Joystick links"
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Right"
+msgstr "Linker Joystick rechts"
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Up"
+msgstr "Linker Joystick rauf"
+
+#: src/client/keycode.cpp
 msgid "Left Menu"
 msgstr "Menü links"
 
@@ -2075,7 +2245,15 @@ msgstr "Menü links"
 msgid "Left Shift"
 msgstr "Umschalt links"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+msgid "Left Shoulder"
+msgstr "Linker Schulterknopf"
+
+#: src/client/keycode.cpp
+msgid "Left Trigger"
+msgstr "Linker Trigger"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Left Windows"
 msgstr "Windows links"
@@ -2088,10 +2266,18 @@ msgstr "Menü-Taste"
 msgid "Middle Click"
 msgstr "Mittelklick"
 
+#. TRANSLATORS: This is for mouse buttons without an intuitive description. %d is the number of the button.
+#: src/client/keycode.cpp
+#, c-format
+msgid "Mouse Button %d"
+msgstr "Maustaste %d"
+
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X1"
 msgstr "Maus X1"
 
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X2"
 msgstr "Maus X2"
@@ -2168,7 +2354,7 @@ msgstr "Bild ab"
 msgid "Page Up"
 msgstr "Bild auf"
 
-#. ~ Usually paired with the Break key
+#. TRANSLATORS: Usually paired with the Break key
 #: src/client/keycode.cpp
 msgid "Pause Key"
 msgstr "Pause-Taste"
@@ -2177,7 +2363,15 @@ msgstr "Pause-Taste"
 msgid "Play"
 msgstr "Spielen"
 
-#. ~ "Print screen" key
+#: src/client/keycode.cpp
+msgid "Primary Left Paddle"
+msgstr "Primäres linkes Paddle"
+
+#: src/client/keycode.cpp
+msgid "Primary Right Paddle"
+msgstr "Primäres rechtes Paddle"
+
+#. TRANSLATORS: "Print screen" key
 #: src/client/keycode.cpp
 msgid "Print"
 msgstr "Druck"
@@ -2199,6 +2393,30 @@ msgid "Right Control"
 msgstr "Strg rechts"
 
 #: src/client/keycode.cpp
+msgid "Right Face Button (Gamepad)"
+msgstr "Rechter Face-Button (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Button"
+msgstr "Rechter Joystick-Knopf"
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Down"
+msgstr "Rechter Joystick runter"
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Left"
+msgstr "Rechter Joystick links"
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Right"
+msgstr "Rechter Joystick rechts"
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Up"
+msgstr "Rechter Joystick rauf"
+
+#: src/client/keycode.cpp
 msgid "Right Menu"
 msgstr "Menü rechts"
 
@@ -2206,7 +2424,15 @@ msgstr "Menü rechts"
 msgid "Right Shift"
 msgstr "Umschalt rechts"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+msgid "Right Shoulder"
+msgstr "Rechter Schulterknopf"
+
+#: src/client/keycode.cpp
+msgid "Right Trigger"
+msgstr "Rechter Trigger"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Right Windows"
 msgstr "Windows rechts"
@@ -2221,6 +2447,14 @@ msgid "Scroll Lock"
 msgstr "Rollen"
 
 #: src/client/keycode.cpp
+msgid "Secondary Left Paddle"
+msgstr "Sekundäres linkes Paddle"
+
+#: src/client/keycode.cpp
+msgid "Secondary Right Paddle"
+msgstr "Sekundäres rechtes Paddle"
+
+#: src/client/keycode.cpp
 msgid "Select Key"
 msgstr "Select-Taste"
 
@@ -2233,12 +2467,40 @@ msgid "Space"
 msgstr "Leertaste"
 
 #: src/client/keycode.cpp
+msgid "Square (Gamepad)"
+msgstr "Quadrat (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "Start (Gamepad)"
+msgstr "Start (Gamepad)"
+
+#: src/client/keycode.cpp
 msgid "Tab Key"
 msgstr "Tab-Taste"
 
 #: src/client/keycode.cpp
+msgid "Top Face Button (Gamepad)"
+msgstr "Oberer Face-Button (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "Touchpad Button (Gamepad)"
+msgstr "Touchpad-Knopf (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "Triangle (Gamepad)"
+msgstr "Dreieck (Gamepad)"
+
+#: src/client/keycode.cpp
 msgid "Up Arrow"
 msgstr "Pfeil hoch"
+
+#: src/client/keycode.cpp
+msgid "X (Gamepad)"
+msgstr "X (Gamepad)"
+
+#: src/client/keycode.cpp
+msgid "Y (Gamepad)"
+msgstr "Y (Gamepad)"
 
 #: src/client/minimap.cpp
 msgid "Minimap hidden"
@@ -2264,6 +2526,10 @@ msgid "Failed to create the texture \"%s\" for the rendering pipeline."
 msgstr ""
 "Die Textur „%s“ konnte für die Rendering-Pipeline nicht erstellt werden."
 
+#: src/client/renderingengine.cpp
+msgid "Could not initialize any supported video driver!"
+msgstr "Es konnte kein unterstützter Grafiktreiber initialisiert werden!"
+
 #: src/client/shader.cpp
 #, c-format
 msgid "Failed to compile the \"%s\" shader."
@@ -2274,11 +2540,13 @@ msgstr "Fehler beim Kompilieren des „%s“-Shaders."
 msgid "Failed to find \"%s\" shader files."
 msgstr "Die „%s“-Shader-Dateien konnten nicht gefunden werden."
 
+#. TRANSLATORS: GLSL = OpenGL Shading Language
 #: src/client/shader.cpp
 msgid "GLSL is not supported by the driver"
 msgstr "GLSL wird vom Treiber nicht unterstützt"
 
-#. ~ Error when a mod is missing dependencies. Ex: "Mod Title is missing: mod1, mod2, mod3"
+#. TRANSLATORS: Error when a mod is missing dependencies.
+#. Example: "Mod Title is missing: mod1, mod2, mod3"
 #: src/content/mod_configuration.cpp
 #, c-format
 msgid "%s is missing:"
@@ -2314,6 +2582,10 @@ msgstr "Fehler beim Öffnen der Webseite"
 #: src/gui/guiChatConsole.cpp
 msgid "Opening webpage"
 msgstr "Öffne Webseite"
+
+#: src/gui/guiEngine.cpp
+msgid "Failed to load main menu script!"
+msgstr "Das Hauptmenü-Skript konnte nicht geladen werden!"
 
 #: src/gui/guiFormSpecMenu.cpp
 msgid "Proceed"
@@ -2358,7 +2630,7 @@ msgstr "Tonlautstärke: %d%%"
 
 #: src/gui/touchscreeneditor.cpp
 msgid "Add button"
-msgstr "Button hinzufügen"
+msgstr "Knopf hinzufügen"
 
 #: src/gui/touchscreeneditor.cpp
 msgid "Done"
@@ -2374,11 +2646,11 @@ msgstr "Zurücksetzen"
 
 #: src/gui/touchscreeneditor.cpp
 msgid "Start dragging a button to add. Tap outside to cancel."
-msgstr "Button ziehen zum Hinzufügen. Außerhalb antippen zum Abbrechen."
+msgstr "Knopf ziehen zum Hinzufügen. Außerhalb antippen zum Abbrechen."
 
 #: src/gui/touchscreeneditor.cpp
 msgid "Tap a button to select it. Drag a button to move it."
-msgstr "Button antippen zum Auswählen. Button ziehen zum Verschieben."
+msgstr "Knopf antippen zum Auswählen. Knopf ziehen zum Verschieben."
 
 #: src/gui/touchscreeneditor.cpp
 msgid "Tap outside to deselect."
@@ -2402,7 +2674,7 @@ msgstr "Wegwerfen"
 
 #: src/gui/touchscreenlayout.cpp
 msgid "Exit"
-msgstr "Zurück"
+msgstr "Ausgang"
 
 #: src/gui/touchscreenlayout.cpp
 msgid "Inventory"
@@ -2482,7 +2754,7 @@ msgstr "Interner Serverfehler"
 msgid "Invalid password"
 msgstr "Falsches Passwort"
 
-#. ~ DO NOT TRANSLATE THIS LITERALLY!
+#. TRANSLATORS: DO NOT TRANSLATE THIS LITERALLY!
 #. This is a special string which needs to contain the translation's
 #. language code (e.g. "de" for German).
 #: src/network/clientpackethandler.cpp src/script/lua_api/l_client.cpp
@@ -2548,6 +2820,10 @@ msgid ""
 msgstr ""
 "Ihre Client-Version wird nicht unterstützt.\n"
 "Bitte kontaktieren Sie den Server-Administrator."
+
+#: src/script/lua_api/l_mainmenu.cpp
+msgid "Copied to clipboard!"
+msgstr "In Zwischenablage kopiert!"
 
 #: src/server.cpp
 #, c-format
@@ -2748,6 +3024,10 @@ msgid "Acceleration of gravity, in nodes per second per second."
 msgstr "Beschleunigung der Schwerkraft, in Blöcken pro Sekunde pro Sekunde."
 
 #: src/settings_translation_file.cpp
+msgid "Actions and Keybindings"
+msgstr "Aktionen und Tastenbelegung"
+
+#: src/settings_translation_file.cpp
 msgid "Active Block Modifiers"
 msgstr "Active Block Modifiers"
 
@@ -2876,12 +3156,14 @@ msgid "Anticheat movement tolerance"
 msgstr "Anticheat-Bewegungs-Toleranz"
 
 #: src/settings_translation_file.cpp
-msgid "Append item name"
-msgstr "Gegenstandsnamen anhängen"
+msgid "Append item name to tooltips"
+msgstr "Gegenstandsnamen an Tooltips anhängen"
 
 #: src/settings_translation_file.cpp
-msgid "Append item name to tooltip."
-msgstr "Gegenstandsnamen an Tooltip anhängen."
+msgid "Append the full item name to the tooltip of item stacks."
+msgstr ""
+"Den vollständigen Gegenstandsnamen an das Tooltip von Gegenstandsstapeln "
+"anhängen."
 
 #: src/settings_translation_file.cpp
 msgid "Apple trees noise"
@@ -2963,18 +3245,18 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"At this distance the server will perform a simpler and cheaper occlusion "
-"check.\n"
-"Smaller values potentially improve performance, at the expense of "
-"temporarily visible\n"
-"rendering glitches (missing blocks).\n"
+"At this distance the server will consider blocks as \"far away\".\n"
+"It will perform simpler and cheaper occlusion checks, update\n"
+"low priority block updates lazily, and limit the blocks sent to the\n"
+"client in one roundtrip.\n"
 "This is especially useful for very large viewing range (upwards of 500).\n"
 "Stated in MapBlocks (16 nodes)."
 msgstr ""
-"In dieser Distanz wird der Server einen einfacheren und günstigeren\n"
-"Verdeckungs-Prüfung machen.\n"
-"Kleine Werte werden die Performanz möglicherweise stark erhöhen,\n"
-"auf Kosten von sichtbaren Renderfehlern (fehlende Kartenblöcke).\n"
+"In dieser Distanz wird der Server Blöcke als „weit entfernt“ einstufen.\n"
+"Er wird einfachere und günstigere Verdeckungs-Prüfungen machen,\n"
+"wird Blockaktualisierungen mit niedrigerer Priorätit „lazy“ vornehmen\n"
+"und wird Blöcke, die zum Client in einem Roundtrip gesendet werden,\n"
+"reduzieren.\n"
 "Dies ist besonders nützlich für eine hohe Sichtweite (über 500).\n"
 "In Kartenblöcken (16 Blöcke) angegeben."
 
@@ -3469,6 +3751,10 @@ msgstr ""
 "Gilt auch für das Objektfadenkreuz"
 
 #: src/settings_translation_file.cpp
+msgid "Damage flash"
+msgstr "Schadensaufblitzen"
+
+#: src/settings_translation_file.cpp
 msgid "Debug log file size threshold"
 msgstr "Debugprotokolldateigrößengrenze"
 
@@ -3827,6 +4113,10 @@ msgid "Enable Raytraced Culling"
 msgstr "Raytraced Culling aktivieren"
 
 #: src/settings_translation_file.cpp
+msgid "Enable SSCSM"
+msgstr "SSCSM aktivieren"
+
+#: src/settings_translation_file.cpp
 msgid "Enable a confirmation dialog before closing."
 msgstr "Aktiviert einen Bestätigungsdialog vor dem Schließen."
 
@@ -3857,14 +4147,6 @@ msgstr "Konsolenfenster aktivieren"
 #: src/settings_translation_file.cpp
 msgid "Enable dynamic shadows"
 msgstr "Dynamische Schatten aktivieren"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks"
-msgstr "Joysticks aktivieren"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks. Requires a restart to take effect"
-msgstr "Aktiviert Joysticks. Benötigt einen Neustart, um wirksam zu werden"
 
 #: src/settings_translation_file.cpp
 msgid "Enable mod channels support."
@@ -4111,6 +4393,10 @@ msgstr ""
 "zentriert."
 
 #: src/settings_translation_file.cpp
+msgid "Flashing of the screen when taking damage."
+msgstr "Der Bildschirm blitzt auf, wenn Schaden genommen wird."
+
+#: src/settings_translation_file.cpp
 msgid "Floatland density"
 msgstr "Schwebelanddichte"
 
@@ -4314,8 +4600,12 @@ msgid "GUI scaling filter"
 msgstr "GUI-Skalierfilter"
 
 #: src/settings_translation_file.cpp
-msgid "Gamepads"
-msgstr "Gamepads"
+msgid "Gamepads and Joysticks"
+msgstr "Gamepads und Joysticks"
+
+#: src/settings_translation_file.cpp
+msgid "Gamma"
+msgstr "Gamma"
 
 #: src/settings_translation_file.cpp
 msgid "Global callbacks"
@@ -4963,24 +5253,20 @@ msgstr ""
 "Rechenlast wie der Kartengenerator V7."
 
 #: src/settings_translation_file.cpp
-msgid "Joystick ID"
-msgstr "Joystick-ID"
-
-#: src/settings_translation_file.cpp
 msgid "Joystick button repetition interval"
-msgstr "Joystick-Button-Wiederholungsrate"
-
-#: src/settings_translation_file.cpp
-msgid "Joystick dead zone"
-msgstr "Joystick-Totbereich"
+msgstr "Joystick-Knopf-Wiederholungsrate"
 
 #: src/settings_translation_file.cpp
 msgid "Joystick frustum sensitivity"
 msgstr "Joystick-Pyramidenstumpf-Empfindlichkeit"
 
 #: src/settings_translation_file.cpp
-msgid "Joystick type"
-msgstr "Joystick-Typ"
+msgid "Joystick inner dead zone"
+msgstr "Innerer Joystick-Totbereich"
+
+#: src/settings_translation_file.cpp
+msgid "Joystick outer dead zone"
+msgstr "Äußerer Joystick-Totbereich"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -5083,6 +5369,14 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for opening the pause menu in-game.\n"
+"Pressing the escape key always opens the pause menu."
+msgstr ""
+"Taste für das Öffnen des Pausemenüs im Spiel.\n"
+"Die Escape-Taste wird immer das Pausemenü öffnen."
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for placing an item/block or for using something.\n"
 "(Note: The actual meaning might vary on a per-game basis.)"
 msgstr ""
@@ -5115,12 +5409,17 @@ msgstr ""
 "benutzt."
 
 #: src/settings_translation_file.cpp
-msgid "Keybindings"
-msgstr "Tastenbelegung"
-
-#: src/settings_translation_file.cpp
 msgid "Keyboard and Mouse"
 msgstr "Tastatur und Maus"
+
+#: src/settings_translation_file.cpp
+msgid "Keyboard camera speed"
+msgstr "Tastaturkamerageschwindigkeit"
+
+#: src/settings_translation_file.cpp
+msgid "Keyboard-controlled camera rotation speed, in degrees per second."
+msgstr ""
+"Rotationsgeschwindigkeit der tastaturgesteuerten Kamera, in Grad pro Sekunde."
 
 #: src/settings_translation_file.cpp
 msgid "Kick players who sent more than X messages per 10 seconds."
@@ -5341,6 +5640,22 @@ msgid "Local command"
 msgstr "Lokaler Befehl"
 
 #: src/settings_translation_file.cpp
+msgid "Look down"
+msgstr "Runter schauen"
+
+#: src/settings_translation_file.cpp
+msgid "Look left"
+msgstr "Links schauen"
+
+#: src/settings_translation_file.cpp
+msgid "Look right"
+msgstr "Rechts schauen"
+
+#: src/settings_translation_file.cpp
+msgid "Look up"
+msgstr "Hoch schauen"
+
+#: src/settings_translation_file.cpp
 msgid "Lower Y limit of dungeons."
 msgstr "Y-Untergrenze von Verliesen."
 
@@ -5358,6 +5673,18 @@ msgid ""
 msgstr ""
 "Nebel- und Himmelsfarben von der Tageszeit (Sonnenaufgang/Sonnenuntergang) "
 "und Blickrichtung abhängig machen."
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Make volumetrics weaker against closer objects to emulate physical "
+"volumetrics."
+msgstr ""
+"Volumetriken entgegen näheren Objekten schwächen, um physische Volumetriken "
+"zu emulieren."
+
+#: src/settings_translation_file.cpp
+msgid "Makes the color of light fog more saturated."
+msgstr "Sättigt die Farbe von hellem Nebel."
 
 #: src/settings_translation_file.cpp
 msgid "Map Compression Level for Disk Storage"
@@ -6000,6 +6327,10 @@ msgid "Open inventory"
 msgstr "Inventar öffnen"
 
 #: src/settings_translation_file.cpp
+msgid "Open pause menu"
+msgstr "Pausemenü öffnen"
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Open the pause menu when the window's focus is lost. Does not pause if a "
 "formspec is\n"
@@ -6593,6 +6924,16 @@ msgstr "Serverlistendatei"
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Set proxy to use by cURL. This is an URI just like the *_proxy environment "
+"variables.\n"
+"Note that this will not apply to Luanti's in-game protocol."
+msgstr ""
+"Den von cURL zu verwendenden Proxy festlegen. Das ist eine URI wie die "
+"„*_proxy“-Umgebungsvariablen.\n"
+"Beachten Sie, dass dies sich nicht auf Luantis Spielprotokoll auswirkt."
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Set the default tilt of Sun/Moon orbit in degrees.\n"
 "Games may change orbit tilt via API.\n"
 "Value of 0 means no tilt / vertical orbit."
@@ -6604,12 +6945,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Set the exposure compensation in EV units.\n"
-"Value of 0.0 (default) means no exposure compensation.\n"
-"Range: from -1 to 1.0"
+"Value of 0.0 (default) means no exposure compensation."
 msgstr ""
 "Setzt die Belichtungskorrektur in EV-Einheiten.\n"
-"Der Wert 0.0 (Standard) steht für keine Belichtungskorrektur.\n"
-"Wertebereich: von -1 zu 1.0"
+"Der Wert 0.0 (Standard) steht für keine Belichtungskorrektur."
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6625,6 +6964,14 @@ msgid ""
 msgstr ""
 "Setzt die maximale Zeichenlänge einer Chatnachricht (in Zeichen), die von "
 "Clients gesendet wird."
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Set the post processing gamma value.\n"
+"Higher values give lower contrast and vice versa."
+msgstr ""
+"Setzt den Nachbearbeitungs-Gammawert.\n"
+"Höhere Werte resultieren in einen niedrigeren Kontrast und umgekehrt."
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6772,9 +7119,13 @@ msgstr ""
 "von Vorteil."
 
 #: src/settings_translation_file.cpp
-msgid "Simulate translucency when looking at foliage in the sunlight."
+msgid ""
+"Simulate translucency when looking at foliage in the sunlight.\n"
+"It is recommended to use this with setting \"leaves_style\" set to \"fancy\"."
 msgstr ""
-"Transluzenz simulieren, wenn auf Blattwerk im Sonnenlicht geblickt wird."
+"Transluzenz simulieren, wenn auf Blattwerk im Sonnenlicht geblickt wird.\n"
+"Es wird empfohlen, dies gemeinsam mit der Einstellung „leaves_style“ mit\n"
+"dem Wert „fancy“ zu verwenden."
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7067,10 +7418,6 @@ msgid "The URL for the content repository"
 msgstr "Die URL für den Inhaltespeicher"
 
 #: src/settings_translation_file.cpp
-msgid "The dead zone of the joystick"
-msgstr "Der Totbereich des Joysticks"
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The default format in which profiles are being saved,\n"
 "when calling `/profiler save [format]` without format."
@@ -7114,10 +7461,6 @@ msgstr ""
 "* Langes Antippen\n"
 "Bekannt aus der klassischen Luanti-Mobil-Steuerung.\n"
 "Kämpfen ist mehr oder weniger unmöglich."
-
-#: src/settings_translation_file.cpp
-msgid "The identifier of the joystick to use"
-msgstr "Die Kennung des zu verwendeten Joysticks"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7277,10 +7620,6 @@ msgstr ""
 "die Bautaste gedrückt gehalten wird."
 
 #: src/settings_translation_file.cpp
-msgid "The type of joystick"
-msgstr "Der Typ des Joysticks"
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The vertical distance over which heat drops by 20 if 'altitude_chill' is\n"
 "enabled. Also, the vertical distance over which humidity drops by 10 if\n"
@@ -7325,6 +7664,18 @@ msgid "Timeout for client to remove unused map data from memory, in seconds."
 msgstr ""
 "Zeit, nach dem Clients nicht benutzte Kartendaten aus dem Speicher löschen, "
 "in Sekunden."
+
+#: src/settings_translation_file.cpp
+msgid "Tint sunlight during sunrise/sunset."
+msgstr "Sonnenlicht während des Sonnenauf-/untergangs einfärben."
+
+#: src/settings_translation_file.cpp
+msgid "Tinted fog"
+msgstr "Eingefärbter Nebel"
+
+#: src/settings_translation_file.cpp
+msgid "Tinted sunlight"
+msgstr "Eingefärbtes Sonnenlicht"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7729,7 +8080,11 @@ msgid "Volume when unfocused"
 msgstr "Lautstärke außerhalb Fokus"
 
 #: src/settings_translation_file.cpp
-msgid "Volumetric lighting"
+msgid "Volumetric Depth Attenuation"
+msgstr "Volumetrische Tiefendämpfung"
+
+#: src/settings_translation_file.cpp
+msgid "Volumetric Lighting"
 msgstr "Volumetrisches Licht"
 
 #: src/settings_translation_file.cpp
@@ -7801,8 +8156,13 @@ msgid "Weblink color"
 msgstr "Weblinkfarbe"
 
 #: src/settings_translation_file.cpp
-msgid "When enabled, liquid reflections are simulated."
-msgstr "Falls aktiviert, werden Flüssigkeitsreflextionen simuliert."
+msgid ""
+"When enabled, crude liquid reflections are simulated.\n"
+"Wave height, length and speed will affect these reflections."
+msgstr ""
+"Falls aktiviert, werden grobe Flussigkeitsreflexionen simuliert.\n"
+"Die Wellenhöhe, -länge und -geschwindigkeit wird sich auf diese Reflexionen "
+"auswirken."
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7845,6 +8205,14 @@ msgstr ""
 "einer der genannten Filter aktiviert ist.\n"
 "Dies wird außerdem verwendet als die Basisblocktexturengröße für\n"
 "welt-ausgerichtete automatische Texturenskalierung."
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Where to enable server-sent client-side modding (SSCSM).\n"
+"Warning: Experimental."
+msgstr ""
+"Wo Server-Sent Client Side Modding (SSCSM) aktiviert wird.\n"
+"Achtung: Experimentell."
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -8029,45 +8397,32 @@ msgstr "cURL-Interaktiv-Zeitüberschreitung"
 msgid "cURL parallel limit"
 msgstr "cURL-Parallel-Begrenzung"
 
+#: src/settings_translation_file.cpp
+msgid "cURL proxy address"
+msgstr "cURL-Proxy-Adresse"
+
 #: src/util/screenshot.cpp
 #, c-format
 msgid "Failed to save screenshot to \"%s\""
 msgstr "Bildschirmfotos konnten nicht nach „%s“ gespeichert werden"
 
-#~ msgid ""
-#~ "Number of emerge threads to use.\n"
-#~ "Value 0:\n"
-#~ "-    Automatic selection. The number of emerge threads will be\n"
-#~ "-    'number of processors - 2', with a lower limit of 1.\n"
-#~ "Any other value:\n"
-#~ "-    Specifies the number of emerge threads, with a lower limit of 1.\n"
-#~ "WARNING: Increasing the number of emerge threads increases engine mapgen\n"
-#~ "speed, but this may harm game performance by interfering with other\n"
-#~ "processes, especially in singleplayer and/or when running Lua code in\n"
-#~ "'on_generated'. For many users the optimum setting may be '1'."
-#~ msgstr ""
-#~ "Anzahl der zu verwendeten Erzeugerthreads.\n"
-#~ "Wert 0:\n"
-#~ "-    Automatische Wahl. Die Anzahl der Erzeugerthreads wird\n"
-#~ "-    „Anzahl der Prozessoren - 2“ sein, mit einer Untergrenze von 1.\n"
-#~ "Jeder andere Wert:\n"
-#~ "-    Legt die Anzahl der Erzeugerthreads fest, mit einer Untergrenze von "
-#~ "1.\n"
-#~ "ACHTUNG: Das Erhöhen der Anzahl der Erzeugerthreads erhöht die\n"
-#~ "Geschwindigkeit des Engine-Kartengenerators, aber dies könnte die Spiel-\n"
-#~ "performanz beeinträchtigen, da mit anderen Prozessen konkurriert wird;\n"
-#~ "das ist besonders im Einzelspielermodus der Fall und/oder, wenn Lua-Code\n"
-#~ "in „on_generated“ ausgeführt wird.\n"
-#~ "Für viele Benutzer wird die optimale Einstellung wohl die „1“ sein."
+#~ msgid "Enable joysticks"
+#~ msgstr "Joysticks aktivieren"
 
-#~ msgid "Provided world path doesn't exist: "
-#~ msgstr "Angegebener Weltpfad existiert nicht: "
+#~ msgid "Enable joysticks. Requires a restart to take effect"
+#~ msgstr "Aktiviert Joysticks. Benötigt einen Neustart, um wirksam zu werden"
 
-#~ msgid "Shadow map max distance in nodes to render shadows"
-#~ msgstr "Maximale Schattenrenderdistanz von Schattenkarten in Blöcken"
+#~ msgid "Keybindings"
+#~ msgstr "Tastenbelegung"
 
-#~ msgid "Y spread"
-#~ msgstr "Y-Ausbreitung"
+#~ msgid "The dead zone of the joystick"
+#~ msgstr "Der Totbereich des Joysticks"
 
-#~ msgid "Z spread"
-#~ msgstr "Z-Ausbreitung"
+#~ msgid "The identifier of the joystick to use"
+#~ msgstr "Die Kennung des zu verwendeten Joysticks"
+
+#~ msgid "The type of joystick"
+#~ msgstr "Der Typ des Joysticks"
+
+#~ msgid "When enabled, liquid reflections are simulated."
+#~ msgstr "Falls aktiviert, werden Flüssigkeitsreflextionen simuliert."

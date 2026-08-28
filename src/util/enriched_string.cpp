@@ -13,8 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+with this program; if not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "enriched_string.h"
@@ -97,7 +96,7 @@ void EnrichedString::addAtEnd(std::wstring_view s, SColor initial_color)
 			++i;
 			length = 1;
 		}
-		std::wstring escape_sequence(s, start_index, length);
+		std::wstring_view escape_sequence(&s[start_index], length);
 		std::vector<std::wstring> parts = split(escape_sequence, L'@');
 		if (parts[0] == L"c") {
 			if (parts.size() < 2) {

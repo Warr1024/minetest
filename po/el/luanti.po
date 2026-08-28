@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Greek (Minetest)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 23:13+0100\n"
-"PO-Revision-Date: 2026-01-16 15:01+0000\n"
-"Last-Translator: Wuzzy <Wuzzy@disroot.org>\n"
+"POT-Creation-Date: 2026-08-10 17:35+0200\n"
+"PO-Revision-Date: 2026-02-03 04:56+0000\n"
+"Last-Translator: GeekSteak <lpdj@ik.me>\n"
 "Language-Team: Greek <https://hosted.weblate.org/projects/minetest/minetest/"
 "el/>\n"
 "Language: el\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.15.2\n"
+"X-Generator: Weblate 5.16-dev\n"
 
 #: builtin/client/chatcommands.lua
 msgid "Clear the out chat queue"
@@ -66,6 +66,7 @@ msgstr "Η εντολή δεν είναι διαθέσιμη: "
 msgid "Get help for commands (-t: output in chat)"
 msgstr "Βρες βοήθεια για τις εντολές (-t: αποτελέσματα στην συζήτηση)"
 
+#. TRANSLATORS: 'help' and 'all' mustn't be translated. cmd = command
 #: builtin/common/chatcommands.lua
 msgid ""
 "Use '.help <cmd>' to get more information, or '.help all' to list everything."
@@ -73,9 +74,10 @@ msgstr ""
 "Χρησιμοποιήστε το '.help <cmd>' για να λάβετε περισσότερες πληροφορίες ή το "
 "'.help all' για την λίστα των εντολών."
 
+#. TRANSLATORS: Syntax of 'help' command. Don't translate anything except 'cmd' (=command)
 #: builtin/common/chatcommands.lua
 msgid "[all | <cmd>] [-t]"
-msgstr "[όλα | <εντολή>] [-t]"
+msgstr "[all | <εντολή>] [-t]"
 
 #: builtin/common/settings/components.lua
 #, fuzzy
@@ -239,6 +241,7 @@ msgstr ""
 msgid "Scales the noise in the $1 axis by this value."
 msgstr ""
 
+#. TRANSLATORS: Value for randomness
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Seed"
@@ -279,7 +282,7 @@ msgstr ""
 msgid "This results in spiky noise."
 msgstr ""
 
-#. ~ "absvalue" is a noise parameter flag.
+#. TRANSLATORS: "absvalue" is a noise parameter flag.
 #. It is short for "absolute value".
 #. It can be enabled in noise settings in
 #. the settings menu.
@@ -287,14 +290,14 @@ msgstr ""
 msgid "absvalue"
 msgstr "απόλυτη τιμή"
 
-#. ~ "defaults" is a noise parameter flag.
+#. TRANSLATORS: "defaults" is a noise parameter flag.
 #. It describes the default processing options
 #. for noise settings in the settings menu.
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "defaults"
 msgstr "προεπιλογή"
 
-#. ~ "eased" is a noise parameter flag.
+#. TRANSLATORS: "eased" is a noise parameter flag.
 #. It is used to make the map smoother and
 #. can be enabled in noise settings in
 #. the settings menu.
@@ -302,6 +305,8 @@ msgstr "προεπιλογή"
 msgid "eased"
 msgstr "Ομαλός Χάρτης"
 
+#. TRANSLATORS: "automatic exposure" refers to light. This note
+#. will be displayed for the graphics setting 'enable_auto_exposure'
 #: builtin/common/settings/dlg_settings.lua
 msgid "(The game will need to enable automatic exposure as well)"
 msgstr "(Το παιχνίδι θα πρέπει επίσης να ενεργοποιήσει αυτόματη έκθεση)"
@@ -318,20 +323,28 @@ msgstr "(Το παιχνίδι θα πρέπει επίσης να ενεργο�
 msgid "(Use system language)"
 msgstr "(Χρήση γλώσσας συστήματος)"
 
+#. TRANSLATORS: Shown when a default setting is the empty string
+#: builtin/common/settings/dlg_settings.lua
+msgid "<empty>"
+msgstr ""
+
 #: builtin/common/settings/dlg_settings.lua
 msgid "Accessibility"
 msgstr "Προσβασιμότητα"
 
+#. TRANSLATORS: Automatic
 #: builtin/common/settings/dlg_settings.lua
 msgid "Auto"
 msgstr "Αυτόματο"
 
+#. TRANSLATORS: Button text to go back
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 #: builtin/mainmenu/content/dlg_package.lua src/gui/guiVolumeChange.cpp
 msgid "Back"
 msgstr "Πίσω"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Buttons with crosshair"
 msgstr "Κουμπιά με σταυρό στόχευσης"
@@ -341,6 +354,7 @@ msgstr "Κουμπιά με σταυρό στόχευσης"
 msgid "Chat"
 msgstr "Συζήτηση"
 
+#. TRANSLATORS: Tooltip of a button that clears input
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Clear"
 msgstr "Εκκαθάριση"
@@ -348,6 +362,11 @@ msgstr "Εκκαθάριση"
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "Controls"
 msgstr "Πλήκτρα χειρισμού"
+
+#: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage"
+msgstr "Μάχες μεταξύ παιχτών"
 
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/common/settings/shadows_component.lua
@@ -358,10 +377,12 @@ msgstr "Απενεργοποιημένο"
 msgid "Enabled"
 msgstr "Ενεργοποιημένο"
 
+#. TRANSLATORS: Category for general settings
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "General"
 msgstr "Γενικά"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Long tap"
 msgstr "Πάτημα μεγάλης διάρκειας"
@@ -370,12 +391,13 @@ msgstr "Πάτημα μεγάλης διάρκειας"
 msgid "Movement"
 msgstr "Κίνηση"
 
+#. TRANSLATORS: No search results
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "No results"
 msgstr "Χωρίς αποτελέσματα"
 
-#. ~ Indicates that the action does not have a corresponding keybinding.
+#. TRANSLATORS: Indicates that the action does not have a corresponding keybinding.
 #: builtin/common/settings/dlg_settings.lua
 #, fuzzy
 msgid "Not bound"
@@ -385,14 +407,17 @@ msgstr "Δε βρέθηκε"
 msgid "Reset setting to default"
 msgstr "Επαναφορά ρύθμισης στην προεπιλογή"
 
+#. TRANSLATORS: $1 will be replaced with a default setting value
 #: builtin/common/settings/dlg_settings.lua
-msgid "Reset setting to default ($1)"
+#, fuzzy
+msgid "Reset setting to default: $1"
 msgstr "Επαναφορά ρύθμισης στην προεπιλογή ($1)"
 
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Search"
 msgstr "Αναζήτηση"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Short tap"
 msgstr "Πάτημα μικρής διάρκειας"
@@ -401,14 +426,17 @@ msgstr "Πάτημα μικρής διάρκειας"
 msgid "Show advanced settings"
 msgstr "Εμφάνιση προχωρημένων ρυθμίσεων"
 
+#. TRANSLATORS: Checkbox that toggles displaying the technical setting names
 #: builtin/common/settings/dlg_settings.lua
 msgid "Show technical names"
 msgstr "Εμφάνιση τεχνικών ονομάτων"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap"
 msgstr "Πάτημα"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap with crosshair"
 msgstr "Πάτημα με σταυρό στόχευσης"
@@ -483,6 +511,10 @@ msgstr "Ένα σφάλμα προέκυψε σε ένα σενάριο Lua:"
 #: builtin/fstk/ui.lua
 msgid "An error occurred:"
 msgstr "Παρουσιάστηκε σφάλμα:"
+
+#: builtin/fstk/ui.lua
+msgid "Copy to clipboard"
+msgstr ""
 
 #: builtin/fstk/ui.lua
 msgid "Main menu"
@@ -565,6 +597,8 @@ msgstr ""
 msgid "Downloading..."
 msgstr "Λήψη ..."
 
+#. TRANSLATORS: A 'featured' package in ContentDB is a package that is
+#. more prominently displayed than other packages
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Featured"
 msgstr "Με χαρακτηριστικά"
@@ -592,6 +626,7 @@ msgstr "Δεν ήταν δυνατή η ανάκτηση πακέτων"
 msgid "No updates"
 msgstr "Δεν υπάρχουν ενημερώσεις"
 
+#. TRANSLATORS: A download is queued
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Queued"
 msgstr "Σε αναμονή"
@@ -604,14 +639,17 @@ msgstr "Πακέτα Υφής"
 msgid "The package $1 was not found."
 msgstr "Το πακέτο $1 δεν βρέθηκε."
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Update All [$1]"
 msgstr "Ενημέρωση Όλων [$1]"
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 and $2 dependencies will be installed."
 msgstr "Οι εξαρτήσεις $1 και $2 θα εγκατασταθούν."
 
+#. TRANSLATORS: Package (mod, texture pack, etc.) info: $1 = package name, $2 = package author
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 by $2"
 msgstr "$1 με $2"
@@ -620,6 +658,7 @@ msgstr "$1 με $2"
 msgid "$1 required dependencies could not be found."
 msgstr "Δεν ήταν δυνατή η εύρεση των απαιτούμενων εξαρτήσεων $1."
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 will be installed, and $2 dependencies will be skipped."
 msgstr "Θα εγκατασταθεί το $1 και οι εξαρτήσεις $2 θα παραβλεφθούν."
@@ -632,6 +671,7 @@ msgstr "Ήδη εγκαταστημένο"
 msgid "Base Game:"
 msgstr "Βασικό παιχνίδι:"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/content/dlg_install.lua
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Dependencies:"
@@ -702,10 +742,12 @@ msgstr "Θέμα Φόρουμ"
 msgid "Information"
 msgstr "Πληροφορίες"
 
+#. TRANSLATORS: $1 = download size
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Install [$1]"
 msgstr "Εγκατάσταση [$1]"
 
+#. TRANSLATORS: Also known as 'bug tracker'
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Issue Tracker"
 msgstr "Ανιχνευτής Προβλημάτων"
@@ -714,6 +756,7 @@ msgstr "Ανιχνευτής Προβλημάτων"
 msgid "Reviews"
 msgstr "Αξιολογήσεις"
 
+#. TRANSLATORS: Link to source code repository
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Source"
 msgstr "Πηγή"
@@ -738,6 +781,10 @@ msgstr "Ιστοσελίδα"
 msgid "by $1"
 msgstr "Από $1"
 
+#. TRANSLATORS: Info line for a ContentDB package:
+#. $1 = author,
+#. $2 = number of downloads,
+#. $3, $4, $5 = number of positive/neutral/negative reviews
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "by $1  —  $2 downloads  —  +$3 / $4 / -$5"
 msgstr "από $1  —  $2 λήψεις  —  +$3 / $4 / -$5"
@@ -777,6 +824,7 @@ msgstr "Δεν είναι δυνατή η εγκατάσταση $1 ως πακ�
 msgid "World mods"
 msgstr "Όνομα κόσμου"
 
+#. TRANSLATORS: $1 = server name
 #: builtin/mainmenu/dlg_clients_list.lua
 msgid ""
 "Players connected to\n"
@@ -785,10 +833,12 @@ msgstr ""
 "Παίκτες συνδέθηκαν σε\n"
 "$1"
 
+#. TRANSLATORS: Message in the mod list when a mod is enabled with error
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Enabled, has error)"
 msgstr "(Ενεργό, έχει σφάλμα)"
 
+#. TRANSLATORS: Displayed when a mod dependency is unsatisfied
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Unsatisfied)"
 msgstr "(Ανικανοποίητος)"
@@ -829,6 +879,7 @@ msgstr "Τροποποίηση:"
 msgid "Mods located inside the world folder."
 msgstr ""
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No (optional) dependencies"
 msgstr "Δεν υπάρχουν (προαιρετικές) εξαρτήσεις"
@@ -837,6 +888,7 @@ msgstr "Δεν υπάρχουν (προαιρετικές) εξαρτήσεις"
 msgid "No game description provided."
 msgstr "Δεν παρέχεται περιγραφή παιχνιδιού."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No hard dependencies"
 msgstr "Δεν υπάρχουν απαραίτητες εξαρτήσεις"
@@ -845,10 +897,12 @@ msgstr "Δεν υπάρχουν απαραίτητες εξαρτήσεις"
 msgid "No modpack description provided."
 msgstr "Δεν παρέχεται περιγραφή για το πακέτο τροποποιήσεων."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No optional dependencies"
 msgstr "Δεν υπάρχουν προαιρετικές εξαρτήσεις"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Optional dependencies:"
 msgstr "Προαιρετικές εξαρτήσεις:"
@@ -890,6 +944,7 @@ msgstr "Κρύο υψομέτρου"
 msgid "Altitude dry"
 msgstr "Ξηρασία υψομέτρου"
 
+#. TRANSLATORS: Smooth transition between biomes
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Biome blending"
 msgstr "Ανάμειξη Μεγαοικοσυστημάτων"
@@ -910,6 +965,7 @@ msgstr "Σπηλιές"
 msgid "Create"
 msgstr "Δημιουργία"
 
+#. TRANSLATORS: Map generator decorations (used for structures, trees, plants, and more)
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Decorations"
 msgstr "Διακοσμήσεις"
@@ -1115,6 +1171,7 @@ msgstr "Το σύστημα διαχείρισης εισόδων αναδιαμ
 msgid "Confirm Password"
 msgstr "Επιβεβαίωση Κωδικού"
 
+#. TRANSLATORS: Message when joining a server
 #: builtin/mainmenu/dlg_register.lua
 msgid "Joining $1"
 msgstr "Συμμετάσχει $1"
@@ -1137,10 +1194,12 @@ msgstr "Κωδικός"
 msgid "Passwords do not match"
 msgstr "Οι κωδικοί δεν ταιριάζουν"
 
+#. TRANSLATORS: Register an account on a server
 #: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_online.lua
 msgid "Register"
 msgstr "Εγγραφή"
 
+#. TRANSLATORS: Dismiss a dialog window/message
 #: builtin/mainmenu/dlg_reinstall_mtg.lua
 msgid "Dismiss"
 msgstr "Παράβλεψε"
@@ -1186,10 +1245,12 @@ msgstr ""
 "Αυτό το modpack έχει ένα ρητό όνομα που δίνεται στο modpack.conf το οποίο θα "
 "παρακάμψει οποιαδήποτε μετονομασία εδώ."
 
+#. TRANSLATORS: Expand all entries in a tree view
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Expand all"
 msgstr "Επέκταση όλων"
 
+#. TRANSLATORS: A checkbox; if enabled, it will group mods by their prefix
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Group by prefix"
 msgstr "Ταξινόμηση κατά πρόθεμα"
@@ -1204,10 +1265,12 @@ msgstr ""
 msgid "The $1 server uses the following mods:"
 msgstr "Ο διακομιστής $1 χρησιμοποιεί τις ακόλουθες τροποποιήσεις:"
 
+#. TRANSLATORS: $1 = name of the engine
 #: builtin/mainmenu/dlg_version_info.lua
 msgid "A new $1 version is available"
 msgstr "Μία νέα $1 έκδοση είναι διαθέσιμη"
 
+#. TRANSLATORS: $1 and $2 are version numbers, $3 is a URL
 #: builtin/mainmenu/dlg_version_info.lua
 msgid ""
 "Installed version: $1\n"
@@ -1236,6 +1299,7 @@ msgstr "Επισκέψου την ιστοσελίδα"
 msgid "Debug build, expect worse performance"
 msgstr ""
 
+#. TRANSLATORS: Try to keep the translation short
 #: builtin/mainmenu/init.lua src/client/game_formspec.cpp
 msgid "Settings"
 msgstr "Ρυθμίσεις"
@@ -1299,6 +1363,7 @@ msgstr "Μοιράσμος καταγραφών αποσφαλμάτωσης"
 msgid "Browse online content"
 msgstr "Περιήγηση διαδικτυακού περιεχομένου"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 msgid "Browse online content [$1]"
 msgstr "Περιήγηση διαδικτυακού περιεχομένου [$1]"
@@ -1307,6 +1372,7 @@ msgstr "Περιήγηση διαδικτυακού περιεχομένου [$1
 msgid "Content"
 msgstr "Περιεχόμενο"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 msgid "Content [$1]"
 msgstr "Περιεχόμενο [$1]"
@@ -1391,6 +1457,7 @@ msgstr "Νέο"
 msgid "Play Game"
 msgstr "Εκκίνηση Παιχνιδιού"
 
+#. TRANSLATORS: Network port
 #: builtin/mainmenu/tab_local.lua builtin/mainmenu/tab_online.lua
 msgid "Port"
 msgstr "Θήρα"
@@ -1421,6 +1488,7 @@ msgstr ""
 msgid "Add favorite"
 msgstr "Προσθήκη στα αγαπημένα"
 
+#. TRANSLATORS: Network address
 #: builtin/mainmenu/tab_online.lua
 msgid "Address"
 msgstr "Διεύθυνση"
@@ -1429,7 +1497,7 @@ msgstr "Διεύθυνση"
 msgid "Creative mode"
 msgstr "Λειτουργία δημιουργίας"
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: builtin/mainmenu/tab_online.lua
 msgid "Damage / PvP"
 msgstr "Μάχες μεταξύ παιχτών"
@@ -1450,6 +1518,7 @@ msgstr "Μη συμβατοί διακομιστές"
 msgid "Join Game"
 msgstr "Συμμετοχή στο Παιχνίδι"
 
+#. TRANSLATORS: Login to server
 #: builtin/mainmenu/tab_online.lua
 msgid "Login"
 msgstr "Σύνδεση"
@@ -1462,10 +1531,12 @@ msgstr "Αριθμός τροποποιήσεων: $1"
 msgid "Open server website"
 msgstr "Άνοιγμα ιστότοπου διακομιστή"
 
+#. TRANSLATORS: Also known as "latency"
 #: builtin/mainmenu/tab_online.lua
 msgid "Ping"
 msgstr "Ping"
 
+#. TRANSLATORS: $1 is a list of players
 #: builtin/mainmenu/tab_online.lua
 msgid ""
 "Players:\n"
@@ -1475,21 +1546,14 @@ msgstr ""
 "$1"
 
 #: builtin/mainmenu/tab_online.lua
-msgid ""
-"Possible filters\n"
-"game:<name>\n"
-"mod:<name>\n"
-"player:<name>"
+msgid "Possible filters"
 msgstr ""
-"Πιθανά φίλτρα\n"
-"game:<όνομα>\n"
-"mod:<όνομα>\n"
-"player:<όνομα>"
 
 #: builtin/mainmenu/tab_online.lua
 msgid "Public Servers"
 msgstr "Δημόσιοι Διακομιστές"
 
+#. TRANSLATORS: As in 'reload'/'check again'
 #: builtin/mainmenu/tab_online.lua
 msgid "Refresh"
 msgstr "Ανανέωση"
@@ -1501,6 +1565,11 @@ msgstr "Αφαίρεση αγαπημένου"
 #: builtin/mainmenu/tab_online.lua
 msgid "Server Description"
 msgstr "Περιγραφή Διακομιστή"
+
+#: src/chat.cpp
+#, fuzzy
+msgid "Player names: "
+msgstr "Εκκίνηση Παιχνιδιού"
 
 #: src/client/client.cpp
 msgid "Connection aborted (protocol error?)."
@@ -1530,7 +1599,7 @@ msgstr "Φόρτωση υφών..."
 msgid "Rebuilding shaders..."
 msgstr "Ανακατασκευή σκίαστρων..."
 
-#: src/client/client.cpp src/util/screenshot.cpp
+#: src/client/client.cpp src/gui/guiEngine.cpp src/util/screenshot.cpp
 #, c-format
 msgid "Saved screenshot to \"%s\""
 msgstr "Αποθηκεύτηκε στιγμιότυπο οθόνης σε \"%s\""
@@ -1566,6 +1635,11 @@ msgstr ""
 #: src/client/clientmedia.cpp src/client/game.cpp
 msgid "Media..."
 msgstr "Μέσα..."
+
+#: src/client/fontengine.cpp
+#, fuzzy
+msgid "Failed to find a valid font"
+msgstr "Αποτυχία εγκατάστασης $1 έως $2"
 
 #: src/client/game.cpp src/client/render/pipeline.cpp src/client/shader.cpp
 #: src/server.cpp
@@ -1691,6 +1765,11 @@ msgstr ""
 "Γρήγορη λειτουργία ενεργοποιημένη (σημείωση: δεν υπάρχει προνόμιο \"fast\")"
 
 #: src/client/game.cpp
+#, c-format
+msgid "Files: %d / %d"
+msgstr ""
+
+#: src/client/game.cpp
 msgid "Fly mode disabled"
 msgstr "Λειτουργία πτήσης απενεργοποιημένη"
 
@@ -1720,11 +1799,13 @@ msgid "Item definitions..."
 msgstr "Ορισμοί στοιχείων..."
 
 #: src/client/game.cpp
-msgid "KiB/s"
+#, fuzzy
+msgid "KiB"
 msgstr "KiB/s"
 
 #: src/client/game.cpp
-msgid "MiB/s"
+#, fuzzy
+msgid "MiB"
 msgstr "MiB/s"
 
 #: src/client/game.cpp
@@ -1777,6 +1858,11 @@ msgstr "Τερματισμός Λειτουργίας..."
 #: src/client/game.cpp src/client/game_formspec.cpp
 msgid "Singleplayer"
 msgstr "Παιχνίδι ενός παίκτη"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Size: %.2f %s"
+msgstr ""
 
 #: src/client/game.cpp
 msgid "Sound muted"
@@ -1875,6 +1961,7 @@ msgstr "Το Wireframe είναι εμφανές"
 msgid "Zoom currently disabled by game or mod"
 msgstr "Το ζουμ είναι απενεργοποιημένο από το παιχνίδι ή την τροποποίηση"
 
+#. TRANSLATORS: Game mode (server or singleplayer)
 #: src/client/game_formspec.cpp
 msgid "- Mode: "
 msgstr "- Λειτουργία: "
@@ -1883,7 +1970,7 @@ msgstr "- Λειτουργία: "
 msgid "- Public: "
 msgstr "- Δημόσιο: "
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: src/client/game_formspec.cpp
 msgid "- PvP: "
 msgstr "-PvP: "
@@ -1892,10 +1979,12 @@ msgstr "-PvP: "
 msgid "- Server Name: "
 msgstr "- Όνομα Διακομιστή: "
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Change Password"
 msgstr "Αλλαγή Κωδικού"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Continue"
 msgstr "Συνέχεια"
@@ -1928,10 +2017,12 @@ msgstr ""
 "- άγγιγμα & σύρσιμο, πάτημα 2ου δαχτύλού\n"
 " --> τοποθέτηση μεμονωμένου αντικειμένου στην υποδοχή\n"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Exit to Menu"
 msgstr "Έξοδος στο Μενού"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short (OS = Operating System)
 #: src/client/game_formspec.cpp
 msgid "Exit to OS"
 msgstr "Έξοδος στο ΛΣ"
@@ -1964,6 +2055,7 @@ msgstr "Απομακρυσμένος διακομιστής"
 msgid "Respawn"
 msgstr "Aναγέννηση"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Sound Volume"
 msgstr "Ένταση Ήχου"
@@ -2002,10 +2094,29 @@ msgid "Profiler shown (page %d of %d)"
 msgstr "Profiler εμφανής (σελίδα %d από %d)"
 
 #: src/client/keycode.cpp
+#, fuzzy
+msgid "A (Gamepad)"
+msgstr "Παιχνίδια"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "B (Gamepad)"
+msgstr "Παιχνίδια"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Back (Gamepad)"
+msgstr "Παιχνίδια"
+
+#: src/client/keycode.cpp
 msgid "Backspace"
 msgstr "Οπισθοδιάστημα"
 
-#. ~ Usually paired with the Pause key
+#: src/client/keycode.cpp
+msgid "Bottom Face Button (Gamepad)"
+msgstr ""
+
+#. TRANSLATORS: Usually paired with the Pause key
 #: src/client/keycode.cpp
 msgid "Break Key"
 msgstr "Κουμπί Παύσης"
@@ -2015,12 +2126,38 @@ msgid "Caps Lock"
 msgstr "Caps Lock"
 
 #: src/client/keycode.cpp
+msgid "Circle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Clear Key"
 msgstr "Πλήκτρο Clear"
 
 #: src/client/keycode.cpp
 msgid "Control Key"
 msgstr "Πλήκτρο Control"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Cross (Gamepad)"
+msgstr "Παιχνίδια"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "D-Pad Down"
+msgstr "Κάτω"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Left"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Up"
+msgstr ""
 
 #: src/client/keycode.cpp
 msgid "Delete Key"
@@ -2034,6 +2171,26 @@ msgstr "Κάτω Βέλος"
 #, fuzzy
 msgid "End Key"
 msgstr "Μενού"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d +"
+msgstr "Παιχνίδια"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d -"
+msgstr "Παιχνίδια"
+
+#: src/client/keycode.cpp
+#, c-format
+msgid "Gamepad Button %d"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Guide (Gamepad)"
+msgstr "Παιχνίδια"
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2062,6 +2219,30 @@ msgid "Left Control"
 msgstr ""
 
 #: src/client/keycode.cpp
+msgid "Left Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Button"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Down"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Left"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Up"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Left Menu"
 msgstr ""
 
@@ -2069,7 +2250,15 @@ msgstr ""
 msgid "Left Shift"
 msgstr ""
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+msgid "Left Shoulder"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Trigger"
+msgstr ""
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Left Windows"
 msgstr ""
@@ -2083,10 +2272,18 @@ msgstr "Μενού"
 msgid "Middle Click"
 msgstr ""
 
+#. TRANSLATORS: This is for mouse buttons without an intuitive description. %d is the number of the button.
+#: src/client/keycode.cpp
+#, c-format
+msgid "Mouse Button %d"
+msgstr ""
+
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X1"
 msgstr ""
 
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X2"
 msgstr ""
@@ -2164,7 +2361,7 @@ msgstr "Κάτω"
 msgid "Page Up"
 msgstr ""
 
-#. ~ Usually paired with the Break key
+#. TRANSLATORS: Usually paired with the Break key
 #: src/client/keycode.cpp
 #, fuzzy
 msgid "Pause Key"
@@ -2174,7 +2371,15 @@ msgstr "Παύση"
 msgid "Play"
 msgstr "Αναπαραγωγή"
 
-#. ~ "Print screen" key
+#: src/client/keycode.cpp
+msgid "Primary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Primary Right Paddle"
+msgstr ""
+
+#. TRANSLATORS: "Print screen" key
 #: src/client/keycode.cpp
 msgid "Print"
 msgstr "Εκτύπωση"
@@ -2198,6 +2403,30 @@ msgid "Right Control"
 msgstr ""
 
 #: src/client/keycode.cpp
+msgid "Right Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Button"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Down"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Left"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Up"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Right Menu"
 msgstr ""
 
@@ -2205,7 +2434,16 @@ msgstr ""
 msgid "Right Shift"
 msgstr ""
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+msgid "Right Shoulder"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Trigger"
+msgstr "Δεξιά"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Right Windows"
 msgstr ""
@@ -2217,6 +2455,14 @@ msgstr ""
 
 #: src/client/keycode.cpp
 msgid "Scroll Lock"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Secondary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Secondary Right Paddle"
 msgstr ""
 
 #: src/client/keycode.cpp
@@ -2234,12 +2480,44 @@ msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
+msgid "Square (Gamepad)"
+msgstr "Όνομα διακομιστή"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Start (Gamepad)"
+msgstr "Εκκίνηση Παιχνιδιού"
+
+#: src/client/keycode.cpp
+#, fuzzy
 msgid "Tab Key"
 msgstr "Κουμπί Παύσης"
 
 #: src/client/keycode.cpp
+msgid "Top Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Touchpad Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Triangle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Up Arrow"
 msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "X (Gamepad)"
+msgstr "Παιχνίδια"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Y (Gamepad)"
+msgstr "Παιχνίδια"
 
 #: src/client/minimap.cpp
 msgid "Minimap hidden"
@@ -2264,6 +2542,11 @@ msgstr ""
 msgid "Failed to create the texture \"%s\" for the rendering pipeline."
 msgstr ""
 
+#: src/client/renderingengine.cpp
+#, fuzzy
+msgid "Could not initialize any supported video driver!"
+msgstr "Το Wireframe δεν υποστηρίζεται από το πρόγραμμα οδήγησης βίντεο"
+
 #: src/client/shader.cpp
 #, c-format
 msgid "Failed to compile the \"%s\" shader."
@@ -2274,12 +2557,14 @@ msgstr ""
 msgid "Failed to find \"%s\" shader files."
 msgstr ""
 
+#. TRANSLATORS: GLSL = OpenGL Shading Language
 #: src/client/shader.cpp
 #, fuzzy
 msgid "GLSL is not supported by the driver"
 msgstr "Το Σύστημα Ήχου δεν υποστηρίζεται σε αυτή την έκδοση"
 
-#. ~ Error when a mod is missing dependencies. Ex: "Mod Title is missing: mod1, mod2, mod3"
+#. TRANSLATORS: Error when a mod is missing dependencies.
+#. Example: "Mod Title is missing: mod1, mod2, mod3"
 #: src/content/mod_configuration.cpp
 #, c-format
 msgid "%s is missing:"
@@ -2310,6 +2595,10 @@ msgstr ""
 
 #: src/gui/guiChatConsole.cpp
 msgid "Opening webpage"
+msgstr ""
+
+#: src/gui/guiEngine.cpp
+msgid "Failed to load main menu script!"
 msgstr ""
 
 #: src/gui/guiFormSpecMenu.cpp
@@ -2477,7 +2766,7 @@ msgstr ""
 msgid "Invalid password"
 msgstr "Παλιός Κωδικός"
 
-#. ~ DO NOT TRANSLATE THIS LITERALLY!
+#. TRANSLATORS: DO NOT TRANSLATE THIS LITERALLY!
 #. This is a special string which needs to contain the translation's
 #. language code (e.g. "de" for German).
 #: src/network/clientpackethandler.cpp src/script/lua_api/l_client.cpp
@@ -2533,6 +2822,10 @@ msgstr ""
 msgid ""
 "Your client's version is not supported.\n"
 "Please contact the server administrator."
+msgstr ""
+
+#: src/script/lua_api/l_mainmenu.cpp
+msgid "Copied to clipboard!"
 msgstr ""
 
 #: src/server.cpp
@@ -2687,6 +2980,11 @@ msgid "Acceleration of gravity, in nodes per second per second."
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Actions and Keybindings"
+msgstr "Αφαίρεση δεσμευμένων πλήκτρων"
+
+#: src/settings_translation_file.cpp
 msgid "Active Block Modifiers"
 msgstr ""
 
@@ -2796,11 +3094,11 @@ msgid "Anticheat movement tolerance"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Append item name"
+msgid "Append item name to tooltips"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Append item name to tooltip."
+msgid "Append the full item name to the tooltip of item stacks."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2859,11 +3157,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"At this distance the server will perform a simpler and cheaper occlusion "
-"check.\n"
-"Smaller values potentially improve performance, at the expense of "
-"temporarily visible\n"
-"rendering glitches (missing blocks).\n"
+"At this distance the server will consider blocks as \"far away\".\n"
+"It will perform simpler and cheaper occlusion checks, update\n"
+"low priority block updates lazily, and limit the blocks sent to the\n"
+"client in one roundtrip.\n"
 "This is especially useful for very large viewing range (upwards of 500).\n"
 "Stated in MapBlocks (16 nodes)."
 msgstr ""
@@ -3309,6 +3606,11 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage flash"
+msgstr "Ρυθμίσεις δημιουργίας χάρτη"
+
+#: src/settings_translation_file.cpp
 msgid "Debug log file size threshold"
 msgstr ""
 
@@ -3612,6 +3914,11 @@ msgid "Enable Raytraced Culling"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Enable SSCSM"
+msgstr "Ενεργοποίηση όλων"
+
+#: src/settings_translation_file.cpp
 msgid "Enable a confirmation dialog before closing."
 msgstr ""
 
@@ -3637,14 +3944,6 @@ msgstr ""
 #, fuzzy
 msgid "Enable dynamic shadows"
 msgstr "Δυναμικές σκιές"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks. Requires a restart to take effect"
-msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Enable mod channels support."
@@ -3847,6 +4146,10 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Flashing of the screen when taking damage."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Floatland density"
 msgstr ""
 
@@ -4016,9 +4319,12 @@ msgid "GUI scaling filter"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-#, fuzzy
-msgid "Gamepads"
-msgstr "Παιχνίδια"
+msgid "Gamepads and Joysticks"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Gamma"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Global callbacks"
@@ -4560,15 +4866,7 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Joystick ID"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Joystick button repetition interval"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Joystick dead zone"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4576,7 +4874,11 @@ msgid "Joystick frustum sensitivity"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Joystick type"
+msgid "Joystick inner dead zone"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Joystick outer dead zone"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4660,6 +4962,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for opening the pause menu in-game.\n"
+"Pressing the escape key always opens the pause menu."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for placing an item/block or for using something.\n"
 "(Note: The actual meaning might vary on a per-game basis.)"
 msgstr ""
@@ -4685,11 +4993,15 @@ msgid "Key for toggling the display of the profiler. Used for development."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Keybindings"
+msgid "Keyboard and Mouse"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Keyboard and Mouse"
+msgid "Keyboard camera speed"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Keyboard-controlled camera rotation speed, in degrees per second."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4875,6 +5187,22 @@ msgid "Local command"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Look down"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Look left"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Look right"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Look up"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Lower Y limit of dungeons."
 msgstr ""
 
@@ -4889,6 +5217,16 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Make fog and sky colors depend on daytime (dawn/sunset) and view direction."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Make volumetrics weaker against closer objects to emulate physical "
+"volumetrics."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Makes the color of light fog more saturated."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5448,6 +5786,10 @@ msgid "Open inventory"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+msgid "Open pause menu"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Open the pause menu when the window's focus is lost. Does not pause if a "
 "formspec is\n"
@@ -5942,6 +6284,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Set proxy to use by cURL. This is an URI just like the *_proxy environment "
+"variables.\n"
+"Note that this will not apply to Luanti's in-game protocol."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Set the default tilt of Sun/Moon orbit in degrees.\n"
 "Games may change orbit tilt via API.\n"
 "Value of 0 means no tilt / vertical orbit."
@@ -5950,8 +6299,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Set the exposure compensation in EV units.\n"
-"Value of 0.0 (default) means no exposure compensation.\n"
-"Range: from -1 to 1.0"
+"Value of 0.0 (default) means no exposure compensation."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5963,6 +6311,12 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Set the maximum length of a chat message (in characters) sent by clients."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Set the post processing gamma value.\n"
+"Higher values give lower contrast and vice versa."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6081,7 +6435,9 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Simulate translucency when looking at foliage in the sunlight."
+msgid ""
+"Simulate translucency when looking at foliage in the sunlight.\n"
+"It is recommended to use this with setting \"leaves_style\" set to \"fancy\"."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6314,10 +6670,6 @@ msgid "The URL for the content repository"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "The dead zone of the joystick"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The default format in which profiles are being saved,\n"
 "when calling `/profiler save [format]` without format."
@@ -6345,10 +6697,6 @@ msgid ""
 "* Long tap\n"
 "Known from the classic Luanti mobile controls.\n"
 "Combat is more or less impossible."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "The identifier of the joystick to use"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6455,10 +6803,6 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "The type of joystick"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The vertical distance over which heat drops by 20 if 'altitude_chill' is\n"
 "enabled. Also, the vertical distance over which humidity drops by 10 if\n"
@@ -6489,6 +6833,18 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Timeout for client to remove unused map data from memory, in seconds."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Tint sunlight during sunrise/sunset."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Tinted fog"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Tinted sunlight"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6840,7 +7196,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
-msgid "Volumetric lighting"
+msgid "Volumetric Depth Attenuation"
+msgstr "Επισήμανση Στοιχείων"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Volumetric Lighting"
 msgstr "Επισήμανση Στοιχείων"
 
 #: src/settings_translation_file.cpp
@@ -6905,7 +7266,9 @@ msgid "Weblink color"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "When enabled, liquid reflections are simulated."
+msgid ""
+"When enabled, crude liquid reflections are simulated.\n"
+"Wave height, length and speed will affect these reflections."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6931,6 +7294,12 @@ msgid ""
 "This setting is ONLY applied if any of the mentioned filters are enabled.\n"
 "This is also used as the base node texture size for world-aligned\n"
 "texture autoscaling."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Where to enable server-sent client-side modding (SSCSM).\n"
+"Warning: Experimental."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -7080,16 +7449,11 @@ msgstr ""
 msgid "cURL parallel limit"
 msgstr "Παράλληλο όριο cURL"
 
+#: src/settings_translation_file.cpp
+msgid "cURL proxy address"
+msgstr ""
+
 #: src/util/screenshot.cpp
 #, c-format
 msgid "Failed to save screenshot to \"%s\""
 msgstr "Αποτυχία αποθήκευσης στιγμιότυπου οθόνης σε \"%s\""
-
-#~ msgid "Provided world path doesn't exist: "
-#~ msgstr "Το αρχείο του Κόσμου δεν υπάρχει: "
-
-#~ msgid "Y spread"
-#~ msgstr "Υ εξάπλωση"
-
-#~ msgid "Z spread"
-#~ msgstr "Ζ εξάπλωση"

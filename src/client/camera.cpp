@@ -140,9 +140,7 @@ void Camera::step(f32 dtime)
 	m_wield_change_timer = MYMIN(m_wield_change_timer + dtime, 0.125);
 
 	if (m_wield_change_timer >= 0 && was_under_zero) {
-		m_wieldnode->setItem(m_wield_item_next, m_client);
-		m_wieldnode->setLightColorAndAnimation(m_player_light_color,
-				m_client->getAnimationTime());
+		updateWieldedTool();
 	}
 
 	if (m_view_bobbing_state != 0)
@@ -356,6 +354,7 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 		v3f eye_offset = player->getEyeOffset();
 		switch(m_camera_mode) {
 		case CAMERA_MODE_ANY:
+		case CameraMode_END:
 			assert(false);
 			break;
 		case CAMERA_MODE_FIRST:
@@ -444,7 +443,7 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 			}
 		}
 
-		// If node blocks camera position don't move y to heigh
+		// If node blocks camera position don't move y to height
 		if (abort && my_cp.Y > player_position.Y+BS*2)
 			my_cp.Y = player_position.Y+BS*2;
 
@@ -590,15 +589,27 @@ void Camera::updateViewingRange()
 
 void Camera::setDigging(s32 button)
 {
-	if (m_digging_button == -1)
+	// If placing, do not desynchronize the animation and placement sound.
+	if (button == 1) {
 		m_digging_button = button;
+		m_digging_anim = 0.0f;
+	} else if (m_digging_button == -1) {
+		// Any other action.
+		m_digging_button = button;
+	}
 }
 
-void Camera::wield(const ItemStack &item)
+void Camera::wield(const ItemStack &item, bool animate)
 {
 	if (item.name != m_wield_item_next.name ||
 			item.metadata != m_wield_item_next.metadata) {
 		m_wield_item_next = item;
+
+		if (!animate) {
+			updateWieldedTool();
+			return;
+		}
+
 		if (m_wield_change_timer > 0)
 			m_wield_change_timer = -m_wield_change_timer;
 		else if (m_wield_change_timer == 0)
@@ -750,4 +761,10 @@ std::array<core::plane3d<f32>, 4> Camera::getFrustumCullPlanes() const
 		frustum_planes[SViewFrustum::VF_BOTTOM_PLANE],
 		frustum_planes[SViewFrustum::VF_TOP_PLANE],
 	};
+}
+
+void Camera::updateWieldedTool()
+{
+	m_wieldnode->setItem(m_wield_item_next, m_client);
+	m_wieldnode->setLightColorAndAnimation(m_player_light_color, m_client->getAnimationTime());
 }

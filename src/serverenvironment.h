@@ -125,7 +125,7 @@ public:
 	ServerScripting* getScriptIface()
 	{ return m_script; }
 
-	Server *getGameDef()
+	Server *getServer()
 	{ return m_server; }
 
 	float getSendRecommendedInterval()
@@ -265,6 +265,7 @@ public:
 	float getMaxLagEstimate() const { return m_max_lag_estimate; }
 
 	std::set<v3s16>* getForceloadedBlocks() { return &m_active_blocks.m_forceloaded_list; }
+	const std::set<v3s16> &getActiveBlocks() const { return m_active_blocks.m_list; }
 
 	// Sorted by how ready a mapblock is
 	enum BlockStatus {
@@ -328,6 +329,9 @@ private:
 
 	/*
 		Remove all objects that satisfy (isGone() && m_known_by_count==0)
+
+		WARNING: only safe to call if you can ensure that no code is left holding
+		pointers to any SAO.
 	*/
 	void removeRemovedObjects();
 
@@ -344,6 +348,9 @@ private:
 
 		If force_delete is set, active object is deleted nevertheless. It
 		shall only be set so in the destructor of the environment.
+
+		WARNING: only safe to call if you can ensure that no code is left holding
+		pointers to any SAO.
 	*/
 	void deactivateFarObjects(bool force_delete);
 

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Estonian (Minetest)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 23:13+0100\n"
+"POT-Creation-Date: 2026-08-10 17:35+0200\n"
 "PO-Revision-Date: 2023-10-22 17:18+0000\n"
 "Last-Translator: Janar Leas <janarleas+ubuntuone@googlemail.com>\n"
 "Language-Team: Estonian <https://hosted.weblate.org/projects/minetest/"
@@ -67,6 +67,7 @@ msgstr "Käsk pole saadaval: "
 msgid "Get help for commands (-t: output in chat)"
 msgstr "Leia abi käskude kohta"
 
+#. TRANSLATORS: 'help' and 'all' mustn't be translated. cmd = command
 #: builtin/common/chatcommands.lua
 msgid ""
 "Use '.help <cmd>' to get more information, or '.help all' to list everything."
@@ -74,6 +75,7 @@ msgstr ""
 "Kasuta '.help <käsk>' et saada rohkem teada, või '.help all' et loetleda "
 "kõik käsud."
 
+#. TRANSLATORS: Syntax of 'help' command. Don't translate anything except 'cmd' (=command)
 #: builtin/common/chatcommands.lua
 #, fuzzy
 msgid "[all | <cmd>] [-t]"
@@ -241,6 +243,7 @@ msgstr ""
 msgid "Scales the noise in the $1 axis by this value."
 msgstr ""
 
+#. TRANSLATORS: Value for randomness
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Seed"
@@ -281,7 +284,7 @@ msgstr ""
 msgid "This results in spiky noise."
 msgstr ""
 
-#. ~ "absvalue" is a noise parameter flag.
+#. TRANSLATORS: "absvalue" is a noise parameter flag.
 #. It is short for "absolute value".
 #. It can be enabled in noise settings in
 #. the settings menu.
@@ -289,14 +292,14 @@ msgstr ""
 msgid "absvalue"
 msgstr "täisväärtus"
 
-#. ~ "defaults" is a noise parameter flag.
+#. TRANSLATORS: "defaults" is a noise parameter flag.
 #. It describes the default processing options
 #. for noise settings in the settings menu.
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "defaults"
 msgstr "algsed"
 
-#. ~ "eased" is a noise parameter flag.
+#. TRANSLATORS: "eased" is a noise parameter flag.
 #. It is used to make the map smoother and
 #. can be enabled in noise settings in
 #. the settings menu.
@@ -304,6 +307,8 @@ msgstr "algsed"
 msgid "eased"
 msgstr "pehmendatud"
 
+#. TRANSLATORS: "automatic exposure" refers to light. This note
+#. will be displayed for the graphics setting 'enable_auto_exposure'
 #: builtin/common/settings/dlg_settings.lua
 msgid "(The game will need to enable automatic exposure as well)"
 msgstr ""
@@ -320,20 +325,28 @@ msgstr ""
 msgid "(Use system language)"
 msgstr ""
 
+#. TRANSLATORS: Shown when a default setting is the empty string
+#: builtin/common/settings/dlg_settings.lua
+msgid "<empty>"
+msgstr ""
+
 #: builtin/common/settings/dlg_settings.lua
 msgid "Accessibility"
 msgstr ""
 
+#. TRANSLATORS: Automatic
 #: builtin/common/settings/dlg_settings.lua
 msgid "Auto"
 msgstr ""
 
+#. TRANSLATORS: Button text to go back
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 #: builtin/mainmenu/content/dlg_package.lua src/gui/guiVolumeChange.cpp
 msgid "Back"
 msgstr "Tagasi"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Buttons with crosshair"
 msgstr ""
@@ -343,6 +356,7 @@ msgstr ""
 msgid "Chat"
 msgstr "Jututuba"
 
+#. TRANSLATORS: Tooltip of a button that clears input
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Clear"
 msgstr "Tühjenda"
@@ -350,6 +364,11 @@ msgstr "Tühjenda"
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "Controls"
 msgstr "Juhtklahvid"
+
+#: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage"
+msgstr "Vigastused mängijatelt"
 
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/common/settings/shadows_component.lua
@@ -360,10 +379,12 @@ msgstr "Keelatud"
 msgid "Enabled"
 msgstr "Lubatud"
 
+#. TRANSLATORS: Category for general settings
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "General"
 msgstr ""
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Long tap"
 msgstr ""
@@ -372,12 +393,13 @@ msgstr ""
 msgid "Movement"
 msgstr ""
 
+#. TRANSLATORS: No search results
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "No results"
 msgstr "Tulemused puuduvad"
 
-#. ~ Indicates that the action does not have a corresponding keybinding.
+#. TRANSLATORS: Indicates that the action does not have a corresponding keybinding.
 #: builtin/common/settings/dlg_settings.lua
 #, fuzzy
 msgid "Not bound"
@@ -388,14 +410,17 @@ msgstr "Ei leitud"
 msgid "Reset setting to default"
 msgstr "Taasta vaikeväärtus"
 
+#. TRANSLATORS: $1 will be replaced with a default setting value
 #: builtin/common/settings/dlg_settings.lua
-msgid "Reset setting to default ($1)"
-msgstr ""
+#, fuzzy
+msgid "Reset setting to default: $1"
+msgstr "Taasta vaikeväärtus"
 
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Search"
 msgstr "Otsi"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Short tap"
 msgstr ""
@@ -404,15 +429,18 @@ msgstr ""
 msgid "Show advanced settings"
 msgstr ""
 
+#. TRANSLATORS: Checkbox that toggles displaying the technical setting names
 #: builtin/common/settings/dlg_settings.lua
 msgid "Show technical names"
 msgstr "Kuva tehnilised nimetused"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 #, fuzzy
 msgid "Tap"
 msgstr "Reavahetus"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap with crosshair"
 msgstr ""
@@ -488,6 +516,10 @@ msgstr "Lua skriptis ilmnes viga:"
 #: builtin/fstk/ui.lua
 msgid "An error occurred:"
 msgstr "Ilmnes viga:"
+
+#: builtin/fstk/ui.lua
+msgid "Copy to clipboard"
+msgstr ""
 
 #: builtin/fstk/ui.lua
 msgid "Main menu"
@@ -569,6 +601,8 @@ msgstr "ContentDB ei ole olemas kui Minetest on kompileeritud ilma cURL'ita"
 msgid "Downloading..."
 msgstr "Allalaadimine..."
 
+#. TRANSLATORS: A 'featured' package in ContentDB is a package that is
+#. more prominently displayed than other packages
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Featured"
 msgstr ""
@@ -596,6 +630,7 @@ msgstr "Ei õnnestunud ühtki pakki vastu võtta"
 msgid "No updates"
 msgstr "Värskendusi pole"
 
+#. TRANSLATORS: A download is queued
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Queued"
 msgstr "Ootel"
@@ -609,14 +644,17 @@ msgstr "Tekstuuripakid"
 msgid "The package $1 was not found."
 msgstr ""
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Update All [$1]"
 msgstr "Värskenda kõiki [$1]"
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 and $2 dependencies will be installed."
 msgstr "Paigaldatakse sõltuvused $1 ja $2."
 
+#. TRANSLATORS: Package (mod, texture pack, etc.) info: $1 = package name, $2 = package author
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 by $2"
 msgstr "$1 $2 poolt"
@@ -625,6 +663,7 @@ msgstr "$1 $2 poolt"
 msgid "$1 required dependencies could not be found."
 msgstr "$1 vajaliku sõltuvust polnud leida."
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 will be installed, and $2 dependencies will be skipped."
 msgstr "Installitakse $1 ja $2 sõltuvus jäetakse vahele."
@@ -637,6 +676,7 @@ msgstr "Juba installeeritud"
 msgid "Base Game:"
 msgstr "Põhi Mäng:"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/content/dlg_install.lua
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Dependencies:"
@@ -711,11 +751,13 @@ msgstr ""
 msgid "Information"
 msgstr "Teave:"
 
+#. TRANSLATORS: $1 = download size
 #: builtin/mainmenu/content/dlg_package.lua
 #, fuzzy
 msgid "Install [$1]"
 msgstr "Paigalda $1"
 
+#. TRANSLATORS: Also known as 'bug tracker'
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Issue Tracker"
 msgstr ""
@@ -724,6 +766,7 @@ msgstr ""
 msgid "Reviews"
 msgstr ""
 
+#. TRANSLATORS: Link to source code repository
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Source"
 msgstr ""
@@ -750,6 +793,10 @@ msgstr "Külasta veebilehte"
 msgid "by $1"
 msgstr "$1 $2 poolt"
 
+#. TRANSLATORS: Info line for a ContentDB package:
+#. $1 = author,
+#. $2 = number of downloads,
+#. $3, $4, $5 = number of positive/neutral/negative reviews
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "by $1  —  $2 downloads  —  +$3 / $4 / -$5"
 msgstr ""
@@ -787,16 +834,19 @@ msgstr "$1 paigaldamine tekstuurikomplektiks nurjus"
 msgid "World mods"
 msgstr "Maailma nimi"
 
+#. TRANSLATORS: $1 = server name
 #: builtin/mainmenu/dlg_clients_list.lua
 msgid ""
 "Players connected to\n"
 "$1"
 msgstr ""
 
+#. TRANSLATORS: Message in the mod list when a mod is enabled with error
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Enabled, has error)"
 msgstr "(Lubatud, vigane)"
 
+#. TRANSLATORS: Displayed when a mod dependency is unsatisfied
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Unsatisfied)"
 msgstr "(Rahuldamatta)"
@@ -837,6 +887,7 @@ msgstr "Mod:"
 msgid "Mods located inside the world folder."
 msgstr ""
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No (optional) dependencies"
 msgstr "(Valikulised) sõltuvused puuduvad"
@@ -845,6 +896,7 @@ msgstr "(Valikulised) sõltuvused puuduvad"
 msgid "No game description provided."
 msgstr "Mängu kirjeldus puudub."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No hard dependencies"
 msgstr "Vajalikud sõltuvused puuduvad"
@@ -853,10 +905,12 @@ msgstr "Vajalikud sõltuvused puuduvad"
 msgid "No modpack description provided."
 msgstr "MOD-i pakile pole kirjeldust saadaval."
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No optional dependencies"
 msgstr "Valikulised sõltuvused puuduvad"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Optional dependencies:"
 msgstr "Valikulised sõltuvused:"
@@ -898,6 +952,7 @@ msgstr "Külmetus kõrgus"
 msgid "Altitude dry"
 msgstr "Põua kõrgus"
 
+#. TRANSLATORS: Smooth transition between biomes
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Biome blending"
 msgstr "Loodusvööndi hajumine"
@@ -918,6 +973,7 @@ msgstr "Koopad"
 msgid "Create"
 msgstr "Loo"
 
+#. TRANSLATORS: Map generator decorations (used for structures, trees, plants, and more)
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Decorations"
 msgstr "Ilmestused"
@@ -1123,6 +1179,7 @@ msgstr ""
 msgid "Confirm Password"
 msgstr "Kinnita salasõna"
 
+#. TRANSLATORS: Message when joining a server
 #: builtin/mainmenu/dlg_register.lua
 msgid "Joining $1"
 msgstr "Liitu $1-ga"
@@ -1145,10 +1202,12 @@ msgstr "Salasõna"
 msgid "Passwords do not match"
 msgstr "Salasõnad pole samased"
 
+#. TRANSLATORS: Register an account on a server
 #: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_online.lua
 msgid "Register"
 msgstr "Registreeru"
 
+#. TRANSLATORS: Dismiss a dialog window/message
 #: builtin/mainmenu/dlg_reinstall_mtg.lua
 msgid "Dismiss"
 msgstr ""
@@ -1190,11 +1249,13 @@ msgstr ""
 "Selle MOD-i pakk nimi on määratud oma „modpack.conf“ failid, mis asendab "
 "siinse ümber nimetamise."
 
+#. TRANSLATORS: Expand all entries in a tree view
 #: builtin/mainmenu/dlg_server_list_mods.lua
 #, fuzzy
 msgid "Expand all"
 msgstr "Luba kõik"
 
+#. TRANSLATORS: A checkbox; if enabled, it will group mods by their prefix
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Group by prefix"
 msgstr ""
@@ -1207,10 +1268,12 @@ msgstr ""
 msgid "The $1 server uses the following mods:"
 msgstr ""
 
+#. TRANSLATORS: $1 = name of the engine
 #: builtin/mainmenu/dlg_version_info.lua
 msgid "A new $1 version is available"
 msgstr "Uus $1 versioon on saadaval"
 
+#. TRANSLATORS: $1 and $2 are version numbers, $3 is a URL
 #: builtin/mainmenu/dlg_version_info.lua
 msgid ""
 "Installed version: $1\n"
@@ -1239,6 +1302,7 @@ msgstr "Külasta veebilehte"
 msgid "Debug build, expect worse performance"
 msgstr ""
 
+#. TRANSLATORS: Try to keep the translation short
 #: builtin/mainmenu/init.lua src/client/game_formspec.cpp
 msgid "Settings"
 msgstr "Sätted"
@@ -1301,6 +1365,7 @@ msgstr "Jaga veajälitus-päevikut"
 msgid "Browse online content"
 msgstr "Sirvi veebist sisu"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 #, fuzzy
 msgid "Browse online content [$1]"
@@ -1310,6 +1375,7 @@ msgstr "Sirvi veebist sisu"
 msgid "Content"
 msgstr "Sisu"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 #, fuzzy
 msgid "Content [$1]"
@@ -1394,6 +1460,7 @@ msgstr "Uus"
 msgid "Play Game"
 msgstr "Mängi"
 
+#. TRANSLATORS: Network port
 #: builtin/mainmenu/tab_local.lua builtin/mainmenu/tab_online.lua
 msgid "Port"
 msgstr "Port"
@@ -1423,6 +1490,7 @@ msgstr ""
 msgid "Add favorite"
 msgstr "Eemalda lemmik"
 
+#. TRANSLATORS: Network address
 #: builtin/mainmenu/tab_online.lua
 msgid "Address"
 msgstr "Aadress"
@@ -1431,7 +1499,7 @@ msgstr "Aadress"
 msgid "Creative mode"
 msgstr "Loov-laad"
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: builtin/mainmenu/tab_online.lua
 msgid "Damage / PvP"
 msgstr "Vigastused mängijatelt"
@@ -1453,6 +1521,7 @@ msgstr "Ühildumatud Võõrustajad"
 msgid "Join Game"
 msgstr "Ühine mänguga"
 
+#. TRANSLATORS: Login to server
 #: builtin/mainmenu/tab_online.lua
 msgid "Login"
 msgstr "Logi sisse"
@@ -1465,10 +1534,12 @@ msgstr ""
 msgid "Open server website"
 msgstr ""
 
+#. TRANSLATORS: Also known as "latency"
 #: builtin/mainmenu/tab_online.lua
 msgid "Ping"
 msgstr "Viivitus"
 
+#. TRANSLATORS: $1 is a list of players
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid ""
@@ -1477,17 +1548,15 @@ msgid ""
 msgstr "Kliendi mod-id"
 
 #: builtin/mainmenu/tab_online.lua
-msgid ""
-"Possible filters\n"
-"game:<name>\n"
-"mod:<name>\n"
-"player:<name>"
-msgstr ""
+#, fuzzy
+msgid "Possible filters"
+msgstr "Poissoni filtreerimine"
 
 #: builtin/mainmenu/tab_online.lua
 msgid "Public Servers"
 msgstr "Avalikud võõrustajad"
 
+#. TRANSLATORS: As in 'reload'/'check again'
 #: builtin/mainmenu/tab_online.lua
 msgid "Refresh"
 msgstr "Värskenda"
@@ -1499,6 +1568,11 @@ msgstr "Eemalda lemmik"
 #: builtin/mainmenu/tab_online.lua
 msgid "Server Description"
 msgstr "Võõrustaja kirjeldus"
+
+#: src/chat.cpp
+#, fuzzy
+msgid "Player names: "
+msgstr "Mängi"
 
 #: src/client/client.cpp
 msgid "Connection aborted (protocol error?)."
@@ -1528,7 +1602,7 @@ msgstr "Tekstuuride laadimine ..."
 msgid "Rebuilding shaders..."
 msgstr "Varjutajate taasloomine..."
 
-#: src/client/client.cpp src/util/screenshot.cpp
+#: src/client/client.cpp src/gui/guiEngine.cpp src/util/screenshot.cpp
 #, fuzzy, c-format
 msgid "Saved screenshot to \"%s\""
 msgstr "Kuva pildistused"
@@ -1564,6 +1638,11 @@ msgstr ""
 #: src/client/clientmedia.cpp src/client/game.cpp
 msgid "Media..."
 msgstr "Meedia..."
+
+#: src/client/fontengine.cpp
+#, fuzzy
+msgid "Failed to find a valid font"
+msgstr "Veebilehe avamine ebaõnnestus"
 
 #: src/client/game.cpp src/client/render/pipeline.cpp src/client/shader.cpp
 #: src/server.cpp
@@ -1688,6 +1767,11 @@ msgid "Fast mode enabled (note: no 'fast' privilege)"
 msgstr "Kiirrežiim on lubatud (hoiatus: 'fast' privileeg puudub)"
 
 #: src/client/game.cpp
+#, c-format
+msgid "Files: %d / %d"
+msgstr ""
+
+#: src/client/game.cpp
 msgid "Fly mode disabled"
 msgstr "Lennurežiim on keelatud"
 
@@ -1717,11 +1801,13 @@ msgid "Item definitions..."
 msgstr "Esemete määratlused..."
 
 #: src/client/game.cpp
-msgid "KiB/s"
+#, fuzzy
+msgid "KiB"
 msgstr "KiB/s"
 
 #: src/client/game.cpp
-msgid "MiB/s"
+#, fuzzy
+msgid "MiB"
 msgstr "MiB/s"
 
 #: src/client/game.cpp
@@ -1771,6 +1857,11 @@ msgstr "Sulgemine..."
 #: src/client/game.cpp src/client/game_formspec.cpp
 msgid "Singleplayer"
 msgstr "Üksikmäng"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Size: %.2f %s"
+msgstr ""
 
 #: src/client/game.cpp
 msgid "Sound muted"
@@ -1861,6 +1952,7 @@ msgstr "Raamvõrgustiku paljastus"
 msgid "Zoom currently disabled by game or mod"
 msgstr "Suumimine on praegu mängu või modi tõttu keelatud"
 
+#. TRANSLATORS: Game mode (server or singleplayer)
 #: src/client/game_formspec.cpp
 msgid "- Mode: "
 msgstr "- Režiim: "
@@ -1869,7 +1961,7 @@ msgstr "- Režiim: "
 msgid "- Public: "
 msgstr "- Avalik: "
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: src/client/game_formspec.cpp
 msgid "- PvP: "
 msgstr "- Üksteise vastu: "
@@ -1878,10 +1970,12 @@ msgstr "- Üksteise vastu: "
 msgid "- Server Name: "
 msgstr "- Serveri nimi: "
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Change Password"
 msgstr "Vaheta parooli"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Continue"
 msgstr "Jätka"
@@ -1915,10 +2009,12 @@ msgstr ""
 "- puutu&lohista, toksa 2-se näpuga\n"
 " --> asetab ühe eseme pessa\n"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Exit to Menu"
 msgstr "Välju menüüsse"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short (OS = Operating System)
 #: src/client/game_formspec.cpp
 msgid "Exit to OS"
 msgstr "Välju mängust"
@@ -1951,6 +2047,7 @@ msgstr "Kaug võõrustaja"
 msgid "Respawn"
 msgstr "Ärka ellu"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Sound Volume"
 msgstr "Hääle volüüm"
@@ -1989,10 +2086,29 @@ msgid "Profiler shown (page %d of %d)"
 msgstr "Koormushinnang (%d leht %d-st)"
 
 #: src/client/keycode.cpp
+#, fuzzy
+msgid "A (Gamepad)"
+msgstr "Juhtpuldid"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "B (Gamepad)"
+msgstr "Juhtpuldid"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Back (Gamepad)"
+msgstr "Juhtpuldid"
+
+#: src/client/keycode.cpp
 msgid "Backspace"
 msgstr "Tagasinihe"
 
-#. ~ Usually paired with the Pause key
+#: src/client/keycode.cpp
+msgid "Bottom Face Button (Gamepad)"
+msgstr ""
+
+#. TRANSLATORS: Usually paired with the Pause key
 #: src/client/keycode.cpp
 #, fuzzy
 msgid "Break Key"
@@ -2003,6 +2119,10 @@ msgid "Caps Lock"
 msgstr "Suurtähelukk"
 
 #: src/client/keycode.cpp
+msgid "Circle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 #, fuzzy
 msgid "Clear Key"
 msgstr "Tühjenda"
@@ -2011,6 +2131,28 @@ msgstr "Tühjenda"
 #, fuzzy
 msgid "Control Key"
 msgstr "CTRL"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Cross (Gamepad)"
+msgstr "Juhtpuldid"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "D-Pad Down"
+msgstr "Lehekülg alla"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Left"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Up"
+msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2025,6 +2167,26 @@ msgstr ""
 #, fuzzy
 msgid "End Key"
 msgstr "Menüü"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d +"
+msgstr "Juhtpuldid"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d -"
+msgstr "Juhtpuldid"
+
+#: src/client/keycode.cpp
+#, c-format
+msgid "Gamepad Button %d"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Guide (Gamepad)"
+msgstr "Juhtpuldid"
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2055,6 +2217,31 @@ msgid "Left Control"
 msgstr "Vasak CTRL"
 
 #: src/client/keycode.cpp
+msgid "Left Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Button"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Down"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Left"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Left Joystick Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Up"
+msgstr "Vasak CTRL"
+
+#: src/client/keycode.cpp
 msgid "Left Menu"
 msgstr "Vasak Menüü"
 
@@ -2062,7 +2249,17 @@ msgstr "Vasak Menüü"
 msgid "Left Shift"
 msgstr "Vasak Shift"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Shoulder"
+msgstr "Vasak Shift"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Trigger"
+msgstr "Vasak CTRL"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Left Windows"
 msgstr "Vasak Windowsi nupp"
@@ -2076,10 +2273,18 @@ msgstr "Menüü"
 msgid "Middle Click"
 msgstr ""
 
+#. TRANSLATORS: This is for mouse buttons without an intuitive description. %d is the number of the button.
+#: src/client/keycode.cpp
+#, c-format
+msgid "Mouse Button %d"
+msgstr ""
+
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X1"
 msgstr ""
 
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X2"
 msgstr ""
@@ -2158,7 +2363,7 @@ msgstr "Lehekülg alla"
 msgid "Page Up"
 msgstr "Lehekülg üles"
 
-#. ~ Usually paired with the Break key
+#. TRANSLATORS: Usually paired with the Break key
 #: src/client/keycode.cpp
 #, fuzzy
 msgid "Pause Key"
@@ -2168,7 +2373,15 @@ msgstr "Paus"
 msgid "Play"
 msgstr "Mängi"
 
-#. ~ "Print screen" key
+#: src/client/keycode.cpp
+msgid "Primary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Primary Right Paddle"
+msgstr ""
+
+#. TRANSLATORS: "Print screen" key
 #: src/client/keycode.cpp
 msgid "Print"
 msgstr "Prindi"
@@ -2193,6 +2406,33 @@ msgid "Right Control"
 msgstr "Parem CTRL"
 
 #: src/client/keycode.cpp
+msgid "Right Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Button"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Down"
+msgstr "Parem CTRL"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Left"
+msgstr "Parem CTRL"
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Up"
+msgstr "Parem CTRL"
+
+#: src/client/keycode.cpp
 msgid "Right Menu"
 msgstr "Parem Menüü"
 
@@ -2200,7 +2440,17 @@ msgstr "Parem Menüü"
 msgid "Right Shift"
 msgstr "Parem Shift"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Shoulder"
+msgstr "Parem Shift"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Trigger"
+msgstr "Parem CTRL"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Right Windows"
 msgstr "Parem Windowsi nupp"
@@ -2213,6 +2463,14 @@ msgstr ""
 #: src/client/keycode.cpp
 msgid "Scroll Lock"
 msgstr "Scroll lukk"
+
+#: src/client/keycode.cpp
+msgid "Secondary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Secondary Right Paddle"
+msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2230,12 +2488,44 @@ msgstr "Tühik"
 
 #: src/client/keycode.cpp
 #, fuzzy
+msgid "Square (Gamepad)"
+msgstr "Mängimine võõrustaja juures"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Start (Gamepad)"
+msgstr "Alusta mängu"
+
+#: src/client/keycode.cpp
+#, fuzzy
 msgid "Tab Key"
 msgstr "Hiilimis klahv"
 
 #: src/client/keycode.cpp
+msgid "Top Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Touchpad Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Triangle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Up Arrow"
 msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "X (Gamepad)"
+msgstr "Juhtpuldid"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Y (Gamepad)"
+msgstr "Juhtpuldid"
 
 #: src/client/minimap.cpp
 msgid "Minimap hidden"
@@ -2260,6 +2550,10 @@ msgstr "Pisikaart tekstuur-laadis"
 msgid "Failed to create the texture \"%s\" for the rendering pipeline."
 msgstr ""
 
+#: src/client/renderingengine.cpp
+msgid "Could not initialize any supported video driver!"
+msgstr ""
+
 #: src/client/shader.cpp
 #, fuzzy, c-format
 msgid "Failed to compile the \"%s\" shader."
@@ -2270,12 +2564,14 @@ msgstr "Veebilehe avamine ebaõnnestus"
 msgid "Failed to find \"%s\" shader files."
 msgstr "Veebilehe avamine ebaõnnestus"
 
+#. TRANSLATORS: GLSL = OpenGL Shading Language
 #: src/client/shader.cpp
 #, fuzzy
 msgid "GLSL is not supported by the driver"
 msgstr "See kooste ei toeta heli süsteemi"
 
-#. ~ Error when a mod is missing dependencies. Ex: "Mod Title is missing: mod1, mod2, mod3"
+#. TRANSLATORS: Error when a mod is missing dependencies.
+#. Example: "Mod Title is missing: mod1, mod2, mod3"
 #: src/content/mod_configuration.cpp
 #, c-format
 msgid "%s is missing:"
@@ -2308,6 +2604,11 @@ msgstr "Veebilehe avamine ebaõnnestus"
 #: src/gui/guiChatConsole.cpp
 msgid "Opening webpage"
 msgstr ""
+
+#: src/gui/guiEngine.cpp
+#, fuzzy
+msgid "Failed to load main menu script!"
+msgstr "Peamenüü skript"
 
 #: src/gui/guiFormSpecMenu.cpp
 msgid "Proceed"
@@ -2479,7 +2780,7 @@ msgstr ""
 msgid "Invalid password"
 msgstr "Vana parool"
 
-#. ~ DO NOT TRANSLATE THIS LITERALLY!
+#. TRANSLATORS: DO NOT TRANSLATE THIS LITERALLY!
 #. This is a special string which needs to contain the translation's
 #. language code (e.g. "de" for German).
 #: src/network/clientpackethandler.cpp src/script/lua_api/l_client.cpp
@@ -2537,6 +2838,10 @@ msgstr ""
 msgid ""
 "Your client's version is not supported.\n"
 "Please contact the server administrator."
+msgstr ""
+
+#: src/script/lua_api/l_mainmenu.cpp
+msgid "Copied to clipboard!"
 msgstr ""
 
 #: src/server.cpp
@@ -2692,6 +2997,10 @@ msgid "Acceleration of gravity, in nodes per second per second."
 msgstr "Raskuskiirendus, (klotsi sekundis) sekundi kohta."
 
 #: src/settings_translation_file.cpp
+msgid "Actions and Keybindings"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Active Block Modifiers"
 msgstr ""
 
@@ -2801,11 +3110,11 @@ msgid "Anticheat movement tolerance"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Append item name"
+msgid "Append item name to tooltips"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Append item name to tooltip."
+msgid "Append the full item name to the tooltip of item stacks."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -2864,11 +3173,10 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"At this distance the server will perform a simpler and cheaper occlusion "
-"check.\n"
-"Smaller values potentially improve performance, at the expense of "
-"temporarily visible\n"
-"rendering glitches (missing blocks).\n"
+"At this distance the server will consider blocks as \"far away\".\n"
+"It will perform simpler and cheaper occlusion checks, update\n"
+"low priority block updates lazily, and limit the blocks sent to the\n"
+"client in one roundtrip.\n"
 "This is especially useful for very large viewing range (upwards of 500).\n"
 "Stated in MapBlocks (16 nodes)."
 msgstr ""
@@ -3315,6 +3623,11 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage flash"
+msgstr "Kaartiloome lipud"
+
+#: src/settings_translation_file.cpp
 msgid "Debug log file size threshold"
 msgstr ""
 
@@ -3622,6 +3935,11 @@ msgid "Enable Raytraced Culling"
 msgstr ""
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Enable SSCSM"
+msgstr "Luba kõik"
+
+#: src/settings_translation_file.cpp
 msgid "Enable a confirmation dialog before closing."
 msgstr ""
 
@@ -3647,14 +3965,6 @@ msgstr ""
 #, fuzzy
 msgid "Enable dynamic shadows"
 msgstr "Elavad varjud"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks. Requires a restart to take effect"
-msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Enable mod channels support."
@@ -3862,6 +4172,10 @@ msgstr ""
 "Kui keelatud, siis juhtkangi kese asub esmapuute kohal."
 
 #: src/settings_translation_file.cpp
+msgid "Flashing of the screen when taking damage."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Floatland density"
 msgstr ""
 
@@ -4030,8 +4344,12 @@ msgid "GUI scaling filter"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Gamepads"
-msgstr "Juhtpuldid"
+msgid "Gamepads and Joysticks"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Gamma"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Global callbacks"
@@ -4579,15 +4897,7 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Joystick ID"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Joystick button repetition interval"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "Joystick dead zone"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4595,7 +4905,11 @@ msgid "Joystick frustum sensitivity"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Joystick type"
+msgid "Joystick inner dead zone"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Joystick outer dead zone"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4679,6 +4993,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for opening the pause menu in-game.\n"
+"Pressing the escape key always opens the pause menu."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for placing an item/block or for using something.\n"
 "(Note: The actual meaning might vary on a per-game basis.)"
 msgstr ""
@@ -4704,12 +5024,17 @@ msgid "Key for toggling the display of the profiler. Used for development."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Keybindings"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid "Keyboard and Mouse"
 msgstr "Klaviatuur ja hiir"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Keyboard camera speed"
+msgstr "Klaviatuur ja hiir"
+
+#: src/settings_translation_file.cpp
+msgid "Keyboard-controlled camera rotation speed, in degrees per second."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Kick players who sent more than X messages per 10 seconds."
@@ -4894,6 +5219,22 @@ msgid "Local command"
 msgstr "Kohalik käsk"
 
 #: src/settings_translation_file.cpp
+msgid "Look down"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Look left"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Look right"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Look up"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Lower Y limit of dungeons."
 msgstr ""
 
@@ -4908,6 +5249,16 @@ msgstr "Peamenüü skript"
 #: src/settings_translation_file.cpp
 msgid ""
 "Make fog and sky colors depend on daytime (dawn/sunset) and view direction."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Make volumetrics weaker against closer objects to emulate physical "
+"volumetrics."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Makes the color of light fog more saturated."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5472,6 +5823,10 @@ msgid "Open inventory"
 msgstr "Seljakott"
 
 #: src/settings_translation_file.cpp
+msgid "Open pause menu"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Open the pause menu when the window's focus is lost. Does not pause if a "
 "formspec is\n"
@@ -5964,6 +6319,13 @@ msgstr "Võõrustaja-loendi fail"
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Set proxy to use by cURL. This is an URI just like the *_proxy environment "
+"variables.\n"
+"Note that this will not apply to Luanti's in-game protocol."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Set the default tilt of Sun/Moon orbit in degrees.\n"
 "Games may change orbit tilt via API.\n"
 "Value of 0 means no tilt / vertical orbit."
@@ -5972,8 +6334,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Set the exposure compensation in EV units.\n"
-"Value of 0.0 (default) means no exposure compensation.\n"
-"Range: from -1 to 1.0"
+"Value of 0.0 (default) means no exposure compensation."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5985,6 +6346,12 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Set the maximum length of a chat message (in characters) sent by clients."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Set the post processing gamma value.\n"
+"Higher values give lower contrast and vice versa."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6104,7 +6471,9 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Simulate translucency when looking at foliage in the sunlight."
+msgid ""
+"Simulate translucency when looking at foliage in the sunlight.\n"
+"It is recommended to use this with setting \"leaves_style\" set to \"fancy\"."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6338,10 +6707,6 @@ msgid "The URL for the content repository"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "The dead zone of the joystick"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The default format in which profiles are being saved,\n"
 "when calling `/profiler save [format]` without format."
@@ -6369,10 +6734,6 @@ msgid ""
 "* Long tap\n"
 "Known from the classic Luanti mobile controls.\n"
 "Combat is more or less impossible."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "The identifier of the joystick to use"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6479,10 +6840,6 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "The type of joystick"
-msgstr ""
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The vertical distance over which heat drops by 20 if 'altitude_chill' is\n"
 "enabled. Also, the vertical distance over which humidity drops by 10 if\n"
@@ -6513,6 +6870,19 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Timeout for client to remove unused map data from memory, in seconds."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Tint sunlight during sunrise/sunset."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Tinted fog"
+msgstr "Lülita udu sisse/välja"
+
+#: src/settings_translation_file.cpp
+msgid "Tinted sunlight"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6875,7 +7245,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
-msgid "Volumetric lighting"
+msgid "Volumetric Depth Attenuation"
+msgstr "Hajus valgus"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Volumetric Lighting"
 msgstr "Hajus valgus"
 
 #: src/settings_translation_file.cpp
@@ -6940,7 +7315,9 @@ msgid "Weblink color"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "When enabled, liquid reflections are simulated."
+msgid ""
+"When enabled, crude liquid reflections are simulated.\n"
+"Wave height, length and speed will affect these reflections."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6966,6 +7343,12 @@ msgid ""
 "This setting is ONLY applied if any of the mentioned filters are enabled.\n"
 "This is also used as the base node texture size for world-aligned\n"
 "texture autoscaling."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Where to enable server-sent client-side modding (SSCSM).\n"
+"Warning: Experimental."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -7115,16 +7498,11 @@ msgstr "cURL-i interaktiivne aegumine"
 msgid "cURL parallel limit"
 msgstr ""
 
+#: src/settings_translation_file.cpp
+msgid "cURL proxy address"
+msgstr ""
+
 #: src/util/screenshot.cpp
 #, c-format
 msgid "Failed to save screenshot to \"%s\""
 msgstr ""
-
-#~ msgid "Provided world path doesn't exist: "
-#~ msgstr "Maailma failiteed pole olemas: "
-
-#~ msgid "Y spread"
-#~ msgstr "Y levi"
-
-#~ msgid "Z spread"
-#~ msgstr "Z levi"

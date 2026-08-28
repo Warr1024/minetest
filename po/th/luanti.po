@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Thai (Minetest)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 23:13+0100\n"
-"PO-Revision-Date: 2022-03-18 01:05+0000\n"
-"Last-Translator: Thomas Wiegand <weblate.org@wiegand.info>\n"
+"POT-Creation-Date: 2026-08-10 17:35+0200\n"
+"PO-Revision-Date: 2026-02-03 04:56+0000\n"
+"Last-Translator: GeekSteak <lpdj@ik.me>\n"
 "Language-Team: Thai <https://hosted.weblate.org/projects/minetest/minetest/"
 "th/>\n"
 "Language: th\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.12-dev\n"
+"X-Generator: Weblate 5.16-dev\n"
 
 #: builtin/client/chatcommands.lua
 msgid "Clear the out chat queue"
@@ -67,16 +67,17 @@ msgstr "ไม่มีคำสั่ง: "
 msgid "Get help for commands (-t: output in chat)"
 msgstr "รับความช่วยเหลือสำหรับการพิมพ์คำสั่ง"
 
+#. TRANSLATORS: 'help' and 'all' mustn't be translated. cmd = command
 #: builtin/common/chatcommands.lua
 msgid ""
 "Use '.help <cmd>' to get more information, or '.help all' to list everything."
 msgstr ""
 "ใช้ '.help <cmd>' เพื่อรับข้อมูลเพิ่มเติม หรือใช้ '.help all' เพื่อแสดงรายการคำสั่งทั้งหมด"
 
+#. TRANSLATORS: Syntax of 'help' command. Don't translate anything except 'cmd' (=command)
 #: builtin/common/chatcommands.lua
-#, fuzzy
 msgid "[all | <cmd>] [-t]"
-msgstr "[ทั้งหมด | <cmd>]"
+msgstr "[all | <cmd>] [-t]"
 
 #: builtin/common/settings/components.lua
 #, fuzzy
@@ -243,6 +244,7 @@ msgstr ""
 msgid "Scales the noise in the $1 axis by this value."
 msgstr ""
 
+#. TRANSLATORS: Value for randomness
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Seed"
@@ -283,7 +285,7 @@ msgstr ""
 msgid "This results in spiky noise."
 msgstr ""
 
-#. ~ "absvalue" is a noise parameter flag.
+#. TRANSLATORS: "absvalue" is a noise parameter flag.
 #. It is short for "absolute value".
 #. It can be enabled in noise settings in
 #. the settings menu.
@@ -291,14 +293,14 @@ msgstr ""
 msgid "absvalue"
 msgstr "ค่าผันแปรการสุ่มสร้างแผนที่"
 
-#. ~ "defaults" is a noise parameter flag.
+#. TRANSLATORS: "defaults" is a noise parameter flag.
 #. It describes the default processing options
 #. for noise settings in the settings menu.
 #: builtin/common/settings/dlg_change_mapgen_flags.lua
 msgid "defaults"
 msgstr "เริ่มต้น"
 
-#. ~ "eased" is a noise parameter flag.
+#. TRANSLATORS: "eased" is a noise parameter flag.
 #. It is used to make the map smoother and
 #. can be enabled in noise settings in
 #. the settings menu.
@@ -306,6 +308,8 @@ msgstr "เริ่มต้น"
 msgid "eased"
 msgstr "ความนุ่มนวลของพื้นผิวบนทางลาด"
 
+#. TRANSLATORS: "automatic exposure" refers to light. This note
+#. will be displayed for the graphics setting 'enable_auto_exposure'
 #: builtin/common/settings/dlg_settings.lua
 msgid "(The game will need to enable automatic exposure as well)"
 msgstr ""
@@ -322,20 +326,28 @@ msgstr ""
 msgid "(Use system language)"
 msgstr ""
 
+#. TRANSLATORS: Shown when a default setting is the empty string
+#: builtin/common/settings/dlg_settings.lua
+msgid "<empty>"
+msgstr ""
+
 #: builtin/common/settings/dlg_settings.lua
 msgid "Accessibility"
 msgstr ""
 
+#. TRANSLATORS: Automatic
 #: builtin/common/settings/dlg_settings.lua
 msgid "Auto"
 msgstr ""
 
+#. TRANSLATORS: Button text to go back
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 #: builtin/mainmenu/content/dlg_package.lua src/gui/guiVolumeChange.cpp
 msgid "Back"
 msgstr "หลัง"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Buttons with crosshair"
 msgstr ""
@@ -345,6 +357,7 @@ msgstr ""
 msgid "Chat"
 msgstr "แช"
 
+#. TRANSLATORS: Tooltip of a button that clears input
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Clear"
 msgstr "ล้าง"
@@ -352,6 +365,11 @@ msgstr "ล้าง"
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "Controls"
 msgstr "ควบคุม"
+
+#: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage"
+msgstr "ดาเมจ / ผู้เล่นผ่านเครื่องเล่น"
 
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/common/settings/shadows_component.lua
@@ -362,10 +380,12 @@ msgstr "ปิดการใช้งานแล้ว"
 msgid "Enabled"
 msgstr "เปิดใช้งานแล้ว"
 
+#. TRANSLATORS: Category for general settings
 #: builtin/common/settings/dlg_settings.lua src/settings_translation_file.cpp
 msgid "General"
 msgstr ""
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Long tap"
 msgstr ""
@@ -375,12 +395,13 @@ msgstr ""
 msgid "Movement"
 msgstr "การเคลื่อนไหวเร็ว"
 
+#. TRANSLATORS: No search results
 #: builtin/common/settings/dlg_settings.lua
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "No results"
 msgstr "ไม่มีผลลัพธ์"
 
-#. ~ Indicates that the action does not have a corresponding keybinding.
+#. TRANSLATORS: Indicates that the action does not have a corresponding keybinding.
 #: builtin/common/settings/dlg_settings.lua
 #, fuzzy
 msgid "Not bound"
@@ -391,14 +412,17 @@ msgstr "ไม่พบ"
 msgid "Reset setting to default"
 msgstr "คืนค่าเริ่มต้น"
 
+#. TRANSLATORS: $1 will be replaced with a default setting value
 #: builtin/common/settings/dlg_settings.lua
-msgid "Reset setting to default ($1)"
-msgstr ""
+#, fuzzy
+msgid "Reset setting to default: $1"
+msgstr "คืนค่าเริ่มต้น"
 
 #: builtin/common/settings/dlg_settings.lua builtin/mainmenu/tab_online.lua
 msgid "Search"
 msgstr "ค้นหา"
 
+#. TRANSLATORS: Touchscreen gesture
 #: builtin/common/settings/dlg_settings.lua
 msgid "Short tap"
 msgstr ""
@@ -407,15 +431,18 @@ msgstr ""
 msgid "Show advanced settings"
 msgstr ""
 
+#. TRANSLATORS: Checkbox that toggles displaying the technical setting names
 #: builtin/common/settings/dlg_settings.lua
 msgid "Show technical names"
 msgstr "แสดงชื่อทางเทคนิค"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 #, fuzzy
 msgid "Tap"
 msgstr "แท็บ"
 
+#. TRANSLATORS: Touchscreen interaction style
 #: builtin/common/settings/dlg_settings.lua
 msgid "Tap with crosshair"
 msgstr ""
@@ -495,6 +522,10 @@ msgstr "เกิดข้อผิดพลาดในสคริปต์ล
 #: builtin/fstk/ui.lua
 msgid "An error occurred:"
 msgstr "เกิดข้อผิดพลาดขึ้น:"
+
+#: builtin/fstk/ui.lua
+msgid "Copy to clipboard"
+msgstr ""
 
 #: builtin/fstk/ui.lua
 msgid "Main menu"
@@ -577,6 +608,8 @@ msgstr "ContentDB ไม่พร้อมใช้งานเมื่อร�
 msgid "Downloading..."
 msgstr "โหลด ..."
 
+#. TRANSLATORS: A 'featured' package in ContentDB is a package that is
+#. more prominently displayed than other packages
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Featured"
 msgstr ""
@@ -604,6 +637,7 @@ msgstr "ไม่สามารถเรียกแพคเกจได้"
 msgid "No updates"
 msgstr "ไม่มีการปรับปรุง"
 
+#. TRANSLATORS: A download is queued
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Queued"
 msgstr "เข้าคิว"
@@ -617,14 +651,17 @@ msgstr "เทกซ์เจอร์แพ็ค"
 msgid "The package $1 was not found."
 msgstr ""
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/content/dlg_contentdb.lua
 msgid "Update All [$1]"
 msgstr "อัปเดต All [$1]"
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 and $2 dependencies will be installed."
 msgstr "การอ้างอิง $1 และ $2 จะถูกติดตั้ง."
 
+#. TRANSLATORS: Package (mod, texture pack, etc.) info: $1 = package name, $2 = package author
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 by $2"
 msgstr "$1 โดย $2"
@@ -633,6 +670,7 @@ msgstr "$1 โดย $2"
 msgid "$1 required dependencies could not be found."
 msgstr "$1 ไม่พบการพึ่งพาที่จำเป็น."
 
+#. TRANSLATORS: $1 is the name of a package and $2 is a number of depencencies
 #: builtin/mainmenu/content/dlg_install.lua
 msgid "$1 will be installed, and $2 dependencies will be skipped."
 msgstr "$1 จะถูกติดตั้ง และการขึ้นต่อกัน $2 จะถูกข้ามไป."
@@ -645,6 +683,7 @@ msgstr "ติดตั้งแล้ว"
 msgid "Base Game:"
 msgstr "เกมพื้นฐาน:"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/content/dlg_install.lua
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Dependencies:"
@@ -719,11 +758,13 @@ msgstr ""
 msgid "Information"
 msgstr "ข้อมูล:"
 
+#. TRANSLATORS: $1 = download size
 #: builtin/mainmenu/content/dlg_package.lua
 #, fuzzy
 msgid "Install [$1]"
 msgstr "ติดตั้ง $1"
 
+#. TRANSLATORS: Also known as 'bug tracker'
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Issue Tracker"
 msgstr ""
@@ -732,6 +773,7 @@ msgstr ""
 msgid "Reviews"
 msgstr ""
 
+#. TRANSLATORS: Link to source code repository
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "Source"
 msgstr ""
@@ -757,6 +799,10 @@ msgstr ""
 msgid "by $1"
 msgstr "$1 โดย $2"
 
+#. TRANSLATORS: Info line for a ContentDB package:
+#. $1 = author,
+#. $2 = number of downloads,
+#. $3, $4, $5 = number of positive/neutral/negative reviews
 #: builtin/mainmenu/content/dlg_package.lua
 msgid "by $1  —  $2 downloads  —  +$3 / $4 / -$5"
 msgstr ""
@@ -797,16 +843,19 @@ msgstr "ไม่สามารถติดตั้งพื้นผิว Te
 msgid "World mods"
 msgstr "ชื่อโลก"
 
+#. TRANSLATORS: $1 = server name
 #: builtin/mainmenu/dlg_clients_list.lua
 msgid ""
 "Players connected to\n"
 "$1"
 msgstr ""
 
+#. TRANSLATORS: Message in the mod list when a mod is enabled with error
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Enabled, has error)"
 msgstr ""
 
+#. TRANSLATORS: Displayed when a mod dependency is unsatisfied
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "(Unsatisfied)"
 msgstr ""
@@ -847,6 +896,7 @@ msgstr "ม็อด:"
 msgid "Mods located inside the world folder."
 msgstr ""
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No (optional) dependencies"
 msgstr "ไม่มีการพึ่งพา (ไม่จำเป็น)"
@@ -855,6 +905,7 @@ msgstr "ไม่มีการพึ่งพา (ไม่จำเป็น)
 msgid "No game description provided."
 msgstr "ไม่มีคำอธิบายของเกมที่ให้มา"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No hard dependencies"
 msgstr "ไม่มีการอ้างอิง"
@@ -863,10 +914,12 @@ msgstr "ไม่มีการอ้างอิง"
 msgid "No modpack description provided."
 msgstr "ไม่มีคำอธิบายของม็อดแพ็คที่ให้มา"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua
 msgid "No optional dependencies"
 msgstr "เสริม อ้างอิง"
 
+#. TRANSLATORS: About mod dependencies
 #: builtin/mainmenu/dlg_config_world.lua builtin/mainmenu/tab_content.lua
 msgid "Optional dependencies:"
 msgstr "ไฟล์อ้างอิงที่เลือกใช้ได้:"
@@ -908,6 +961,7 @@ msgstr "ระดับความสูงที่หนาวเย็น"
 msgid "Altitude dry"
 msgstr "ระดับความสูงแห้ง"
 
+#. TRANSLATORS: Smooth transition between biomes
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Biome blending"
 msgstr "การผสมไบโอม"
@@ -928,6 +982,7 @@ msgstr "ถ้ำ"
 msgid "Create"
 msgstr "สร้าง"
 
+#. TRANSLATORS: Map generator decorations (used for structures, trees, plants, and more)
 #: builtin/mainmenu/dlg_create_world.lua
 msgid "Decorations"
 msgstr "ของตกแต่ง"
@@ -1131,6 +1186,7 @@ msgstr ""
 msgid "Confirm Password"
 msgstr "ยืนยันรหัสผ่าน"
 
+#. TRANSLATORS: Message when joining a server
 #: builtin/mainmenu/dlg_register.lua
 msgid "Joining $1"
 msgstr ""
@@ -1155,11 +1211,13 @@ msgstr "รหัสผ่าน"
 msgid "Passwords do not match"
 msgstr "รหัสผ่านไม่ตรงกับ!"
 
+#. TRANSLATORS: Register an account on a server
 #: builtin/mainmenu/dlg_register.lua builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid "Register"
 msgstr "ลงทะเบียน และเข้าร่วม"
 
+#. TRANSLATORS: Dismiss a dialog window/message
 #: builtin/mainmenu/dlg_reinstall_mtg.lua
 msgid "Dismiss"
 msgstr ""
@@ -1198,11 +1256,13 @@ msgid ""
 "override any renaming here."
 msgstr "ม็อดแพ็คมีชื่อชื่อที่ถูกตั้งในไฟล์ modpack.conf ซึ่งจะแทนที่ชื่อที่เปลี่ยนตรงนี้"
 
+#. TRANSLATORS: Expand all entries in a tree view
 #: builtin/mainmenu/dlg_server_list_mods.lua
 #, fuzzy
 msgid "Expand all"
 msgstr "เปิดใช้งานทั้งหมด"
 
+#. TRANSLATORS: A checkbox; if enabled, it will group mods by their prefix
 #: builtin/mainmenu/dlg_server_list_mods.lua
 msgid "Group by prefix"
 msgstr ""
@@ -1215,10 +1275,12 @@ msgstr ""
 msgid "The $1 server uses the following mods:"
 msgstr ""
 
+#. TRANSLATORS: $1 = name of the engine
 #: builtin/mainmenu/dlg_version_info.lua
 msgid "A new $1 version is available"
 msgstr ""
 
+#. TRANSLATORS: $1 and $2 are version numbers, $3 is a URL
 #: builtin/mainmenu/dlg_version_info.lua
 msgid ""
 "Installed version: $1\n"
@@ -1243,6 +1305,7 @@ msgstr ""
 msgid "Debug build, expect worse performance"
 msgstr ""
 
+#. TRANSLATORS: Try to keep the translation short
 #: builtin/mainmenu/init.lua src/client/game_formspec.cpp
 msgid "Settings"
 msgstr "การตั้งค่า"
@@ -1304,6 +1367,7 @@ msgstr "แสดงข้อมูลการดีบัก"
 msgid "Browse online content"
 msgstr "เรียกดูเนื้อหาออนไลน์"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 #, fuzzy
 msgid "Browse online content [$1]"
@@ -1313,6 +1377,7 @@ msgstr "เรียกดูเนื้อหาออนไลน์"
 msgid "Content"
 msgstr "เนื้อหา"
 
+#. TRANSLATORS: $1 = number of available updates
 #: builtin/mainmenu/tab_content.lua
 #, fuzzy
 msgid "Content [$1]"
@@ -1398,6 +1463,7 @@ msgstr "ใหม่"
 msgid "Play Game"
 msgstr "เล่นเกม"
 
+#. TRANSLATORS: Network port
 #: builtin/mainmenu/tab_local.lua builtin/mainmenu/tab_online.lua
 msgid "Port"
 msgstr "พอร์ต"
@@ -1427,6 +1493,7 @@ msgstr ""
 msgid "Add favorite"
 msgstr "รีโมตพอร์ต"
 
+#. TRANSLATORS: Network address
 #: builtin/mainmenu/tab_online.lua
 msgid "Address"
 msgstr "ที่อยู่"
@@ -1435,7 +1502,7 @@ msgstr "ที่อยู่"
 msgid "Creative mode"
 msgstr "โหมดสร้างสรรค์"
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: builtin/mainmenu/tab_online.lua
 msgid "Damage / PvP"
 msgstr "ดาเมจ / ผู้เล่นผ่านเครื่องเล่น"
@@ -1457,6 +1524,7 @@ msgstr "เซิร์ฟเวอร์ที่เข้ากันไม่
 msgid "Join Game"
 msgstr "เข้าร่วมเกม"
 
+#. TRANSLATORS: Login to server
 #: builtin/mainmenu/tab_online.lua
 msgid "Login"
 msgstr ""
@@ -1471,10 +1539,12 @@ msgstr "จำนวนเธรดที่โผล่ออกมา"
 msgid "Open server website"
 msgstr "ขั้นตอนเซิร์ฟเวอร์เฉพาะ"
 
+#. TRANSLATORS: Also known as "latency"
 #: builtin/mainmenu/tab_online.lua
 msgid "Ping"
 msgstr "เวลาตอบสนอง"
 
+#. TRANSLATORS: $1 is a list of players
 #: builtin/mainmenu/tab_online.lua
 #, fuzzy
 msgid ""
@@ -1483,17 +1553,15 @@ msgid ""
 msgstr "ไคลเอนต์"
 
 #: builtin/mainmenu/tab_online.lua
-msgid ""
-"Possible filters\n"
-"game:<name>\n"
-"mod:<name>\n"
-"player:<name>"
-msgstr ""
+#, fuzzy
+msgid "Possible filters"
+msgstr "การกรองปัวซอง"
 
 #: builtin/mainmenu/tab_online.lua
 msgid "Public Servers"
 msgstr "เซิฟเวอร์สาธารณะ"
 
+#. TRANSLATORS: As in 'reload'/'check again'
 #: builtin/mainmenu/tab_online.lua
 msgid "Refresh"
 msgstr "รีเฟรช"
@@ -1506,6 +1574,11 @@ msgstr "รีโมตพอร์ต"
 #: builtin/mainmenu/tab_online.lua
 msgid "Server Description"
 msgstr "คำอธิบายเซิร์ฟเวอร์"
+
+#: src/chat.cpp
+#, fuzzy
+msgid "Player names: "
+msgstr "เล่นเกม"
 
 #: src/client/client.cpp
 #, fuzzy
@@ -1536,7 +1609,7 @@ msgstr "โหลดพื้นผิว..."
 msgid "Rebuilding shaders..."
 msgstr "บูรณะ shaders..."
 
-#: src/client/client.cpp src/util/screenshot.cpp
+#: src/client/client.cpp src/gui/guiEngine.cpp src/util/screenshot.cpp
 #, fuzzy, c-format
 msgid "Saved screenshot to \"%s\""
 msgstr "ภาพหน้าจอ"
@@ -1572,6 +1645,11 @@ msgstr ""
 #: src/client/clientmedia.cpp src/client/game.cpp
 msgid "Media..."
 msgstr "สื่อ..."
+
+#: src/client/fontengine.cpp
+#, fuzzy
+msgid "Failed to find a valid font"
+msgstr "ไม่สามารถเปิดหน้าเว็บ"
 
 #: src/client/game.cpp src/client/render/pipeline.cpp src/client/shader.cpp
 #: src/server.cpp
@@ -1696,6 +1774,11 @@ msgid "Fast mode enabled (note: no 'fast' privilege)"
 msgstr "เปิดใช้งานโหมดเร็ว (หมายเหตุ: ไม่มีสิทธิ์ 'เร็ว')"
 
 #: src/client/game.cpp
+#, c-format
+msgid "Files: %d / %d"
+msgstr ""
+
+#: src/client/game.cpp
 msgid "Fly mode disabled"
 msgstr "โหมดการบินปิด"
 
@@ -1725,11 +1808,13 @@ msgid "Item definitions..."
 msgstr "ข้อกำหนดของสินค้า..."
 
 #: src/client/game.cpp
-msgid "KiB/s"
+#, fuzzy
+msgid "KiB"
 msgstr "KiB/s"
 
 #: src/client/game.cpp
-msgid "MiB/s"
+#, fuzzy
+msgid "MiB"
 msgstr "MiB/s"
 
 #: src/client/game.cpp
@@ -1779,6 +1864,11 @@ msgstr "ปิด..."
 #: src/client/game.cpp src/client/game_formspec.cpp
 msgid "Singleplayer"
 msgstr "เล่นคนเดียว"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Size: %.2f %s"
+msgstr ""
 
 #: src/client/game.cpp
 msgid "Sound muted"
@@ -1869,6 +1959,7 @@ msgstr "แสดงโครงลวด"
 msgid "Zoom currently disabled by game or mod"
 msgstr "ซูมถูกปิดใช้งานในปัจจุบันโดยเกมหรือตัวดัดแปลง"
 
+#. TRANSLATORS: Game mode (server or singleplayer)
 #: src/client/game_formspec.cpp
 msgid "- Mode: "
 msgstr "-โหมด: "
@@ -1877,7 +1968,7 @@ msgstr "-โหมด: "
 msgid "- Public: "
 msgstr "-ประชาชน: "
 
-#. ~ PvP = Player versus Player
+#. TRANSLATORS: PvP = Player versus Player
 #: src/client/game_formspec.cpp
 msgid "- PvP: "
 msgstr "- ผู้เล่นวีซ่าผู้เล่น: "
@@ -1886,10 +1977,12 @@ msgstr "- ผู้เล่นวีซ่าผู้เล่น: "
 msgid "- Server Name: "
 msgstr "-ชื่อเซิร์ฟเวอร์: "
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Change Password"
 msgstr "เปลี่ยนรหัสผ่าน"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Continue"
 msgstr "ต่อ"
@@ -1923,10 +2016,12 @@ msgstr ""
 "- แตะแล้วลากแตะนิ้วที่สอง\n"
 "-> วางรายการเดียวไปยังสล็อต\n"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Exit to Menu"
 msgstr "ออกจากเมนู"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short (OS = Operating System)
 #: src/client/game_formspec.cpp
 msgid "Exit to OS"
 msgstr "อธิบายระบบปฏิบัติการ"
@@ -1959,6 +2054,7 @@ msgstr "เซิร์ฟเวอร์ระยะไกล"
 msgid "Respawn"
 msgstr "เกิดใหม่"
 
+#. TRANSLATORS: Pause menu button, try to keep the translation short
 #: src/client/game_formspec.cpp
 msgid "Sound Volume"
 msgstr "ระดับเสียง"
@@ -1998,10 +2094,29 @@ msgid "Profiler shown (page %d of %d)"
 msgstr "สร้างโปรไฟล์ที่แสดง (หน้า %d1 of %d2)"
 
 #: src/client/keycode.cpp
+#, fuzzy
+msgid "A (Gamepad)"
+msgstr "เกม"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "B (Gamepad)"
+msgstr "เกม"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Back (Gamepad)"
+msgstr "เกม"
+
+#: src/client/keycode.cpp
 msgid "Backspace"
 msgstr "แบ็คสเปซ"
 
-#. ~ Usually paired with the Pause key
+#: src/client/keycode.cpp
+msgid "Bottom Face Button (Gamepad)"
+msgstr ""
+
+#. TRANSLATORS: Usually paired with the Pause key
 #: src/client/keycode.cpp
 #, fuzzy
 msgid "Break Key"
@@ -2012,6 +2127,10 @@ msgid "Caps Lock"
 msgstr "แคปล็อค"
 
 #: src/client/keycode.cpp
+msgid "Circle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 #, fuzzy
 msgid "Clear Key"
 msgstr "ล้าง"
@@ -2020,6 +2139,28 @@ msgstr "ล้าง"
 #, fuzzy
 msgid "Control Key"
 msgstr "ควบคุม"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Cross (Gamepad)"
+msgstr "เกม"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "D-Pad Down"
+msgstr "เพลง"
+
+#: src/client/keycode.cpp
+msgid "D-Pad Left"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Right"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "D-Pad Up"
+msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2034,6 +2175,26 @@ msgstr ""
 #, fuzzy
 msgid "End Key"
 msgstr "เมนู"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d +"
+msgstr "เกม"
+
+#: src/client/keycode.cpp
+#, fuzzy, c-format
+msgid "Gamepad Axis %d -"
+msgstr "เกม"
+
+#: src/client/keycode.cpp
+#, c-format
+msgid "Gamepad Button %d"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Guide (Gamepad)"
+msgstr "เกม"
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2064,6 +2225,35 @@ msgid "Left Control"
 msgstr "ด้านซ้าย Control"
 
 #: src/client/keycode.cpp
+msgid "Left Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Button"
+msgstr "ประเภทของจอยสติ๊ก"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Down"
+msgstr "จอยสติ๊ก ID"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Left"
+msgstr "ประเภทของจอยสติ๊ก"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Right"
+msgstr "ประเภทของจอยสติ๊ก"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Joystick Up"
+msgstr "ประเภทของจอยสติ๊ก"
+
+#: src/client/keycode.cpp
 msgid "Left Menu"
 msgstr "ด้านซ้าย Menu"
 
@@ -2071,7 +2261,17 @@ msgstr "ด้านซ้าย Menu"
 msgid "Left Shift"
 msgstr "ข้อกะ"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Shoulder"
+msgstr "ข้อกะ"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Left Trigger"
+msgstr "ด้านซ้าย Control"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Left Windows"
 msgstr "หน้าต่างซ้าย"
@@ -2085,10 +2285,18 @@ msgstr "เมนู"
 msgid "Middle Click"
 msgstr ""
 
+#. TRANSLATORS: This is for mouse buttons without an intuitive description. %d is the number of the button.
+#: src/client/keycode.cpp
+#, c-format
+msgid "Mouse Button %d"
+msgstr ""
+
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X1"
 msgstr ""
 
+#. TRANSLATORS: This is a mouse button.
 #: src/client/keycode.cpp
 msgid "Mouse X2"
 msgstr ""
@@ -2167,7 +2375,7 @@ msgstr "เพลง"
 msgid "Page Up"
 msgstr "หน้าขึ้น"
 
-#. ~ Usually paired with the Break key
+#. TRANSLATORS: Usually paired with the Break key
 #: src/client/keycode.cpp
 #, fuzzy
 msgid "Pause Key"
@@ -2177,7 +2385,15 @@ msgstr "หยุด"
 msgid "Play"
 msgstr "เล่น"
 
-#. ~ "Print screen" key
+#: src/client/keycode.cpp
+msgid "Primary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Primary Right Paddle"
+msgstr ""
+
+#. TRANSLATORS: "Print screen" key
 #: src/client/keycode.cpp
 msgid "Print"
 msgstr "พิมพ์"
@@ -2202,6 +2418,34 @@ msgid "Right Control"
 msgstr "สิทธิ Control"
 
 #: src/client/keycode.cpp
+msgid "Right Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Right Joystick Button"
+msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Down"
+msgstr "จอยสติ๊ก ID"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Left"
+msgstr "ประเภทของจอยสติ๊ก"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Right"
+msgstr "ประเภทของจอยสติ๊ก"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Joystick Up"
+msgstr "ประเภทของจอยสติ๊ก"
+
+#: src/client/keycode.cpp
 msgid "Right Menu"
 msgstr "สิทธิ Menu"
 
@@ -2209,7 +2453,17 @@ msgstr "สิทธิ Menu"
 msgid "Right Shift"
 msgstr "สิทธิ Shift"
 
-#. ~ Name of key
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Shoulder"
+msgstr "สิทธิ Shift"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Right Trigger"
+msgstr "สิทธิ Control"
+
+#. TRANSLATORS: Name of key
 #: src/client/keycode.cpp
 msgid "Right Windows"
 msgstr "หน้าต่างขวา"
@@ -2222,6 +2476,14 @@ msgstr ""
 #: src/client/keycode.cpp
 msgid "Scroll Lock"
 msgstr "ล็อคเลื่อน"
+
+#: src/client/keycode.cpp
+msgid "Secondary Left Paddle"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Secondary Right Paddle"
+msgstr ""
 
 #: src/client/keycode.cpp
 #, fuzzy
@@ -2239,12 +2501,44 @@ msgstr "ช่องว่าง"
 
 #: src/client/keycode.cpp
 #, fuzzy
+msgid "Square (Gamepad)"
+msgstr "ชื่อเซิร์ฟเวอร์"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Start (Gamepad)"
+msgstr "เริ่มเกม"
+
+#: src/client/keycode.cpp
+#, fuzzy
 msgid "Tab Key"
 msgstr "กุญแจแอบ"
 
 #: src/client/keycode.cpp
+msgid "Top Face Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Touchpad Button (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
+msgid "Triangle (Gamepad)"
+msgstr ""
+
+#: src/client/keycode.cpp
 msgid "Up Arrow"
 msgstr ""
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "X (Gamepad)"
+msgstr "เกม"
+
+#: src/client/keycode.cpp
+#, fuzzy
+msgid "Y (Gamepad)"
+msgstr "เกม"
 
 #: src/client/minimap.cpp
 msgid "Minimap hidden"
@@ -2269,6 +2563,10 @@ msgstr "แผนที่ย่อในโหมดพื้นผิว"
 msgid "Failed to create the texture \"%s\" for the rendering pipeline."
 msgstr ""
 
+#: src/client/renderingengine.cpp
+msgid "Could not initialize any supported video driver!"
+msgstr ""
+
 #: src/client/shader.cpp
 #, fuzzy, c-format
 msgid "Failed to compile the \"%s\" shader."
@@ -2279,12 +2577,14 @@ msgstr "ไม่สามารถเปิดหน้าเว็บ"
 msgid "Failed to find \"%s\" shader files."
 msgstr "ไม่สามารถเปิดหน้าเว็บ"
 
+#. TRANSLATORS: GLSL = OpenGL Shading Language
 #: src/client/shader.cpp
 #, fuzzy
 msgid "GLSL is not supported by the driver"
 msgstr "ไม่รองรับระบบเสียงในบิลด์นี้"
 
-#. ~ Error when a mod is missing dependencies. Ex: "Mod Title is missing: mod1, mod2, mod3"
+#. TRANSLATORS: Error when a mod is missing dependencies.
+#. Example: "Mod Title is missing: mod1, mod2, mod3"
 #: src/content/mod_configuration.cpp
 #, c-format
 msgid "%s is missing:"
@@ -2318,6 +2618,11 @@ msgstr "ไม่สามารถเปิดหน้าเว็บ"
 #: src/gui/guiChatConsole.cpp
 msgid "Opening webpage"
 msgstr "เปิดหน้าเว็บ"
+
+#: src/gui/guiEngine.cpp
+#, fuzzy
+msgid "Failed to load main menu script!"
+msgstr "สคริปต์เมนูหลัก"
 
 #: src/gui/guiFormSpecMenu.cpp
 msgid "Proceed"
@@ -2490,7 +2795,7 @@ msgstr ""
 msgid "Invalid password"
 msgstr "รหัสผ่านเก่า"
 
-#. ~ DO NOT TRANSLATE THIS LITERALLY!
+#. TRANSLATORS: DO NOT TRANSLATE THIS LITERALLY!
 #. This is a special string which needs to contain the translation's
 #. language code (e.g. "de" for German).
 #: src/network/clientpackethandler.cpp src/script/lua_api/l_client.cpp
@@ -2549,6 +2854,10 @@ msgstr ""
 msgid ""
 "Your client's version is not supported.\n"
 "Please contact the server administrator."
+msgstr ""
+
+#: src/script/lua_api/l_mainmenu.cpp
+msgid "Copied to clipboard!"
 msgstr ""
 
 #: src/server.cpp
@@ -2738,6 +3047,11 @@ msgid "Acceleration of gravity, in nodes per second per second."
 msgstr "ความเร่งของแรงโน้มถ่วง เป็นโหนดต่อวินาทีต่อวินาที"
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Actions and Keybindings"
+msgstr "รีโมตสื่อบันทึก"
+
+#: src/settings_translation_file.cpp
 msgid "Active Block Modifiers"
 msgstr "ตัวดัดแปลงบล็อกที่ใช้งานอยู่"
 
@@ -2865,11 +3179,13 @@ msgid "Anticheat movement tolerance"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Append item name"
-msgstr "ผนวกชื่อรายการ"
+#, fuzzy
+msgid "Append item name to tooltips"
+msgstr "ต่อท้ายชื่อรายการในคำแนะนำเครื่องมือ."
 
 #: src/settings_translation_file.cpp
-msgid "Append item name to tooltip."
+#, fuzzy
+msgid "Append the full item name to the tooltip of item stacks."
 msgstr "ต่อท้ายชื่อรายการในคำแนะนำเครื่องมือ."
 
 #: src/settings_translation_file.cpp
@@ -2940,11 +3256,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 #, fuzzy
 msgid ""
-"At this distance the server will perform a simpler and cheaper occlusion "
-"check.\n"
-"Smaller values potentially improve performance, at the expense of "
-"temporarily visible\n"
-"rendering glitches (missing blocks).\n"
+"At this distance the server will consider blocks as \"far away\".\n"
+"It will perform simpler and cheaper occlusion checks, update\n"
+"low priority block updates lazily, and limit the blocks sent to the\n"
+"client in one roundtrip.\n"
 "This is especially useful for very large viewing range (upwards of 500).\n"
 "Stated in MapBlocks (16 nodes)."
 msgstr ""
@@ -3438,6 +3753,11 @@ msgstr ""
 "ยังควบคุมสีเป้าเล็งของวัตถุ"
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Damage flash"
+msgstr "แผนที่สร้างธง"
+
+#: src/settings_translation_file.cpp
 msgid "Debug log file size threshold"
 msgstr "เกณฑ์ขนาดไฟล์บันทึกการดีบัก"
 
@@ -3766,6 +4086,11 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
+msgid "Enable SSCSM"
+msgstr "เปิดใช้งานทั้งหมด"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
 msgid "Enable a confirmation dialog before closing."
 msgstr "เปิดใช้งานภาพเคลื่อนไหวของรายการสินค้าคงคลัง."
 
@@ -3794,14 +4119,6 @@ msgstr "เปิดใช้งานหน้าต่างคอนโซล
 #, fuzzy
 msgid "Enable dynamic shadows"
 msgstr "เงาแบบไดนามิก"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks"
-msgstr "เปิดใช้งานจอยสติ๊ก"
-
-#: src/settings_translation_file.cpp
-msgid "Enable joysticks. Requires a restart to take effect"
-msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Enable mod channels support."
@@ -4039,6 +4356,10 @@ msgstr ""
 "หากปิดใช้งานจอยสติกเสมือนจะอยู่ที่ตำแหน่งแรกของสัมผัส"
 
 #: src/settings_translation_file.cpp
+msgid "Flashing of the screen when taking damage."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Floatland density"
 msgstr "ความหนาแน่นของพื้นที่ลุ่มน้ำ"
 
@@ -4221,9 +4542,12 @@ msgid "GUI scaling filter"
 msgstr "ตัวกรองมาตราส่วน GUI"
 
 #: src/settings_translation_file.cpp
-#, fuzzy
-msgid "Gamepads"
-msgstr "เกม"
+msgid "Gamepads and Joysticks"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Gamma"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Global callbacks"
@@ -4873,23 +5197,21 @@ msgstr ""
 "เมื่อวนซ้ำ = 20 mapgen นี้มีภาระคล้ายกับ mapgen V7."
 
 #: src/settings_translation_file.cpp
-msgid "Joystick ID"
-msgstr "จอยสติ๊ก ID"
-
-#: src/settings_translation_file.cpp
 msgid "Joystick button repetition interval"
 msgstr "ช่วงเวลาการทำซ้ำปุ่มจอยสติ๊ก"
-
-#: src/settings_translation_file.cpp
-msgid "Joystick dead zone"
-msgstr "ประเภทของจอยสติ๊ก"
 
 #: src/settings_translation_file.cpp
 msgid "Joystick frustum sensitivity"
 msgstr "ความไวของจอยสติ๊ก frustum"
 
 #: src/settings_translation_file.cpp
-msgid "Joystick type"
+#, fuzzy
+msgid "Joystick inner dead zone"
+msgstr "ประเภทของจอยสติ๊ก"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Joystick outer dead zone"
 msgstr "ประเภทของจอยสติ๊ก"
 
 #: src/settings_translation_file.cpp
@@ -4990,6 +5312,12 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for opening the pause menu in-game.\n"
+"Pressing the escape key always opens the pause menu."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for placing an item/block or for using something.\n"
 "(Note: The actual meaning might vary on a per-game basis.)"
 msgstr ""
@@ -5015,12 +5343,17 @@ msgid "Key for toggling the display of the profiler. Used for development."
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Keybindings"
+msgid "Keyboard and Mouse"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Keyboard and Mouse"
+msgid "Keyboard camera speed"
 msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Keyboard-controlled camera rotation speed, in degrees per second."
+msgstr "ความเร็วในการปีนแนวตั้ง เป็นโหนดต่อวินาที."
 
 #: src/settings_translation_file.cpp
 msgid "Kick players who sent more than X messages per 10 seconds."
@@ -5238,6 +5571,23 @@ msgid "Local command"
 msgstr "ท้องถิ่นคำสั่ง"
 
 #: src/settings_translation_file.cpp
+msgid "Look down"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Look left"
+msgstr "การเคลื่อนไหวเร็ว"
+
+#: src/settings_translation_file.cpp
+msgid "Look right"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Look up"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Lower Y limit of dungeons."
 msgstr "ขีด จำกัด Y ล่างของดันเจี้ยน."
 
@@ -5254,6 +5604,16 @@ msgid ""
 "Make fog and sky colors depend on daytime (dawn/sunset) and view direction."
 msgstr ""
 "ทำให้หมอกและสีของท้องฟ้าขึ้นอยู่กับเวลากลางวัน (รุ่งอรุณ / พระอาทิตย์ตก) และทิศทางการดู."
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Make volumetrics weaker against closer objects to emulate physical "
+"volumetrics."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Makes the color of light fog more saturated."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Map Compression Level for Disk Storage"
@@ -5873,6 +6233,10 @@ msgid "Open inventory"
 msgstr "สินค้าคงคลัง"
 
 #: src/settings_translation_file.cpp
+msgid "Open pause menu"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid ""
 "Open the pause menu when the window's focus is lost. Does not pause if a "
 "formspec is\n"
@@ -6435,6 +6799,13 @@ msgid "Serverlist file"
 msgstr "ไฟล์เซิร์ฟเวอร์รายการ"
 
 #: src/settings_translation_file.cpp
+msgid ""
+"Set proxy to use by cURL. This is an URI just like the *_proxy environment "
+"variables.\n"
+"Note that this will not apply to Luanti's in-game protocol."
+msgstr ""
+
+#: src/settings_translation_file.cpp
 #, fuzzy
 msgid ""
 "Set the default tilt of Sun/Moon orbit in degrees.\n"
@@ -6448,8 +6819,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Set the exposure compensation in EV units.\n"
-"Value of 0.0 (default) means no exposure compensation.\n"
-"Range: from -1 to 1.0"
+"Value of 0.0 (default) means no exposure compensation."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6466,6 +6836,12 @@ msgstr ""
 msgid ""
 "Set the maximum length of a chat message (in characters) sent by clients."
 msgstr "กำหนดความยาวอักขระสูงสุดของข้อความแชทที่ส่งโดยลูกค้า."
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Set the post processing gamma value.\n"
+"Higher values give lower contrast and vice versa."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
@@ -6610,7 +6986,9 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Simulate translucency when looking at foliage in the sunlight."
+msgid ""
+"Simulate translucency when looking at foliage in the sunlight.\n"
+"It is recommended to use this with setting \"leaves_style\" set to \"fancy\"."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6897,10 +7275,6 @@ msgid "The URL for the content repository"
 msgstr "URL สำหรับที่เก็บเนื้อหา"
 
 #: src/settings_translation_file.cpp
-msgid "The dead zone of the joystick"
-msgstr "ตัวระบุของจอยสติ๊กที่จะใช้"
-
-#: src/settings_translation_file.cpp
 msgid ""
 "The default format in which profiles are being saved,\n"
 "when calling `/profiler save [format]` without format."
@@ -6932,10 +7306,6 @@ msgid ""
 "Known from the classic Luanti mobile controls.\n"
 "Combat is more or less impossible."
 msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid "The identifier of the joystick to use"
-msgstr "ตัวระบุของจอยสติ๊กที่จะใช้"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7079,10 +7449,6 @@ msgstr ""
 "ปุ่มสถานที่"
 
 #: src/settings_translation_file.cpp
-msgid "The type of joystick"
-msgstr "ประเภทของจอยสติ๊ก"
-
-#: src/settings_translation_file.cpp
 #, fuzzy
 msgid ""
 "The vertical distance over which heat drops by 20 if 'altitude_chill' is\n"
@@ -7121,6 +7487,19 @@ msgstr "ความเร็วของเวลา"
 #, fuzzy
 msgid "Timeout for client to remove unused map data from memory, in seconds."
 msgstr "หมดเวลาสำหรับไคลเอ็นต์เพื่อลบข้อมูลแผนที่ที่ไม่ได้ใช้ออกจากหน่วยความจำ."
+
+#: src/settings_translation_file.cpp
+msgid "Tint sunlight during sunrise/sunset."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Tinted fog"
+msgstr "สลับหมอก"
+
+#: src/settings_translation_file.cpp
+msgid "Tinted sunlight"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy
@@ -7515,7 +7894,12 @@ msgstr "เฟรมต่อวินาที (FPS) สูงสุดเม�
 
 #: src/settings_translation_file.cpp
 #, fuzzy
-msgid "Volumetric lighting"
+msgid "Volumetric Depth Attenuation"
+msgstr "แสงที่ราบรื่น"
+
+#: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Volumetric Lighting"
 msgstr "แสงที่ราบรื่น"
 
 #: src/settings_translation_file.cpp
@@ -7585,7 +7969,9 @@ msgid "Weblink color"
 msgstr "สีของกล่องที่เลือก"
 
 #: src/settings_translation_file.cpp
-msgid "When enabled, liquid reflections are simulated."
+msgid ""
+"When enabled, crude liquid reflections are simulated.\n"
+"Wave height, length and speed will affect these reflections."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -7624,6 +8010,12 @@ msgstr ""
 "เปิดใช้งานการกรอง bilinear/trilinear/anisotropic\n"
 "นอกจากนี้ยังใช้เป็นขนาดพื้นผิวของโหนดฐานสำหรับการจัดตำแหน่งโลก\n"
 "การปรับขนาดพื้นผิวอัตโนมัติ"
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Where to enable server-sent client-side modding (SSCSM).\n"
+"Warning: Experimental."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -7805,42 +8197,23 @@ msgstr "cURL หมดเวลาโต้ตอบ"
 msgid "cURL parallel limit"
 msgstr "cURL ขีด จำกัด ขนาน"
 
+#: src/settings_translation_file.cpp
+msgid "cURL proxy address"
+msgstr ""
+
 #: src/util/screenshot.cpp
 #, c-format
 msgid "Failed to save screenshot to \"%s\""
 msgstr ""
 
-#~ msgid ""
-#~ "Number of emerge threads to use.\n"
-#~ "Value 0:\n"
-#~ "-    Automatic selection. The number of emerge threads will be\n"
-#~ "-    'number of processors - 2', with a lower limit of 1.\n"
-#~ "Any other value:\n"
-#~ "-    Specifies the number of emerge threads, with a lower limit of 1.\n"
-#~ "WARNING: Increasing the number of emerge threads increases engine mapgen\n"
-#~ "speed, but this may harm game performance by interfering with other\n"
-#~ "processes, especially in singleplayer and/or when running Lua code in\n"
-#~ "'on_generated'. For many users the optimum setting may be '1'."
-#~ msgstr ""
-#~ "จำนวนเธรดที่โผล่ออกมาที่จะใช้.\n"
-#~ "ค่า 0:\n"
-#~ "- การเลือกอัตโนมัติ จำนวนเธรดที่โผล่ออกมาจะเป็น\n"
-#~ "- 'จำนวนโปรเซสเซอร์ - 2' โดยมีขีดจำกัดล่างที่ 1.\n"
-#~ "ค่าอื่นๆ:\n"
-#~ "- ระบุจำนวนเธรดที่โผล่ออกมา โดยมีขีดจำกัดล่างที่ 1.\n"
-#~ "คำเตือน: การเพิ่มจำนวนของเธรดที่โผล่ออกมาจะเพิ่มการแมปของเครื่องยนต์\n"
-#~ "ความเร็ว แต่อาจส่งผลเสียต่อประสิทธิภาพของเกมโดยการรบกวนผู้อื่น\n"
-#~ "กระบวนการ โดยเฉพาะอย่างยิ่งใน singleplayer และ/หรือเมื่อรันโค้ด Lua ใน\n"
-#~ "'on_generated' สำหรับผู้ใช้หลายคน การตั้งค่าที่เหมาะสมที่สุดอาจเป็น '1'."
+#~ msgid "Enable joysticks"
+#~ msgstr "เปิดใช้งานจอยสติ๊ก"
 
-#~ msgid "Provided world path doesn't exist: "
-#~ msgstr "โลกมีเส้นไม่มี: "
+#~ msgid "The dead zone of the joystick"
+#~ msgstr "ตัวระบุของจอยสติ๊กที่จะใช้"
 
-#~ msgid "Shadow map max distance in nodes to render shadows"
-#~ msgstr "แผนที่เงาระยะทางสูงสุดในโหนดเพื่อแสดงเงา"
+#~ msgid "The identifier of the joystick to use"
+#~ msgstr "ตัวระบุของจอยสติ๊กที่จะใช้"
 
-#~ msgid "Y spread"
-#~ msgstr "Y กระจาย"
-
-#~ msgid "Z spread"
-#~ msgstr "Z กระจาย"
+#~ msgid "The type of joystick"
+#~ msgstr "ประเภทของจอยสติ๊ก"
