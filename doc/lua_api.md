@@ -1146,9 +1146,18 @@ You can register one node/item, which can have up to 256 colors.
 
 When using palettes, you always provide a pixel index for the given
 node or `ItemStack`. The palette is read from left to right and from
-top to bottom. If the palette has less than 256 pixels, then it is
-stretched to contain exactly 256 pixels (after arranging the pixels
-to one line). Palette colors are indexed in range [0, 255].
+top to bottom. Use textures with power-of-two dimensions (4x8, 16x4,
+16x16, ...), with at most 256 pixels. Smaller palettes are expanded to
+256 entries by repeating each source pixel without interpolation. For a
+palette with `area` pixels, the source color is selected using integer
+division:
+
+    color = palette[index / (256 / area)]
+
+Where `index` is the palette index, `area` is the texture pixel count,
+and `palette` contains the source texture colors. A node's `paramtype2`
+may reduce the usable index range. Palette colors are indexed in range
+[0, 255].
 
 Examples:
 
@@ -1157,8 +1166,8 @@ Examples:
 * 16x16 palette, index = 16: the pixel below the top left corner
 * 16x16 palette, index = 255: the bottom right corner
 * 2 (width) x 4 (height) palette, index = 31: the top left corner.
-  The palette has 8 pixels, so each pixel is stretched to 32 pixels,
-  to ensure the total 256 pixels.
+  The palette has 8 pixels, so each pixel is repeated across 32 indices,
+  to ensure the total 256 entries.
 * 2x4 palette, index = 32: the top right corner
 * 2x4 palette, index = 63: the top right corner
 * 2x4 palette, index = 64: the pixel below the top left corner
@@ -2108,6 +2117,8 @@ Displays a horizontal bar made up of half-images with an optional background.
 ### `inventory`
 
 * `text`: The name of the inventory list to be displayed.
+* `text2`: Optional texture name for the inventory background. If not specified,
+  the player's hotbar background is used.
 * `number`: Amount of item slots in the inventory to be displayed.
   Integer in range [u16].
 * `item`: The slot at this index is rendered as if it were selected
@@ -2326,7 +2337,7 @@ The following items are predefined and have special properties.
     * It can be overridden to change those properties:
         * globally using `core.override_item`
         * per-player using the special `"hand"` inventory list
-    * It cannot be used as an ItemStack object, because `""` represents the empty stack.
+    * It cannot be used as an `ItemStack` object, because `""` represents the empty stack.
       Therefore, it can't be stored in an inventory.
 
 Amount and wear
@@ -2351,22 +2362,23 @@ and `ItemStack`.
 When an item must be passed to a function, it can usually be in any of
 these formats.
 
+Empty stacks (defined by name `""`) are always initialized with count = 0.
+
 ### Serialized
 
-This is called "stackstring" or "itemstring". It is a simple string with
-1-4 components:
+This is called "itemstring". It is a simple string with
+1-4 components separated by exactly one space character. Syntax:
+
+    <identifier>[ <amount>[ <wear>[ <metadata>]]]
 
 1. Full item identifier ("item name")
 2. Optional amount
 3. Optional wear value
 4. Optional item metadata
 
-Syntax:
-
-    <identifier> [<amount>[ <wear>[ <metadata>]]]
-
 Examples:
 
+* `""`: empty stack
 * `"default:apple"`: 1 apple
 * `"default:dirt 5"`: 5 dirt
 * `"default:pick_stone"`: a new stone pickaxe
@@ -2399,13 +2411,13 @@ Examples:
 5 dirt nodes:
 
 ```lua
-{name="default:dirt", count=5, wear=0, metadata=""}
+{name="default:dirt", count=5, wear=0, metadata={}}
 ```
 
 A wooden pick about 1/3 worn out:
 
 ```lua
-{name="default:pick_wood", count=1, wear=21323, metadata=""}
+{name="default:pick_wood", count=1, wear=21323, metadata={}}
 ```
 
 An apple:
@@ -2417,7 +2429,8 @@ An apple:
 ### `ItemStack` format
 
 A native C++ format with many helper methods. Useful for converting
-between formats. See the [Class Reference](#class-reference) section for details.
+between formats. See the [Class reference](#class-reference)
+-> [ItemStack](#itemstack) chapter for details.
 
 
 
@@ -3083,6 +3096,8 @@ Formspec Version History
 * Version 11 (5.17.0)
   * Added hypertip[] element
   * label[], textarea[] and field[] alignment styles
+* Version 12 (5.18.0)
+  * `editable` style
 
 
 Elements
@@ -3930,9 +3945,11 @@ Some types may inherit styles from parent types.
 * checkbox
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
     * sound - a sound to be played when triggered.
+    * editable - set to false to make the element read-only (default: true)
 * dropdown
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
     * sound - a sound to be played when the entry is changed.
+    * editable - set to false to make the element read-only (default: true)
 * field, pwdfield, textarea
     * border - set to false to hide the textbox background and border. Default true.
     * font - Sets font type. See button `font` property for more information.
@@ -3944,6 +3961,7 @@ Some types may inherit styles from parent types.
     **Note**: `valign` only has an effect when the text fits completely inside the element vertically.
     If the text is too long (and a scrollbar appears in `textarea[]`), it is forced to `top` alignment
     to prevent text being cut off. `valign` also does not work in `field[]`, however `halign` does.
+    * editable - set to false to make the field read-only (default: true)
 * model
     * bgcolor - color, sets background color.
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
@@ -6778,8 +6796,12 @@ Call these functions only at load time!
       mod calling this function before it prints a message, if it does, to
       allow for multiple protection mods.
 * `core.register_on_item_eat(function(hp_change, replace_with_item, itemstack, user, pointed_thing))`
-    * Called when an item is eaten, by `core.item_eat`
-    * Return `itemstack` to cancel the default item eat response (i.e.: hp increase).
+    * Called when an item is eaten, by `core.do_item_eat`
+    * See `core.do_item_eat` for documentation of the arguments
+    * Return `itemstack` to cancel the default item eat response (i.e.: hp increase),
+      as well as all callbacks registered after this one
+    * Note: The function is allowed to ignore or re-interpret `hp_change` or `replace_with_item`
+      as it wishes
 * `core.register_on_item_pickup(function(itemstack, picker, pointed_thing, time_from_last_punch,  ...))`
     * Called by `core.item_pickup` before an item is picked up.
     * Function is added to `core.registered_on_item_pickups`.
@@ -7353,8 +7375,24 @@ Inventory
 * `core.remove_detached_inventory(name)`
     * Returns a `boolean` indicating whether the removal succeeded.
 * `core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)`:
-  returns leftover ItemStack or nil to indicate no inventory change
-    * See `core.item_eat` and `core.register_on_item_eat`
+    * calls any `core.register_on_item_eat` callbacks with the provided
+      arguments, in the order they've been registered
+    * `hp_change`: suggested amount of HP to change for the user (range: [-65535, 65535])
+    * `replace_with_item`: itemstring of suggested item replacement of `itemstack` (or nil if no replacement)
+    * `itemstack`: itemstack that was eaten
+    * `user`: ObjectRef of player who is eating
+    * `pointed_thing`: where the player was pointing at
+    * once a callback returns an itemstack, this function returns that itemstack
+    * if this function did not return by now, it does the default eat response:
+        * reduces count of `itemstack` by 1
+        * plays `eat` sound of the original `itemstack` (if any)
+        * adds `replace_with_item` to the player inventory (if any)
+        * if `replace_with_item` doesn't fit onto the eaten stack, the rest
+          goes to another inventory slot, or is dropped as an item entity.
+        * increases `user`'s HP by `hp_change`
+          (using a `set_hp` `custom_type` of `__builtin:item_eat`)
+        * returns nil
+    * See also: `core.item_eat`
 
 Formspec functions
 --------
@@ -7604,10 +7642,10 @@ Defaults for the `on_place` and `on_drop` item definition functions
 * `core.item_eat(hp_change[, replace_with_item])`
     * Returns `function(itemstack, user, pointed_thing)` as a
       function wrapper for `core.do_item_eat`.
-    * `hp_change`: amount of HP to change for the user (range: [-65535, 65535])
-    * `replace_with_item`: itemstring which is added to the inventory.
-      If the player is eating a stack and `replace_with_item` doesn't fit onto
-      the eaten stack, then the remainings go to a different spot, or are dropped.
+    * `hp_change`, `replace_with_item`: See `core.do_item_eat`
+    * Note: the interpretation of `hp_change` and `replace_with_item` may
+      may be overridden by the `core.register_on_eat` callbacks.
+      For the exact behavior, see `core.do_item_eat`
 
 Defaults for the `on_punch` and `on_dig` node definition callbacks
 ------------------------------------------------------------------
@@ -7813,12 +7851,13 @@ You can use the gennotify mechanism to transfer this information.
 Server
 ------
 
-* `core.request_shutdown([message],[reconnect],[delay])`: request for
-  server shutdown. Will display `message` to clients.
-    * `reconnect` == true displays a reconnect button
+* `core.request_shutdown([message, [reconnect, [delay]]])`: request for
+  server to shut down
+    * `message`: kick message shown to clients
+    * `reconnect`: if true displays a reconnect button on clients (default: false)
     * `delay` adds an optional delay (in seconds) before shutdown.
-      Negative delay cancels the current active shutdown.
-      Zero delay triggers an immediate shutdown.
+      A negative number cancels the current active shutdown.
+      Zero (the default) triggers an immediate shutdown.
 * `core.cancel_shutdown_requests()`: cancel current delayed shutdown
 * `core.get_server_status(name, joined)`
     * Returns the server status string when a player joins or when the command
@@ -8124,7 +8163,10 @@ Misc.
 * `core.hash_node_position(pos)`: returns an integer in range [0, 2^48-1]
     * `pos`: table {x=integer [s16], y=integer [s16], z=integer [s16]},
     * Gives a unique numeric encoding for a node position (16+16+16=48bit)
-    * Despite the name, this is not a hash function (so it doesn't mix or produce collisions).
+    * This function is better described as an encoding rather than a "true" hash function
+    * Output values follow a particular order, they're not mixed
+    * This operation is fully reversible (see below)
+    * It's probably a bad idea to seed random number generators with this
 * `core.get_position_from_hash(hash)`: returns a position
     * Inverse transform of `core.hash_node_position`
 * `core.get_item_group(name, group)`: returns a rating
@@ -8629,8 +8671,13 @@ This means that all callbacks will be called twice (once for each action).
 
 An `ItemStack` is a stack of items.
 
-It can be created via `ItemStack(x)`, where x is an `ItemStack`,
-an itemstring, a table or `nil`.
+* `ItemStack([x])`: returns an `ItemStack`
+    * `x`: (optional) Is one of the following:
+        * nil value: Empty stack
+        * string value: an "itemstring".
+        * table value: ItemStack [Table format](#table-format).
+            * The `name` field is mandatory.
+
 
 ### Methods
 
@@ -9311,6 +9358,12 @@ You **must not** mix names and track numbers to refer to the same animation.
         * They take both keyboard and joystick input into account.
         * You should prefer them over `up`, `down`, `left` and `right` to
           support different input methods correctly.
+        * Starting from version 5.17.0, the `up`, `down`, `left`, and `right`
+          fields are strictly filled out based on the actual movement; the
+          value of these fields is only true if the movement in the corresponding
+          direction is significant compared to the orthogonal direction. In
+          particular, newer clients never report keys in opposing directions as
+          being held down simultaneously.
     * Returns an empty table `{}` if the object is not a player.
 * `get_player_control_bits()`: returns integer with bit packed player pressed
   keys.
@@ -10626,7 +10679,8 @@ Used by `core.register_node`, `core.register_craftitem`, and
         -- When tool breaks due to wear. Ignored for non-tools
 
         eat = <SimpleSoundSpec>,
-        -- When item is eaten with `core.do_item_eat`
+        -- Played when item is eaten with `core.do_item_eat` - unless
+        -- prevented by a `core.register_on_eat` callback.
 
         punch_use = <SimpleSoundSpec>,
         -- When item is used with the 'punch/dig' key pointing at a node or entity
